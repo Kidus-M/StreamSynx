@@ -23,11 +23,11 @@ export default function Home() {
           } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
         ></div>
       </div>
-      <div className="absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16"> {/** This is the parent that carries them */}
+      <div className="w-screen absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16"> {/** This is the parent that carries them */}
         <div
           className={`w-96 transition-all duration-500 transform ${
             isSignUp ? 'translate-x-[-70%]' : 'translate-x-[70%]'
-          } flex justify-center items-center max-md:translate-x-0 left-0`}
+          } flex justify-center items-center max-md:translate-x-0 max-lg:md:w-2/5`}
         >
           {!isSignUp ? (
             <SignIn setIsSignUp={setIsSignUp} />
