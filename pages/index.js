@@ -4,28 +4,30 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   return (
-    <div className="relative h-screen bg-white">
+    <div className="relative h-screen bg-white overflow-hidden">
       <div
-        className={`absolute inset-0 flex transition-all duration-500 ${
-          isSignUp ? 'translate-x-1/2' : ''
-        }`}
+        className={`absolute inset-0 flex transition-all duration-500${
+          isSignUp ? 'translate-x-full ' : ''
+        } max-md:flex-col max-md:translate-x-0 max-md:h-auto`}
       >
+
         <div
           className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp ? 'bg-blue-900 rounded-l-[50px]' : 'bg-orange-500 rounded-r-[50px]'
-          } flex justify-center items-center`}
+            isSignUp ? 'bg-blue-900 rounded-l-[50px] hidden' : 'bg-orange-500 rounded-r-[50px]'
+          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
         ></div>
+
         <div
           className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp ? 'bg-orange-500 rounded-r-[50px]' : 'bg-white'
-          } flex justify-center items-center`}
+            isSignUp ? 'bg-blue-900 rounded-l-[50px]' : 'bg-white max-md:bg-orange-500'
+          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
         ></div>
       </div>
-      <div className="absolute inset-0 flex justify-center items-center">
+      <div className="absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16"> {/** This is the parent that carries them */}
         <div
           className={`w-96 transition-all duration-500 transform ${
             isSignUp ? 'translate-x-[-70%]' : 'translate-x-[70%]'
-          } flex justify-center items-center`}
+          } flex justify-center items-center max-md:translate-x-0 left-0`}
         >
           {!isSignUp ? (
             <SignIn setIsSignUp={setIsSignUp} />
@@ -40,8 +42,8 @@ export default function Home() {
 
 function SignIn({ setIsSignUp }) {
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full">
-      <h1 className="text-3xl font-bold text-orange-500 mb-6 font-poppins">SIGN IN</h1>
+    <div className="flex flex-col items-center justify-center w-screen h-full max-sm:px-4 lg:bg-red">
+      <h1 className="text-3xl font-bold text-orange-500 mb-6 font-poppins ">SIGN IN</h1>
       <input
         type="email"
         placeholder="email@gmail.com"
@@ -76,8 +78,8 @@ function SignIn({ setIsSignUp }) {
 
 function SignUp({ setIsSignUp }) {
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full">
-      <h1 className="text-3xl font-bold text-blue-900 mb-6 font-poppins">SIGN UP</h1>
+    <div className="flex flex-col items-center justify-center w-screen h-full max-sm:px-4">
+      <h1 className="text-3xl font-bold text-blue-900 mb-6 font-poppins ">SIGN UP</h1>
       <input
         type="text"
         placeholder="Name"
