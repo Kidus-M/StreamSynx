@@ -1,115 +1,116 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
+import { useState } from 'react';
 
 export default function Home() {
+  const [isSignUp, setIsSignUp] = useState(false);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing <code>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="relative h-screen bg-white">
+      <div
+        className={`absolute inset-0 flex transition-all duration-500 ${
+          isSignUp ? 'translate-x-1/2' : ''
+        }`}
+      >
+        <div
+          className={`w-1/2 h-full transition-all duration-500 ${
+            isSignUp ? 'bg-blue-900 rounded-l-[50px]' : 'bg-orange-500 rounded-r-[50px]'
+          } flex justify-center items-center`}
+        ></div>
+        <div
+          className={`w-1/2 h-full transition-all duration-500 ${
+            isSignUp ? 'bg-orange-500 rounded-r-[50px]' : 'bg-white'
+          } flex justify-center items-center`}
+        ></div>
+      </div>
+      <div className="absolute inset-0 flex justify-center items-center">
+        <div
+          className={`w-96 transition-all duration-500 transform ${
+            isSignUp ? 'translate-x-[-70%]' : 'translate-x-[70%]'
+          } flex justify-center items-center`}
         >
-          Powered by{" "}
-          <img src="/vercel.svg" alt="Vercel" className={styles.logo} />
-        </a>
-      </footer>
+          {!isSignUp ? (
+            <SignIn setIsSignUp={setIsSignUp} />
+          ) : (
+            <SignUp setIsSignUp={setIsSignUp} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      <style jsx>{`
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        footer img {
-          margin-left: 0.5rem;
-        }
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-decoration: none;
-          color: inherit;
-        }
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-      `}</style>
+function SignIn({ setIsSignUp }) {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <h1 className="text-3xl font-bold text-orange-500 mb-6 font-poppins">SIGN IN</h1>
+      <input
+        type="email"
+        placeholder="email@gmail.com"
+        className="w-full p-3 border rounded mb-4 text-gray-700"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        className="w-full p-3 border rounded mb-6 text-gray-700"
+      />
+      <button className="w-full bg-orange-500 text-white py-3 rounded mb-4 font-poppins">Sign In</button>
+      <button className="w-full bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
+        <img
+          src="/google-logo.png"
+          alt="Google Logo"
+          className="w-5 h-5 mr-2"
+        />
+        Continue With Google
+      </button>
+      <p className="text-gray-700 font-poppins">
+        <span>Don’t have an account? </span>
+        <button
+          className="text-orange-500 underline"
+          onClick={() => setIsSignUp(true)}
+        >
+          Sign Up
+        </button>
+      </p>
+    </div>
+  );
+}
 
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
+function SignUp({ setIsSignUp }) {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <h1 className="text-3xl font-bold text-blue-900 mb-6 font-poppins">SIGN UP</h1>
+      <input
+        type="text"
+        placeholder="Name"
+        className="w-full p-3 border rounded mb-4 text-gray-700"
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        className="w-full p-3 border rounded mb-4 text-gray-700"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        className="w-full p-3 border rounded mb-6 text-gray-700"
+      />
+      <button className="w-full bg-blue-900 text-white py-3 rounded mb-4 font-poppins">Sign Up</button>
+      <button className="w-full bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
+        <img
+          src="/google-logo.png"
+          alt="Google Logo"
+          className="w-5 h-5 mr-2"
+        />
+        Sign Up With Google
+      </button>
+      <p className="text-gray-700 font-poppins">
+        <span>Already have an account? </span>
+        <button
+          className="text-blue-900 underline"
+          onClick={() => setIsSignUp(false)}
+        >
+          Sign In
+        </button>
+      </p>
     </div>
   );
 }
