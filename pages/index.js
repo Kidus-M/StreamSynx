@@ -14,16 +14,16 @@ export default function Home() {
         <div
           className={`w-1/2 h-full transition-all duration-500 ${
             isSignUp
-              ? "bg-blue-900 rounded-l-[50px] hidden"
-              : "bg-orange-500 rounded-r-[50px]"
+              ? "bg-primary rounded-l-[50px] hidden"
+              : "bg-secondary rounded-r-[50px]"
           } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
         ></div>
 
         <div
           className={`w-1/2 h-full transition-all duration-500 ${
             isSignUp
-              ? "bg-blue-900 rounded-l-[50px]"
-              : "bg-white max-md:bg-orange-500"
+              ? "bg-primary rounded-l-[50px]"
+              : "bg-white max-md:bg-secondary"
           } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
         ></div>
       </div>
@@ -49,7 +49,7 @@ export default function Home() {
 function SignIn({ setIsSignUp }) {
   return (
     <div className="flex flex-col items-center justify-center w-screen h-full max-sm:px-4 lg:bg-red">
-      <h1 className="text-3xl font-bold text-orange-500 mb-6 font-poppins ">
+      <h1 className="text-3xl font-bold text-secondary mb-6 font-poppins ">
         SIGN IN
       </h1>
       <input
@@ -62,7 +62,7 @@ function SignIn({ setIsSignUp }) {
         placeholder="Password"
         className="w-full p-3 border rounded mb-6 text-gray-700"
       />
-      <button className="w-full bg-orange-500 text-white py-3 rounded mb-4 font-poppins">
+      <button className="w-full bg-secondary text-white py-3 rounded mb-4 font-poppins">
         Sign In
       </button>
       <button className="w-full bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
@@ -72,7 +72,7 @@ function SignIn({ setIsSignUp }) {
       <p className="text-gray-700 font-poppins">
         <span>Don’t have an account? </span>
         <button
-          className="text-orange-500 underline"
+          className="text-secondary underline"
           onClick={() => setIsSignUp(true)}
         >
           Sign Up
@@ -85,7 +85,7 @@ function SignIn({ setIsSignUp }) {
 function SignUp({ setIsSignUp }) {
   return (
     <div className="flex flex-col items-center justify-center w-screen h-full max-sm:px-4">
-      <h1 className="text-3xl font-bold text-blue-900 mb-6 font-poppins ">
+      <h1 className="text-3xl font-bold text-primary mb-6 font-poppins ">
         SIGN UP
       </h1>
       <input
@@ -103,7 +103,7 @@ function SignUp({ setIsSignUp }) {
         placeholder="Password"
         className="w-full p-3 border rounded mb-6 text-gray-700"
       />
-      <button className="w-full bg-blue-900 text-white py-3 rounded mb-4 font-poppins">
+      <button className="w-full bg-primary text-white py-3 rounded mb-4 font-poppins">
         Sign Up
       </button>
       <button className="w-full bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
@@ -113,7 +113,7 @@ function SignUp({ setIsSignUp }) {
       <p className="text-gray-700 font-poppins">
         <span>Already have an account? </span>
         <button
-          className="text-blue-900 underline"
+          className="text-primary underline"
           onClick={() => setIsSignUp(false)}
         >
           Sign In
