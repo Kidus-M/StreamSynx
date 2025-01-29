@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-
 export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
 
