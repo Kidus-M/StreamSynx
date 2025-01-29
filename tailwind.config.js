@@ -13,7 +13,11 @@ module.exports = {
       colors: {
         primary: "#01151d",
         secondary: "#ff7f50",
+        tertiary: "#FAF3E0",
       },
+      fontFamily: {
+        'dm-display': ['"DM Serif Display"', 'serif'],
+      },      
     },
   },
   plugins: [],
