@@ -13,7 +13,7 @@ export default function NavBar() {
 
     return (
         <>
-            <div className="flex flex-wrap">
+            <div className="flex flex-wrap mb-10 w-full">
                 <section className="relative mx-auto">
                     <nav className="flex justify-between bg-secondary text-primary w-screen">
                         <div className="px-5 xl:px-12 py-6 flex w-full items-center justify-between">
