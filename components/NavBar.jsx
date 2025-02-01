@@ -21,10 +21,10 @@ export default function NavBar() {
                                 StreamSync.
                             </a>
                             <ul className="max-xl:hidden flex px-4 mx-auto font-semibold font-heading space-x-12">
-                                <li><a className="text-sm cursor-pointer">Watch Later</a></li>
-                                <li><a className="text-sm cursor-pointer">Watch History</a></li>
+                                <li><a className="text-sm cursor-pointer">WatchList</a></li>
+                                <li><a className="text-sm cursor-pointer">History</a></li>
                                 <li><a className="text-sm cursor-pointer">Favorites</a></li>
-                                <li><a className="text-sm cursor-pointer">Watch Buddies</a></li>
+                                <li><a className="text-sm cursor-pointer">Buddies</a></li>
                             </ul>
                             <div className="flex justify-center items-center space-x-5">
                                 <input
