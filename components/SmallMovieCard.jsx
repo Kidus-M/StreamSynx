@@ -13,7 +13,7 @@ const MovieCard = ({ movie }) => {
   };
 
   return (
-    <div className="relative w-full max-w-[200px] rounded-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer group">
+    <div className="relative w-full  rounded-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer group">
       {/* Movie Poster (Smaller Height) */}
       <img
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
