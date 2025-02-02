@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { FaBars } from "react-icons/fa6";
-import { FaSearch } from "react-icons/fa";
-import { FaXmark } from "react-icons/fa6";
+import { FaBars, FaXmark, FaSearchengin } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 
 export default function NavBar() {
@@ -13,50 +11,66 @@ export default function NavBar() {
 
     return (
         <>
-            <div className="flex flex-wrap mb-10 w-full">
-                <section className="relative mx-auto">
-                    <nav className="flex justify-between bg-secondary text-primary w-screen">
-                        <div className="px-5 xl:px-12 py-6 flex w-full items-center justify-between">
-                            <a className="text-2xl text-primary font-dm-display" href="#">
-                                StreamSync.
-                            </a>
-                            <ul className="max-xl:hidden flex px-4 mx-auto font-semibold font-heading space-x-12">
-                                <li><a className="text-sm cursor-pointer">WatchList</a></li>
-                                <li><a className="text-sm cursor-pointer">History</a></li>
-                                <li><a className="text-sm cursor-pointer">Favorites</a></li>
-                                <li><a className="text-sm cursor-pointer">Buddies</a></li>
-                            </ul>
-                            <div className="flex justify-center items-center space-x-5">
-                                <input
-                                    type="text"
-                                    className='h-8 w-80 rounded-2xl mr-4 outline bg-tertiary pl-7 font-sm' />
-                                <FaSearch className="text-xl cursor-pointer hover:text-tertiary" />
-                                <RiAccountCircleFill className='text-3xl cursor-pointer hover:text-tertiary' />
-                            </div>
-                        </div>
+            <div className="w-full">
+                <nav className="flex justify-between items-center bg-secondary text-primary w-full px-5 py-4">
+                    {/* Logo */}
+                    <a className="text-2xl font-dm-display" href="#">
+                        StreamSync.
+                    </a>
 
-                        <a className="navbar-burger flex self-center mr-12 xl:hidden text-primary" href="#" onClick={toggleSidebar}>
-                            <FaBars className='text-xl hover:text-tertiary' />
-                        </a>
-                    </nav>
-                </section>
+                    {/* Desktop Menu */}
+                    <ul className="hidden xl:flex space-x-8 font-semibold">
+                        <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">WatchList</a></li>
+                        <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">History</a></li>
+                        <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">Favorites</a></li>
+                        <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">Buddies</a></li>
+                    </ul>
+
+                    {/* Search and Profile */}
+                    <div className="hidden xl:flex items-center space-x-4">
+                        <div className="relative">
+                            <input 
+                                type="text" 
+                                className="h-8 w-64 xl:w-80 rounded-2xl pl-7 bg-tertiary outline-none text-sm" 
+                                placeholder="Search..." 
+                            />
+                            <FaSearchengin className="absolute left-2 top-2 text-gray-500 cursor-pointer" />
+                        </div>
+                        <RiAccountCircleFill className="text-3xl cursor-pointer hover:text-tertiary" />
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button className="xl:hidden text-2xl" onClick={toggleSidebar}>
+                        <FaBars />
+                    </button>
+                </nav>
             </div>
 
-            <div className={`fixed top-0 right-0 h-full bg-tertiary text-primary w-1/3 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out`}>
-                <ul className="flex flex-col p-4 space-y-8">
-                    <li className='flex justify-between items-center'>
-                        <a className="text-3xl"><FaXmark className='cursor-pointer hover:text-secondary' onClick={toggleSidebar} /></a>
-                    </li>
-                    <li><a className="text-md cursor-pointer hover:text-secondary">Home</a></li>
-                    <li><a className="text-md cursor-pointer hover:text-secondary">Watch Later</a></li>
-                    <li><a className="text-md cursor-pointer hover:text-secondary">Watch History</a></li>
-                    <li><a className="text-md cursor-pointer hover:text-secondary">Favorites</a></li>
-                    <li><a className="text-md cursor-pointer hover:text-secondary">Watch Buddies</a></li>
-                    <li className='bottom-4 fixed flex items-center hover:text-secondary space-x-4'>
-                        <a className="text-5xl"><RiAccountCircleFill className=' cursor-pointer' /></a>
-                        <a className="text-md cursor-pointer">Profile</a>
-                    </li>
-                </ul>
+            {/* Sidebar for Mobile */}
+            <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300`}>
+                <div className="w-4/5 sm:w-2/3 md:w-1/3 h-full bg-tertiary p-6 shadow-lg">
+                    {/* Close Button */}
+                    <div className="flex justify-end">
+                        <button onClick={toggleSidebar}>
+                            <FaXmark className="text-3xl cursor-pointer hover:text-secondary" />
+                        </button>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <ul className="flex flex-col mt-10 space-y-6">
+                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Home</a></li>
+                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch Later</a></li>
+                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch History</a></li>
+                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Favorites</a></li>
+                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch Buddies</a></li>
+                    </ul>
+
+                    {/* Profile Section */}
+                    <div className="absolute bottom-6 left-6 flex items-center space-x-4 hover:text-secondary cursor-pointer">
+                        <RiAccountCircleFill className="text-5xl" />
+                        <a href="#" className="text-lg">Profile</a>
+                    </div>
+                </div>
             </div>
         </>
     );

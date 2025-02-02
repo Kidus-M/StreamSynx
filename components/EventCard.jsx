@@ -3,7 +3,7 @@ import React from 'react';
 const EventCard = ({ movie }) => {
   return (
     <div
-      className="relative w-11/12 m-6 h-96 bg-cover bg-center flex items-end justify-start p-6 rounded-lg shadow-lg"
+      className="relative w-full mt-6 h-96 bg-cover bg-center flex items-end justify-start p-6 rounded-lg shadow-lg"
       style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w500${movie.poster_path})` }}
     >
       {/* Overlay */}
