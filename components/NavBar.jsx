@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaBars, FaXmark, FaSearchengin } from "react-icons/fa6";
+import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 
 export default function NavBar() {
@@ -19,23 +19,15 @@ export default function NavBar() {
                     </a>
 
                     {/* Desktop Menu */}
-                    <ul className="hidden xl:flex space-x-8 font-semibold">
+                    <ul className="hidden xl:flex space-x-20 font-semibold">
                         <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">WatchList</a></li>
                         <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">History</a></li>
                         <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">Favorites</a></li>
                         <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">Buddies</a></li>
                     </ul>
 
-                    {/* Search and Profile */}
-                    <div className="hidden xl:flex items-center space-x-4">
-                        <div className="relative">
-                            <input 
-                                type="text" 
-                                className="h-8 w-64 xl:w-80 rounded-2xl pl-7 bg-tertiary outline-none text-sm" 
-                                placeholder="Search..." 
-                            />
-                            <FaSearchengin className="absolute left-2 top-2 text-gray-500 cursor-pointer" />
-                        </div>
+                    {/* Profile Icon */}
+                    <div className="hidden xl:flex items-center">
                         <RiAccountCircleFill className="text-3xl cursor-pointer hover:text-tertiary" />
                     </div>
 
