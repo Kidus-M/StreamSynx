@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import MovieCard from "../../components/MovieCard"; // Import your card component
+import MovieCard from "../../components/SmallMovieCard"; // Import your card component
 import NavBar from "../../components/NavBar"; // Import your navbar component
 import EventCard from "../../components/EventCard";
 console.log(process.env);
@@ -42,7 +42,7 @@ const MovieList = () => {
     <div>
       <NavBar />
       <EventCard movie= {movies[1]} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-6 p-6">
         {movies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
