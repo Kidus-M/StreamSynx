@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
+import { RiSearchLine } from "react-icons/ri";
 
 export default function NavBar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen((prevState) => !prevState);
     };
+
+    const toggleSearchBar = () => {
+        setIsSearchBarOpen((prevState) => !prevState)
+    }
 
     return (
         <>
@@ -26,8 +32,12 @@ export default function NavBar() {
                         <li><a href="#" className="text-sm cursor-pointer hover:text-tertiary">Buddies</a></li>
                     </ul>
 
+
                     {/* Profile Icon */}
-                    <div className="hidden xl:flex items-center">
+                    <div className="hidden xl:flex items-center gap-4">
+                        <div className='rounded-md p-1 bg-primary hover:bg-tertiary'>
+                            <RiSearchLine className='text-secondary text-xl cursor-pointer' onClick={toggleSearchBar} />
+                        </div>
                         <RiAccountCircleFill className="text-3xl cursor-pointer hover:text-tertiary" />
                     </div>
 
@@ -40,7 +50,7 @@ export default function NavBar() {
 
             {/* Sidebar for Mobile */}
             <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300`}>
-                <div className="w-4/5 sm:w-2/3 md:w-1/3 h-full bg-tertiary p-6 shadow-lg">
+                <div className="w-screen h-full bg-tertiary p-6 shadow-lg">
                     {/* Close Button */}
                     <div className="flex justify-end">
                         <button onClick={toggleSidebar}>
@@ -62,6 +72,13 @@ export default function NavBar() {
                         <RiAccountCircleFill className="text-5xl" />
                         <a href="#" className="text-lg">Profile</a>
                     </div>
+                </div>
+            </div>
+
+            <div className={`w-full bg-tertiary ${isSearchBarOpen ? 'flex' : 'hidden'} transition-all duration-300`}>
+                <div className='flex justify-between items-center w-full px-6 py-3 gap-2'>
+                    <input type="text" className='w-full text-md h-8 pl-4 shadow-lg rounded-md' placeholder='Search' />
+                    <button className='h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer'>Search</button>
                 </div>
             </div>
         </>

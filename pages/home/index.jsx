@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MovieCard from "../../components/SmallMovieCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
+import Footer from "../../components/Footer"
 import EventCard from "../../components/EventCard";
 console.log(process.env);
 const MovieList = () => {
@@ -49,6 +50,7 @@ const MovieList = () => {
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
+      <Footer />
     </div>
   );
 };
