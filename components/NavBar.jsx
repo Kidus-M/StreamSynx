@@ -27,7 +27,7 @@ export default function NavBar() {
             <div className="w-full">
                 <nav className="flex justify-between items-center bg-secondary text-primary w-full px-5 py-4">
                     {/* Logo */}
-                    <a className="text-2xl font-dm-display" href="#">
+                    <a className="text-2xl font-dm-display cursor-pointer" onClick={() => {router.push(`/home`)}}>
                         StreamSync.
                     </a>
 
@@ -40,7 +40,7 @@ export default function NavBar() {
                     </ul>
 
 
-                    {/* Profile Icon */}
+                    {/* Profile and Search Icon */}
                     <div className="hidden xl:flex items-center gap-4">
                         <div className='rounded-md p-1 bg-primary hover:bg-tertiary'>
                             <RiSearchLine className='text-secondary text-xl cursor-pointer' onClick={toggleSearchBar} />
@@ -49,8 +49,11 @@ export default function NavBar() {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <button className="xl:hidden text-2xl" onClick={toggleSidebar}>
-                        <FaBars />
+                    <button className="xl:hidden text-2xl flex justify-between items-center gap-4">
+                        <div className='rounded-md p-1 bg-primary hover:bg-tertiary'>
+                            <RiSearchLine className='text-secondary text-xl cursor-pointer' onClick={toggleSearchBar} />
+                        </div>
+                        <FaBars onClick={toggleSidebar}/>
                     </button>
                 </nav>
             </div>
@@ -89,6 +92,11 @@ export default function NavBar() {
                         className='w-full text-md h-8 pl-4 shadow-lg rounded-md'
                         placeholder='Search' 
                         value={searchQuery}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSearch();
+                            }
+                        }}
                         onChange={(e) => setSearchQuery(e.target.value)}/>
                     <button className='h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer' onClick={handleSearch}>Search</button>
                 </div>

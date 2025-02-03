@@ -50,9 +50,9 @@ const MovieList = () => {
         <div>
             <NavBar />
             <div className="px-6 my-6 flex justify-between items-center">
-                {/* <EventCard movie={movies[1]} /> */}
-                <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl"/>Search results for "{searchQuery}" <FaFilter /></p>
+                <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Search results for "{searchQuery}" <FaFilter /></p>
             </div>
+            {movies.length === 0 && <div className="flex justify-center text-center bg-tertiary mx-6 h-48 rounded-lg items-center py-auto">No movies found.</div>}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-6 p-6">
                 {movies.map((movie) => (
                     <MovieCard key={movie.id} movie={movie} />
