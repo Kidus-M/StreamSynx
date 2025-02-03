@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
+import { useRouter } from 'next/router';
 
 export default function NavBar() {
+    const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const toggleSidebar = () => {
         setIsSidebarOpen((prevState) => !prevState);
@@ -13,6 +16,10 @@ export default function NavBar() {
 
     const toggleSearchBar = () => {
         setIsSearchBarOpen((prevState) => !prevState)
+    }
+
+    const handleSearch = () => {
+        router.push(`/search?query=${searchQuery}`);
     }
 
     return (
@@ -77,8 +84,13 @@ export default function NavBar() {
 
             <div className={`w-full bg-tertiary ${isSearchBarOpen ? 'flex' : 'hidden'} transition-all duration-300`}>
                 <div className='flex justify-between items-center w-full px-6 py-3 gap-2'>
-                    <input type="text" className='w-full text-md h-8 pl-4 shadow-lg rounded-md' placeholder='Search' />
-                    <button className='h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer'>Search</button>
+                    <input
+                        type="text"
+                        className='w-full text-md h-8 pl-4 shadow-lg rounded-md'
+                        placeholder='Search' 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}/>
+                    <button className='h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer' onClick={handleSearch}>Search</button>
                 </div>
             </div>
         </>
