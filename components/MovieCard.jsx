@@ -16,7 +16,13 @@ const MovieCard = ({ movie }) => {
     <div className="relative w-full max-w-xs rounded-xl overflow-hidden transition-transform hover:scale-105 cursor-pointer group">
       {/* Movie Poster with Increased Height */}
       <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` // Movie & TV show poster
+            : movie.backdrop_path
+            ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` // TV show fallback (if available)
+            : "/default-poster.jpg" // Fallback image if no poster exists
+        }
         alt={`${movie.title} Poster`}
         className="w-full h-[500px] object-cover rounded-xl"
       />

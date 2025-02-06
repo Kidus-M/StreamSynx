@@ -16,7 +16,7 @@ const MovieList = () => {
 
     const apiKey = process.env.NEXT_PUBLIC_API_KEY;
     const searchQuery = query.query || "";
-    const apiUrl = `https://api.themoviedb.org/3/search/movie?query=${searchQuery}&api_key=${apiKey}&page=1`;
+    const apiUrl = `https://api.themoviedb.org/3/search/multi?query=${searchQuery}&api_key=${apiKey}&page=1`;
 
     useEffect(() => {
         const fetchMovies = async () => {
