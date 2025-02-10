@@ -9,6 +9,7 @@
     "@fontsource/dm-serif-display": "^5.1.1",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "firebase": "^11.3.0",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",
