@@ -6,7 +6,6 @@ import Footer from "../../components/Footer"
 import { FaFilter } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
 
-console.log(process.env);
 const MovieList = () => {
     const router = useRouter();
     const { query } = router;
@@ -32,6 +31,7 @@ const MovieList = () => {
             } finally {
                 setLoading(false);
             }
+            console.log(movies.map((movie) => movie.movie_id));
         };
 
         fetchMovies();

@@ -11,7 +11,7 @@ const MoviePlayerPage = ({ movie, recommendedMovies }) => {
       <div className="min-h-screen bg-gray-900 text-white flex flex-col">
         {/* Header */}
         <header className="p-4 bg-primary">
-          <h1 className="text-3xl font-bold">Now Playing: {movie.title}</h1>
+          {/* <h1 className="text-3xl font-bold">Now Playing: {movie.title}</h1> */}
         </header>
   
         {/* Main content area */}
@@ -22,7 +22,7 @@ const MoviePlayerPage = ({ movie, recommendedMovies }) => {
             <div className="flex-1">
               <div className="relative rounded-lg overflow-hidden shadow-lg bg-black">
                 <video controls className="w-full h-full object-cover">
-                  <source src={movie.videoUrl} type="video/mp4" />
+                  <source src="" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>
@@ -34,7 +34,7 @@ const MoviePlayerPage = ({ movie, recommendedMovies }) => {
           </div>
   
           {/* Movie Details Section */}
-          <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
+          {/* <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
             <p className="text-gray-300 mb-4">{movie.overview}</p>
             <div className="flex space-x-6">
@@ -42,16 +42,16 @@ const MoviePlayerPage = ({ movie, recommendedMovies }) => {
               <span className="text-secondary">Rating: {movie.vote_average}</span>
             </div>
           </section>
-  
+   */}
           {/* Recommended Movies Section */}
-          <section>
+          {/* <section>
             <h2 className="text-2xl font-bold mb-4">Recommended for You</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {recommendedMovies.map((mov) => (
                 <MovieCard key={mov.id} movie={mov} />
               ))}
             </div>
-          </section>
+          </section> */}
         </main>
   
         

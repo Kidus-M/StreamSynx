@@ -66,7 +66,7 @@ const MovieList = () => {
       <div className="px-6">
         <EventCard movie={movies[1]} />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-6 p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 p-6">
         {movies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
@@ -74,7 +74,7 @@ const MovieList = () => {
       <div className="px-6 my-6 flex justify-start gap-24 items-center">
         <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Highest Rated Movies" <FaFilter /></p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-6 p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-6 p-6">
         {higestRatedMovies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
