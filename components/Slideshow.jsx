@@ -57,7 +57,7 @@ export default function Slideshow() {
               <motion.img
                 src={`${IMAGE_BASE_URL}${images[currentIndex]}`}
                 alt="Movie Backdrop"
-                className="absolute w-full h-full object-cover opacity-30 hover:opacity-100 transition-opacity duration-500 rounded-lg"
+                className="absolute w-full h-full object-cover opacity-60 hover:opacity-1 transition-opacity duration-500 rounded-lg "
                 whileHover={{ scale: 1.05 }}
               />
             </motion.div>
