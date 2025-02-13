@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
+import Slideshow from "../components/Slideshow";
 import { auth } from "../firebase";
 import {
   signInWithEmailAndPassword,
@@ -38,7 +39,10 @@ export default function Home() {
               ? "bg-primary rounded-l-[50px] hidden"
               : "bg-secondary rounded-r-[50px]"
           } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
-        ></div>
+        >
+                
+          <Slideshow />
+        </div>
 
         <div
           className={`w-1/2 h-full transition-all duration-500 ${
@@ -46,7 +50,9 @@ export default function Home() {
               ? "bg-primary rounded-l-[50px]"
               : "bg-white max-md:bg-secondary"
           } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
-        ></div>
+        >
+          {isSignUp? <Slideshow /> : <div className="w-full h-full max-md:hidden"></div>}
+        </div>
       </div>
       <div className="w-screen absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16">
         <div
