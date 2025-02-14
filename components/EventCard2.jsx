@@ -54,10 +54,10 @@ const EventCard = ({ movie }) => {
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-70"></div>
-      
+
       {/* Main Content Container */}
       <motion.div
-        className="relative z-10 bg-black bg-opacity-60 p-10 flex w-full h-full rounded-lg shadow-lg text-white"
+        className="relative z-10 bg-black bg-opacity-60 p-10 flex w-full h-full rounded-lg shadow-lg text-white max-lg:block justify-center items-center"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -121,9 +121,9 @@ const EventCard = ({ movie }) => {
         </div>
 
         {/* Right Section - Cast & Trailer */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col justify-center ">
           {/* Cast Section with Images */}
-          
+
 
           {/* Trailer Section */}
           {trailerKey && (
@@ -134,7 +134,7 @@ const EventCard = ({ movie }) => {
                   className="absolute top-0 left-0 w-full h-full rounded-lg"
                   src={`https://www.youtube.com/embed/${trailerKey}`}
                   title="YouTube video player"
-                  frameBorder="0"
+                  frameborder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>

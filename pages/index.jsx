@@ -37,9 +37,7 @@ export default function Home() {
           className={`w-1/2 h-full transition-all duration-500 ${isSignUp
             ? "bg-primary rounded-l-[50px] hidden"
             : "bg-secondary rounded-r-[50px]"
-            } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
-        >
-
+            } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}>
           <Slideshow />
         </div>
 
@@ -148,6 +146,9 @@ function SignIn({ setIsSignUp }) {
 }
 
 function SignUp({ setIsSignUp }) {
+  const [errorLabel, setErrorLabel] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  
   const handleSignUp = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -155,7 +156,15 @@ function SignUp({ setIsSignUp }) {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.error("Error signing up:", error);
+      if (error.code === 'auth/email-already-in-use') {
+        setErrorLabel(true);
+        setErrorMessage("Email already in use.");
+      } else if (error.code === 'auth/invalid-email') {
+        setErrorLabel(true);
+        setErrorMessage("Invalid email.");
+      } else {
+        console.error("Error signing up:", error);
+      }
     }
   };
 
@@ -192,6 +201,10 @@ function SignUp({ setIsSignUp }) {
           placeholder="Password"
           className="w-full p-3 border rounded mb-6 text-gray-700"
         />
+        <div className={`w-full items-center justify-start gap-2 mb-4 text-red-600 ${errorLabel ? 'flex' : 'hidden'}`}>
+          <MdError className="text-xl" />
+          <p className="text-sm">{errorMessage}</p>
+        </div>
         <button type="submit" className="w-full bg-primary text-white py-3 rounded mb-4 font-poppins">
           Sign Up
         </button>
