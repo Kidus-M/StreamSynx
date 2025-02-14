@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
+import { MdError } from "react-icons/md";
 import Slideshow from "../components/Slideshow";
 import { auth } from "../firebase";
 import {
@@ -29,36 +30,32 @@ export default function Home() {
   return (
     <div className="relative h-screen bg-white overflow-hidden">
       <div
-        className={`absolute inset-0 flex transition-all duration-500${
-          isSignUp ? "translate-x-full " : ""
-        } max-md:flex-col max-md:translate-x-0 max-md:h-auto`}
+        className={`absolute inset-0 flex transition-all duration-500${isSignUp ? "translate-x-full " : ""
+          } max-md:flex-col max-md:translate-x-0 max-md:h-auto`}
       >
         <div
-          className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp
-              ? "bg-primary rounded-l-[50px] hidden"
-              : "bg-secondary rounded-r-[50px]"
-          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
+          className={`w-1/2 h-full transition-all duration-500 ${isSignUp
+            ? "bg-primary rounded-l-[50px] hidden"
+            : "bg-secondary rounded-r-[50px]"
+            } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
         >
-                
+
           <Slideshow />
         </div>
 
         <div
-          className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp
-              ? "bg-primary rounded-l-[50px]"
-              : "bg-white max-md:bg-secondary"
-          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
+          className={`w-1/2 h-full transition-all duration-500 ${isSignUp
+            ? "bg-primary rounded-l-[50px]"
+            : "bg-white max-md:bg-secondary"
+            } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
         >
-          {isSignUp? <Slideshow /> : <div className="w-full h-full max-md:hidden"></div>}
+          {isSignUp ? <Slideshow /> : <div className="w-full h-full max-md:hidden"></div>}
         </div>
       </div>
       <div className="w-screen absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16">
         <div
-          className={`w-96 transition-all duration-500 transform ${
-            isSignUp ? "translate-x-[-70%]" : "translate-x-[70%]"
-          } flex justify-center items-center max-md:translate-x-0 max-lg:md:w-2/5`}
+          className={`w-96 transition-all duration-500 transform ${isSignUp ? "translate-x-[-70%]" : "translate-x-[70%]"
+            } flex justify-center items-center max-md:translate-x-0 max-lg:md:w-2/5`}
         >
           {!isSignUp ? (
             <SignIn setIsSignUp={setIsSignUp} />
@@ -73,16 +70,30 @@ export default function Home() {
 
 function SignIn({ setIsSignUp }) {
   const router = useRouter();
-  
+  const [errorLabel, setErrorLabel] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // setErrorLabel(false);
       router.push("/home");
     } catch (error) {
-      console.error("Error signing in:", error);
+      if (error.code === 'auth/user-not-found') {
+        setErrorLabel(true);
+        setErrorMessage("No account found with this email.");
+        // alert("No account found with this email.");
+      } else if (error.code === 'auth/invalid-credential') {
+        setErrorLabel(true);
+        setErrorMessage("Username or password is incorrect.");
+        // alert("Username or password is incorrect.");
+      } else {
+        setErrorLabel(true);
+        console.error("Error signing in:", error);
+      }
     }
   };
 
@@ -112,12 +123,16 @@ function SignIn({ setIsSignUp }) {
           name="password"
           type="password"
           placeholder="Password"
-          className="w-full p-3 border rounded mb-6 text-gray-700"
+          className="w-full p-3 border rounded mb-3 text-gray-700"
         />
+        <div className={`w-full items-center justify-start gap-2 mb-4 text-red-600 ${errorLabel ? 'flex' : 'hidden'}`}>
+          <MdError className="text-xl" />
+          <p className="text-sm">{errorMessage}</p>
+        </div>
         <button type="submit" className="w-full bg-secondary text-white py-3 rounded mb-4 font-poppins">
           Sign In
         </button>
-      </form>
+      </form >
       <button onClick={handleGoogleSignIn} className="w-full bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
         <FcGoogle className="text-xl mr-2" />
         Continue With Google
@@ -128,7 +143,7 @@ function SignIn({ setIsSignUp }) {
           Sign Up
         </button>
       </p>
-    </div>
+    </div >
   );
 }
 
