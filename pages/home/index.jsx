@@ -59,12 +59,14 @@ const MovieList = () => {
   if (error) {
     return <div className="text-center mt-8 text-red-500">Error: {error}</div>;
   }
-
+  
+    
+  
   return (
     <div>
       <NavBar />
       <div className="px-6">
-        <EventCard movie={movies[1]} />
+        <EventCard movie={movies[0]} />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 p-6">
         {movies.map((movie) => (

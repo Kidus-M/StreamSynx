@@ -84,23 +84,9 @@ const EventCard = ({ movie }) => {
           </div>
 
           {/* Movie Description */}
-          <p className="mt-6 text-gray-300 text-lg leading-relaxed">
+          <p className="my-6 text-gray-300 text-lg leading-relaxed">
             {movie.overview}
           </p>
-
-          {/* Watch Party Button */}
-          <motion.button
-            className="mt-6 px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-all"
-            onClick={() => router.push(`/movie/${movie.id}/watch-party`)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🎬 Join Watch Party
-          </motion.button>
-        </div>
-
-        {/* Right Section - Cast & Trailer */}
-        <div className="flex-1 flex flex-col">
           {/* Cast Section with Images */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-3">Top Cast:</h2>
@@ -123,11 +109,27 @@ const EventCard = ({ movie }) => {
             </div>
           </div>
 
+          {/* Watch Party Button */}
+          <motion.button
+            className="mt-6 px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-all"
+            onClick={() => router.push(`/movie/${movie.id}/watch-party`)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            🎬 Join Watch Party
+          </motion.button>
+        </div>
+
+        {/* Right Section - Cast & Trailer */}
+        <div className="flex-1 flex flex-col">
+          {/* Cast Section with Images */}
+          
+
           {/* Trailer Section */}
           {trailerKey && (
             <div>
-              <h2 className="text-2xl font-semibold mb-3">Official Trailer:</h2>
-              <div className="relative w-full h-80">
+              <h2 className="text-2xl font-semibold mt-20 mb-16">Official Trailer:</h2>
+              <div className="relative w-full h-96">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-lg"
                   src={`https://www.youtube.com/embed/${trailerKey}`}
