@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import MovieCard from "../../components/MovieCard";
+import MovieCard from "../../components/SmallMovieCard";
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import ChatComponent from "../../components/Chat";
 import { useRouter } from "next/router";
@@ -145,10 +145,16 @@ const MoviePlayerPage = () => {
         <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
           <p className="text-gray-300 mb-4">{movie.overview}</p>
-          <div className="flex space-x-6">
+          <div className="flex space-x-6 text-sm">
             <span className="text-secondary">Released: {movie.release_date}</span>
             <span className="text-secondary">Rating: {movie.vote_average}</span>
             <span className="text-secondary hover:text-tertiary"><a className="flex items-center gap-1" href={`https://www.youtube.com/embed/${trailerKey}`}><FaVideo /> Trailer</a></span>
+            <span className="text-secondary">Duration: {movie.runtime} mins</span>
+            <span className="text-secondary">Genres:{" "}
+              <span className="text-orange-600">
+                {movie.genres.map((genre) => genre.name).join(", ")}
+              </span></span>
+
           </div>
         </section>
 
@@ -157,7 +163,7 @@ const MoviePlayerPage = () => {
           <div className="px-6 my-6 flex justify-between items-center">
             <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Recommended for you</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-6 p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-6 p-6">
             {recommendedMovies.map((mov) => (
               <MovieCard key={mov.id} movie={mov} />
             ))}
