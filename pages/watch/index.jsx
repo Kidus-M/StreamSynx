@@ -139,7 +139,9 @@ const MoviePlayerPage = () => {
                 src={`https://vidlink.pro/movie/${movie.id}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
                 frameborder="0"
                 allowfullscreen
+                sandbox
                 className="w-full h-full"
+                
               ></iframe>
             </div>
           </div>
