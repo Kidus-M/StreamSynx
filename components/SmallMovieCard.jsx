@@ -9,7 +9,7 @@ const MovieCard = ({ movie }) => {
   };
 
   const handleAloneWatch = () => {
-    router.push(`/movie/${movie.id}`);
+    router.push(`/watch?movie_id=${movie.id}`);
   };
 
   return (
