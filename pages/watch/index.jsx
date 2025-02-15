@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import axios from 'axios';
 import { FaVideo } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
+import Footer from "../../components/Footer";
 
 
 
@@ -170,7 +171,7 @@ const MoviePlayerPage = () => {
           </div>
         </section>
       </main>
-
+      <Footer />
 
     </div>
   );

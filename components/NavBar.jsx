@@ -89,7 +89,7 @@ export default function NavBar() {
                 <div className='flex justify-between items-center w-full px-6 py-3 gap-2'>
                     <input
                         type="text"
-                        className='w-full text-md h-8 pl-4 shadow-lg rounded-md'
+                        className='w-full text-md h-8 pl-4 shadow-lg rounded-md text-primary'
                         placeholder='Search' 
                         value={searchQuery}
                         onKeyDown={(e) => {

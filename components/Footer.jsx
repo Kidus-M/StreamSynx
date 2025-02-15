@@ -1,4 +1,11 @@
 import React from "react";
+import { FaFacebookSquare } from "react-icons/fa";
+import { FaLinkedin } from "react-icons/fa6";
+import { FaInstagram } from "react-icons/fa";
+import { FaFacebookMessenger } from "react-icons/fa6";
+import { FaXTwitter } from "react-icons/fa6";
+
+
 
 const Footer = () => {
   return (
@@ -24,37 +31,41 @@ const Footer = () => {
         </a>
       </nav>
 
-      <div class="flex justify-center space-x-5">
+      <div class="flex justify-center space-x-5 text-2xl">
         <a
           href="https://facebook.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img src="https://img.icons8.com/fluent/30/000000/facebook-new.png" />
+          <FaFacebookSquare />
         </a>
         <a
           href="https://linkedin.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img src="https://img.icons8.com/fluent/30/000000/linkedin-2.png" />
+          <FaLinkedin />
         </a>
         <a
           href="https://instagram.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img src="https://img.icons8.com/fluent/30/000000/instagram-new.png" />
+          <FaInstagram />
         </a>
         <a
           href="https://messenger.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img src="https://img.icons8.com/fluent/30/000000/facebook-messenger--v2.png" />
+          <FaFacebookMessenger />
         </a>
-        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-          <img src="https://img.icons8.com/fluent/30/000000/twitter.png" />
+        <a
+          href="https://twitter.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <FaXTwitter />
         </a>
       </div>
       <p class="text-center text-gray-700 font-medium">
