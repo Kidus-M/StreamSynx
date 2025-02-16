@@ -1,69 +1,74 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
 
-const TMDB_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
-export default function Slideshow() {
-  const [images, setImages] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+
+const SlideShow = () => {
+  const [movies, setMovies] = useState([[], [], []]);
+  const [hovered, setHovered] = useState(null);
 
   useEffect(() => {
-    async function fetchTopRated() {
+    const fetchMovies = async () => {
       try {
-        const [moviesRes, showsRes] = await Promise.all([
-          fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB_API_KEY}`),
-          fetch(`https://api.themoviedb.org/3/tv/top_rated?api_key=${TMDB_API_KEY}`),
-        ]);
-        const [moviesData, showsData] = await Promise.all([
-          moviesRes.json(),
-          showsRes.json(),
-        ]);
-        
-        const movieImages = moviesData.results.map(movie => movie.backdrop_path);
-        const showImages = showsData.results.map(show => show.backdrop_path);
-        const combinedImages = [...movieImages, ...showImages].filter(Boolean);
-        
-        setImages(combinedImages);
+        const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+        const data = await res.json();
+        const movieChunks = [[], [], []];
+        data.results.forEach((movie, index) => {
+          movieChunks[index % 3].push(movie);
+        });
+        setMovies(movieChunks);
       } catch (error) {
-        console.error("Error fetching TMDB data:", error);
+        console.error('Error fetching movies:', error);
       }
-    }
-    
-    fetchTopRated();
+    };
+
+    fetchMovies();
   }, []);
 
-  useEffect(() => {
-    if (images.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [images]);
+  const columnVariants = (direction) => ({
+    animate: {
+      y: direction === 'up' ? [0, -1000] : [0, 1000],
+      transition: {
+        y: {
+          repeat: Infinity,
+          repeatType: 'loop',
+          duration: 20,
+          ease: 'linear',
+        },
+      },
+    },
+    paused: {
+      y: 0,
+    },
+  });
 
   return (
-    <div className="hidden md:flex relative w-full h-[500px] overflow-hidden bg-transparent  flex-col items-center justify-center p-6">
-      <div className="relative w-full h-96 max-md:h-64 flex items-center justify-center overflow-hidden">
-        <AnimatePresence>
-          {images.length > 0 && (
-            <motion.div
-              key={currentIndex}
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: "0%", opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{ duration: 1, ease: "easeInOut" }}
-              className="relative w-full h-full flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-500  hover:opacity-100" 
-            >
-              <motion.img
-                src={`${IMAGE_BASE_URL}${images[currentIndex]}`}
-                alt="Movie Backdrop"
-                className="absolute w-full h-full object-cover opacity-60 hover:opacity-1 transition-opacity duration-500 rounded-lg "
-                whileHover={{ scale: 1.05 }}
+    <div className="hidden md:flex justify-center space-x-4 overflow-hidden h-[800px] p-4">
+      {movies.map((column, colIndex) => (
+        <motion.div
+          key={colIndex}
+          className={`flex flex-col space-y-4 transition-opacity duration-300 ${hovered === colIndex ? 'opacity-100' : 'opacity-60'}`}
+          variants={columnVariants(colIndex === 1 ? 'down' : 'up')}
+          animate={hovered === colIndex ? 'paused' : 'animate'}
+          onMouseEnter={() => setHovered(colIndex)}
+          onMouseLeave={() => setHovered(null)}
+        >
+          {column.concat(column).map((movie, index) => (
+            <div key={index} className="w-60 h-90 rounded-lg overflow-hidden shadow-lg">
+              <img
+                src={`${IMAGE_BASE_URL}${movie.poster_path}`}
+                alt={movie.title}
+                className="object-cover w-full h-full"
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            </div>
+          ))}
+        </motion.div>
+      ))}
     </div>
   );
-}
+};
+
+export default SlideShow;
