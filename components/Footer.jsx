@@ -11,22 +11,22 @@ const Footer = () => {
   return (
     <footer class="flex flex-col space-y-10 justify-center m-10">
       <nav class="flex justify-center flex-wrap gap-6 text-gray-500 font-medium">
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           Home
         </a>
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           WatchList
         </a>
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           History
         </a>
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           Favorites
         </a>
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           Buddies
         </a>
-        <a class="hover:text-gray-900" href="#">
+        <a class="hover:text-secondary" href="#">
           Account
         </a>
       </nav>
