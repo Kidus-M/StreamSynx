@@ -63,7 +63,7 @@ const MovieList = () => {
     
   
   return (
-    <div>
+    <div className="bg-primary text-white">
       <NavBar />
       <div className="px-6">
         <EventCard movie={movies[0]} />

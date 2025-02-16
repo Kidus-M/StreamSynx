@@ -25,7 +25,7 @@ export default function NavBar() {
     return (
         <>
             <div className="w-full">
-                <nav className="flex justify-between items-center bg-secondary text-primary w-full px-5 py-4">
+                <nav className="flex justify-between items-center bg-secondary opacity-30 text-primary w-full px-5 py-4">
                     {/* Logo */}
                     <a className="text-2xl font-dm-display cursor-pointer" onClick={() => {router.push(`/home`)}}>
                         StreamSync.
@@ -59,7 +59,7 @@ export default function NavBar() {
             </div>
 
             {/* Sidebar for Mobile */}
-            <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300`}>
+            <div className={`fixed inset-0  bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300`}>
                 <div className="w-screen h-full bg-tertiary p-6 shadow-lg">
                     {/* Close Button */}
                     <div className="flex justify-end">
@@ -68,13 +68,13 @@ export default function NavBar() {
                         </button>
                     </div>
 
-                    {/* Mobile Menu */}
-                    <ul className="flex flex-col mt-10 space-y-6">
-                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Home</a></li>
-                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch Later</a></li>
-                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch History</a></li>
-                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Favorites</a></li>
-                        <li><a href="#" className="text-lg cursor-pointer hover:text-secondary">Watch Buddies</a></li>
+                    {/* Mobile Menu */} 
+                    <ul className="flex flex-col mt-10 space-y-6 ">
+                        <li><a href="#" className="text-lg text-primary cursor-pointer hover:text-secondary">Home</a></li>
+                        <li><a href="#" className="text-lg text-primary cursor-pointer hover:text-secondary">Watch Later</a></li>
+                        <li><a href="#" className="text-lg text-primary cursor-pointer hover:text-secondary">Watch History</a></li>
+                        <li><a href="#" className="text-lg text-primary cursor-pointer hover:text-secondary">Favorites</a></li>
+                        <li><a href="#" className="text-lg text-primary cursor-pointer hover:text-secondary">Watch Buddies</a></li>
                     </ul>
 
                     {/* Profile Section */}

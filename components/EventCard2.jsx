@@ -48,7 +48,7 @@ const EventCard = ({ movie }) => {
 
   return (
     <div
-      className="relative w-full h-[calc(100vh-80px)] mt-6 flex items-stretch bg-cover bg-center rounded-xl overflow-hidden"
+      className="relative w-full min-h-[calc(100vh-80px)] mt-6 flex items-stretch bg-cover bg-center rounded-xl overflow-y-auto"
       style={{
         backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
       }}
@@ -57,22 +57,22 @@ const EventCard = ({ movie }) => {
 
       {/* Main Content Container */}
       <motion.div
-        className="relative z-10 bg-black bg-opacity-60 p-10 flex w-full h-full rounded-lg shadow-lg text-white max-lg:block justify-center items-center"
+        className="relative z-10 bg-black bg-opacity-60 p-6 lg:p-10 flex w-full h-full rounded-lg shadow-lg text-white max-lg:flex-col max-lg:items-center justify-center overflow-y-auto"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         {/* Left Section - Movie Info */}
-        <div className="flex-1 pr-8 flex flex-col justify-center">
-          <h1 className="text-5xl font-bold mb-4">{movie.title}</h1>
-          <div className="flex items-center space-x-6 text-gray-300 text-lg">
+        <div className="flex-1 pr-8 flex flex-col justify-center max-lg:pr-0 max-lg:text-center max-lg:w-full">
+          <h1 className="text-4xl lg:text-5xl font-bold mb-4">{movie.title}</h1>
+          <div className="flex items-center space-x-6 text-gray-300 text-lg max-lg:justify-center max-lg:space-x-4 max-lg:text-base">
             <span>{new Date(movie.release_date).toLocaleDateString()}</span>
             <span>⭐ {movie.vote_average}/10</span>
             <span>⏳ {movie.runtime} mins</span>
           </div>
 
           {/* Genres */}
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2 max-lg:justify-center">
             {(movie.genres || []).map((genre) => (
               <span
                 key={genre.id}
@@ -84,13 +84,14 @@ const EventCard = ({ movie }) => {
           </div>
 
           {/* Movie Description */}
-          <p className="my-6 text-gray-300 text-lg leading-relaxed">
+          <p className="my-6 text-gray-300 text-lg leading-relaxed max-lg:text-base max-lg:text-center">
             {movie.overview}
           </p>
+
           {/* Cast Section with Images */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-3">Top Cast:</h2>
-            <div className="flex space-x-4 overflow-x-auto">
+            <h2 className="text-2xl font-semibold mb-3 max-lg:text-xl">Top Cast:</h2>
+            <div className="flex space-x-4 overflow-x-auto max-lg:justify-start">
               {cast.map((member) => (
                 <div key={member.cast_id} className="flex-shrink-0 w-24 text-center">
                   <img
@@ -100,10 +101,10 @@ const EventCard = ({ movie }) => {
                         : '/placeholder.jpg'
                     }
                     alt={member.name}
-                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-700 max-lg:w-16 max-lg:h-16"
                   />
-                  <p className="text-sm mt-2">{member.name}</p>
-                  <p className="text-xs text-gray-400">{member.character}</p>
+                  <p className="text-sm mt-2 max-lg:text-xs">{member.name}</p>
+                  <p className="text-xs text-gray-400 max-lg:text-xs">{member.character}</p>
                 </div>
               ))}
             </div>
@@ -111,7 +112,7 @@ const EventCard = ({ movie }) => {
 
           {/* Watch Party Button */}
           <motion.button
-            className="mt-6 px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-all"
+            className="mt-6 px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-all max-lg:px-6 max-lg:py-2"
             onClick={() => router.push(`/movie/${movie.id}/watch-party`)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -120,16 +121,15 @@ const EventCard = ({ movie }) => {
           </motion.button>
         </div>
 
-        {/* Right Section - Cast & Trailer */}
-        <div className="flex-1 flex flex-col justify-center ">
-          {/* Cast Section with Images */}
-
-
+        {/* Right Section - Trailer */}
+        <div className="flex-1 flex flex-col justify-center max-lg:w-full max-lg:mt-10 max-lg:px-4">
           {/* Trailer Section */}
           {trailerKey && (
             <div>
-              <h2 className="text-2xl font-semibold mt-20 mb-16">Official Trailer:</h2>
-              <div className="relative w-full h-96">
+              <h2 className="text-2xl font-semibold mb-6 max-lg:text-xl max-lg:text-center">
+                Official Trailer:
+              </h2>
+              <div className="relative w-full h-64 lg:h-96">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-lg"
                   src={`https://www.youtube.com/embed/${trailerKey}`}
