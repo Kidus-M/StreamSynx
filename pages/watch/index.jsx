@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "../../components/SmallMovieCard";
-import NavBar from "../../components/Navbar"; // Import your navbar component
-import ChatComponent from "../../components/Chat";
+import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { FaVideo } from "react-icons/fa";
-import { FaGripLinesVertical } from "react-icons/fa";
+import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
 
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -132,64 +130,87 @@ const MoviePlayerPage = () => {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <NavBar />
       <main className="flex-1 p-4 space-y-8">
-        {/* Video Player and Chat */}
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Video Player Section */}
-          <div className="flex-1">
-            <div className="relative rounded-lg overflow-hidden shadow-lg bg-black h-96">
-              <iframe
-                src={`https://vidlink.pro/movie/${movie.id}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
-                frameBorder="0"
-                allowFullScreen
-                sandbox
-                className="w-full h-full"
-              ></iframe>
-            </div>
-          </div>
-          {/* Chat Section */}
-          <div className="w-full lg:w-1/3">
-            <ChatComponent />
+        {/* Video Player Section */}
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="relative rounded-lg overflow-hidden shadow-lg bg-black h-[500px]">
+            <iframe
+              src={`https://vidlink.pro/movie/${movie.id}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
+              frameBorder="0"
+              allowFullScreen
+              sandbox
+              className="w-full h-full"
+            ></iframe>
           </div>
         </div>
 
         {/* Movie Details Section */}
-        <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
-          <p className="text-gray-300 mb-4">{movie.overview}</p>
-          <div className="flex space-x-6 text-sm">
-            <span className="text-secondary">
-              Released: {movie.release_date}
-            </span>
-            <span className="text-secondary">Rating: {movie.vote_average}</span>
-            <span className="text-secondary hover:text-tertiary">
-              <a
-                className="flex items-center gap-1"
-                href={`https://www.youtube.com/embed/${trailerKey}`}
-              >
-                <FaVideo /> Trailer
-              </a>
-            </span>
-            <span className="text-secondary">
-              Duration: {movie.runtime} mins
-            </span>
-            <span className="text-secondary">
-              Genres:{" "}
-              <span className="text-orange-600">
-                {movie.genres.map((genre) => genre.name).join(", ")}
-              </span>
-            </span>
+        <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-3xl font-bold mb-4">{movie.title}</h2>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Movie Poster */}
+            <img
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              alt={movie.title}
+              className="w-64 h-96 object-cover rounded-lg"
+            />
+            {/* Movie Details */}
+            <div className="flex-1">
+              <p className="text-gray-300 mb-4">{movie.overview}</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-secondary">Release Date:</span>
+                  <p>{movie.release_date}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Rating:</span>
+                  <p>{movie.vote_average}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Runtime:</span>
+                  <p>{movie.runtime} mins</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Genres:</span>
+                  <p className="text-orange-600">
+                    {movie.genres.map((genre) => genre.name).join(", ")}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-secondary">Status:</span>
+                  <p>{movie.status}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Budget:</span>
+                  <p>${movie.budget.toLocaleString()}</p>
+                </div>
+              </div>
+              {/* Trailer Section */}
+              {trailerKey && (
+                <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-4">Trailer</h3>
+                  <div className="relative w-full h-64">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${trailerKey}`}
+                      frameBorder="0"
+                      allowFullScreen
+                      className="w-full h-full rounded-lg"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Recommended Movies Section */}
-        <section>
+        <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
             <p className="flex justify-between items-center text-lg gap-4">
               <FaGripLinesVertical className="text-2xl" />
               Recommended for you
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 p-6">
             {recommendedMovies.map((mov) => (
               <MovieCard key={mov.id} movie={mov} />
             ))}
