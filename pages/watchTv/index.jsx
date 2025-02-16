@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import EpisodeCard from "../../components/EpisodeCard"; // Updated EpisodeCard component
+import SearchCard from "../../components/SearchCard"; // Import SearchCard for recommendations
 import NavBar from "../../components/Navbar";
-import ChatComponent from "../../components/Chat";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { FaVideo } from "react-icons/fa";
-import { FaGripLinesVertical } from "react-icons/fa";
+import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
+import { motion, AnimatePresence } from "framer-motion"; // For smooth animations
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -19,7 +19,7 @@ const TVShowPlayerPage = () => {
   const [selectedSeason, setSelectedSeason] = useState(1); // Default to season 1
   const [episodes, setEpisodes] = useState([]);
   const [selectedEpisode, setSelectedEpisode] = useState(null); // Track selected episode
-  const [visibleEpisodes, setVisibleEpisodes] = useState(5); // Show only 5 episodes initially
+  const [showAllEpisodes, setShowAllEpisodes] = useState(false); // Show all episodes when true
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cast, setCast] = useState([]);
@@ -156,59 +156,91 @@ const TVShowPlayerPage = () => {
     );
   }
 
+  // Scroll to top when an episode is selected
+  const handleEpisodeClick = (episodeNumber) => {
+    setSelectedEpisode(episodeNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <NavBar />
       <main className="flex-1 p-4 space-y-8">
-        {/* Video Player and Chat */}
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Video Player Section */}
-          <div className="flex-1">
-            <div className="relative rounded-lg overflow-hidden shadow-lg bg-black h-96">
-              <iframe
-                src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
-                frameBorder="0"
-                allowFullScreen
-                sandbox
-                className="w-full h-full"
-              ></iframe>
-            </div>
-          </div>
-          {/* Chat Section */}
-          <div className="w-full lg:w-1/3">
-            <ChatComponent />
+        {/* Video Player Section */}
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="relative rounded-lg overflow-hidden shadow-lg bg-black h-[500px]">
+            <iframe
+              src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
+              frameBorder="0"
+              allowFullScreen
+              sandbox
+              className="w-full h-full"
+            ></iframe>
           </div>
         </div>
 
         {/* TV Show Details Section */}
-        <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">{tvShow.name}</h2>
-          <p className="text-gray-300 mb-4">{tvShow.overview}</p>
-          <div className="flex space-x-6 text-sm">
-            <span className="text-secondary">
-              First Air Date: {tvShow.first_air_date}
-            </span>
-            <span className="text-secondary">Rating: {tvShow.vote_average}</span>
-            <span className="text-secondary hover:text-tertiary">
-              <a
-                className="flex items-center gap-1"
-                href={`https://www.youtube.com/embed/${trailerKey}`}
-              >
-                <FaVideo /> Trailer
-              </a>
-            </span>
-            <span className="text-secondary">
-              Genres:{" "}
-              <span className="text-orange-600">
-                {tvShow.genres.map((genre) => genre.name).join(", ")}
-              </span>
-            </span>
+        <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-3xl font-bold mb-4">{tvShow.name}</h2>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Show Poster */}
+            <img
+              src={`https://image.tmdb.org/t/p/w500${tvShow.poster_path}`}
+              alt={tvShow.name}
+              className="w-64 h-96 object-cover rounded-lg"
+            />
+            {/* Show Details */}
+            <div className="flex-1">
+              <p className="text-gray-300 mb-4">{tvShow.overview}</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-secondary">First Air Date:</span>
+                  <p>{tvShow.first_air_date}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Rating:</span>
+                  <p>{tvShow.vote_average}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Genres:</span>
+                  <p className="text-orange-600">
+                    {tvShow.genres.map((genre) => genre.name).join(", ")}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-secondary">Status:</span>
+                  <p>{tvShow.status}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Seasons:</span>
+                  <p>{tvShow.number_of_seasons}</p>
+                </div>
+                <div>
+                  <span className="text-secondary">Episodes:</span>
+                  <p>{tvShow.number_of_episodes}</p>
+                </div>
+              </div>
+              {/* Trailer Section */}
+              {trailerKey && (
+                <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-4">Trailer</h3>
+                  <div className="relative w-full h-64">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${trailerKey}`}
+                      frameBorder="0"
+                      allowFullScreen
+                      className="w-full h-full rounded-lg"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Season Selection */}
-        <section className="p-4 bg-gray-800 rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold mb-4">Seasons</h3>
+        <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
+          <h3 className="text-2xl font-bold mb-4">Seasons</h3>
           <div className="flex flex-wrap gap-2">
             {seasons.map((season) => (
               <button
@@ -216,6 +248,7 @@ const TVShowPlayerPage = () => {
                 onClick={() => {
                   setSelectedSeason(season.season_number);
                   setSelectedEpisode(null); // Reset selected episode when changing seasons
+                  setShowAllEpisodes(false); // Reset show all episodes
                 }}
                 className={`px-4 py-2 rounded-lg ${
                   selectedSeason === season.season_number
@@ -230,36 +263,54 @@ const TVShowPlayerPage = () => {
         </section>
 
         {/* Episodes Section */}
-        <section>
+        <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
             <p className="flex justify-between items-center text-lg gap-4">
               <FaGripLinesVertical className="text-2xl" />
               Episodes
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
-            {episodes.slice(0, visibleEpisodes).map((episode) => (
-              <EpisodeCard
-                key={episode.id}
-                episode={episode}
-                onWatchClick={(episodeNumber) => setSelectedEpisode(episodeNumber)}
-              />
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+            <AnimatePresence>
+              {(showAllEpisodes ? episodes : episodes.slice(0, 8)).map((episode) => (
+                <motion.div
+                  key={episode.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <EpisodeCard
+                    episode={episode}
+                    onWatchClick={() => handleEpisodeClick(episode.episode_number)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-          {episodes.length > visibleEpisodes && (
-            <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-6">
+            {!showAllEpisodes && episodes.length > 8 ? (
               <button
-                onClick={() => setVisibleEpisodes((prev) => prev + 5)}
+                onClick={() => setShowAllEpisodes(true)}
                 className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all"
               >
                 Show More
               </button>
-            </div>
-          )}
+            ) : (
+              showAllEpisodes && (
+                <button
+                  onClick={() => setShowAllEpisodes(false)}
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all"
+                >
+                  Show Less
+                </button>
+              )
+            )}
+          </div>
         </section>
 
         {/* Recommended Shows Section */}
-        <section>
+        <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
             <p className="flex justify-between items-center text-lg gap-4">
               <FaGripLinesVertical className="text-2xl" />
@@ -268,15 +319,7 @@ const TVShowPlayerPage = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 p-6">
             {recommendedShows.map((show) => (
-              <EpisodeCard
-                key={show.id}
-                episode={{
-                  ...show,
-                  episode_number: 1, // Placeholder for episode number
-                  still_path: show.poster_path, // Use poster_path for recommended shows
-                }}
-                onWatchClick={() => router.push(`/tv/${show.id}`)}
-              />
+              <SearchCard key={show.id} movie={show} />
             ))}
           </div>
         </section>
