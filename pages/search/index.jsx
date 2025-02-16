@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import MovieCard from "../../components/SmallMovieCard"; // Import your card component
+import MovieCard from "../../components/SearchCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import Footer from "../../components/Footer"
 import { FaFilter } from "react-icons/fa";

@@ -9,7 +9,10 @@ const MovieCard = ({ movie }) => {
   };
 
   const handleAloneWatch = () => {
-    const url = `/watch?movie_id=${movie.id}`;
+    const url = movie.media_type == "movie"
+    ? `/watch?movie_id=${movie.id}`
+    : `/watchTv?tv_id=${movie.id}`;
+
   router.push(url);  };
 
   return (

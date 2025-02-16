@@ -20,23 +20,28 @@ const MoviePlayerPage = () => {
   const [error, setError] = useState(null);
   const [cast, setCast] = useState([]);
   const [trailerKey, setTrailerKey] = useState("");
-  // movie: an object containing details such as title, overview, release_date, vote_average, videoUrl, etc.
-  // recommendedMovies: an array of movie objects to be rendered as MovieCard components
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.movie_id || 0;
-  const apiUrl = `https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=en-US`;
-  const recommendedUrl = `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`;
 
+  // Fetch movie details
   useEffect(() => {
+    if (!id || !apiKey) {
+      setError("Movie ID or API Key is missing");
+      setLoading(false);
+      return;
+    }
+
     const fetchMovie = async () => {
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(
+          `${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`
+        );
         if (!response.ok) {
-          throw new Error("Failed to fetch movie");
+          throw new Error(`Failed to fetch movie: ${response.statusText}`);
         }
         const data = await response.json();
-        setMovie(data); // Set the movie data
+        setMovie(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -45,42 +50,36 @@ const MoviePlayerPage = () => {
     };
 
     fetchMovie();
-    window.addEventListener('message', (event) => {
-      if (event.origin !== 'https://vidlink.pro') return;
-      
-      if (event.data?.type === 'MEDIA_DATA') {
-        const mediaData = event.data.data;
-        localStorage.setItem('vidLinkProgress', JSON.stringify(mediaData));
-      }
-    });
-  }, [apiUrl]);
+  }, [id, apiKey]);
 
+  // Fetch recommended movies
   useEffect(() => {
+    if (!id || !apiKey) return;
+
     const fetchRecommendedMovies = async () => {
       try {
-        const response = await fetch(recommendedUrl);
+        const response = await fetch(
+          `${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
+        );
         if (!response.ok) {
-          throw new Error("Failed to fetch recommended movies");
+          throw new Error(`Failed to fetch recommended movies: ${response.statusText}`);
         }
         const data = await response.json();
-        setRecommendedMovies(data.results.slice(0, 20)); // Get the first 20 recommended movies
+        setRecommendedMovies(data.results.slice(0, 20));
       } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching recommended movies:", error);
       }
     };
 
     fetchRecommendedMovies();
-  }, [recommendedUrl]);
+  }, [id, apiKey]);
 
+  // Fetch additional details (cast and trailer)
   useEffect(() => {
-    if (!movie || !movie.id) return;
+    if (!movie || !movie.id || !apiKey) return;
 
     const fetchAdditionalDetails = async () => {
       try {
-        if (!apiKey) throw new Error("API Key is missing");
-
         const [castResponse, trailerResponse] = await Promise.all([
           axios.get(`${BASE_URL}/movie/${movie.id}/credits`, {
             params: { api_key: apiKey, language: "en-US" },
@@ -102,8 +101,9 @@ const MoviePlayerPage = () => {
     };
 
     fetchAdditionalDetails();
-  }, [movie]);
+  }, [movie, apiKey]);
 
+  // Handle loading and error states
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -120,15 +120,17 @@ const MoviePlayerPage = () => {
     );
   }
 
+  if (!movie) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <p className="text-red-500">Movie not found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <NavBar />
-      {/* Header */}
-      {/* <header className="p-4 bg-primary">
-        <h1 className="text-2xl font-bold">Now Playing: {movie ? movie.title : "Loading..."}</h1>
-      </header> */}
-
-      {/* Main content area */}
       <main className="flex-1 p-4 space-y-8">
         {/* Video Player and Chat */}
         <div className="flex flex-col lg:flex-row gap-4">
@@ -137,11 +139,10 @@ const MoviePlayerPage = () => {
             <div className="relative rounded-lg overflow-hidden shadow-lg bg-black h-96">
               <iframe
                 src={`https://vidlink.pro/movie/${movie.id}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
-                frameborder="0"
-                allowfullscreen
+                frameBorder="0"
+                allowFullScreen
                 sandbox
                 className="w-full h-full"
-                
               ></iframe>
             </div>
           </div>
@@ -188,7 +189,7 @@ const MoviePlayerPage = () => {
               Recommended for you
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5  gap-6 p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 p-6">
             {recommendedMovies.map((mov) => (
               <MovieCard key={mov.id} movie={mov} />
             ))}
