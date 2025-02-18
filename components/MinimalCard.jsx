@@ -57,7 +57,7 @@ const MovieCard = ({ movie }) => {
       />
 
       {/* Bottom Details */}
-      <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-80 text-white p-3 flex justify-between items-center">
+      <div className="absolute bottom-0 left-0 w-full bg-primary bg-opacity-60 text-white p-3 flex justify-between items-center rounded-md">
         <div>
           <h2 className="text-sm font-bold">{movie.title}</h2>
           <p className="text-xs opacity-80">⭐ {movie.vote_average} | {genres}</p>
