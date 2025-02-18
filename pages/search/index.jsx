@@ -3,14 +3,16 @@ import NavBar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
 import MovieCard from "../../components/MinimalCard";
+import { useRouter } from "next/router";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 const SearchPage = () => {
+  const router = useRouter();
   const [query, setQuery] = useState(""); // Search query
   const [results, setResults] = useState([]); // Search results
-  const [isMovie, setIsMovie] = useState(true); // Filter: Movie or TV Show
+  const [isMovie, setIsMovie] = useState(null); // Filter: Movie or TV Show (null for both)
   const [year, setYear] = useState(""); // Filter: Release year
   const [genre, setGenre] = useState(""); // Filter: Genre
   const [genres, setGenres] = useState([]); // List of genres
@@ -21,12 +23,9 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await axios.get(
-          `${BASE_URL}/genre/${isMovie ? "movie" : "tv"}/list`,
-          {
-            params: { api_key: API_KEY, language: "en-US" },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/genre/movie/list`, {
+          params: { api_key: API_KEY, language: "en-US" },
+        });
         setGenres(response.data.genres);
       } catch (error) {
         console.error("Error fetching genres:", error);
@@ -34,20 +33,21 @@ const SearchPage = () => {
     };
 
     fetchGenres();
-  }, [isMovie]);
+  }, []);
 
   // Fetch most searched shows when no query is entered
   useEffect(() => {
     if (!query) {
       const fetchMostSearched = async () => {
         try {
-          const response = await axios.get(
-            `${BASE_URL}/trending/${isMovie ? "movie" : "tv"}/week`,
-            {
-              params: { api_key: API_KEY },
-            }
+          const response = await axios.get(`${BASE_URL}/trending/all/week`, {
+            params: { api_key: API_KEY },
+          });
+          // Filter out items without a poster
+          const filteredResults = response.data.results.filter(
+            (item) => item.poster_path
           );
-          setMostSearched(response.data.results.slice(0, 10)); // Show top 10 trending
+          setMostSearched(filteredResults.slice(0, 10)); // Show top 10 trending
         } catch (error) {
           console.error("Error fetching most searched shows:", error);
         }
@@ -55,7 +55,7 @@ const SearchPage = () => {
 
       fetchMostSearched();
     }
-  }, [query, isMovie]);
+  }, [query]);
 
   // Real-time search functionality
   useEffect(() => {
@@ -63,18 +63,22 @@ const SearchPage = () => {
       const fetchResults = async () => {
         setLoading(true);
         try {
-          const response = await axios.get(
-            `${BASE_URL}/search/${isMovie ? "movie" : "tv"}`,
-            {
-              params: {
-                api_key: API_KEY,
-                query: query,
-                year: year,
-                with_genres: genre,
-              },
-            }
+          const response = await axios.get(`${BASE_URL}/search/multi`, {
+            params: {
+              api_key: API_KEY,
+              query: query,
+              year: year,
+              with_genres: genre,
+            },
+          });
+          // Filter out items without a poster and apply type filter if selected
+          const filteredResults = response.data.results.filter(
+            (item) =>
+              item.poster_path &&
+              (isMovie === null ||
+                (isMovie ? item.media_type === "movie" : item.media_type === "tv"))
           );
-          setResults(response.data.results);
+          setResults(filteredResults);
         } catch (error) {
           console.error("Error fetching search results:", error);
         } finally {
@@ -114,9 +118,19 @@ const SearchPage = () => {
               <div className="flex items-center space-x-2">
                 <label className="text-sm">Type:</label>
                 <button
+                  onClick={() => setIsMovie(null)}
+                  className={`px-4 py-2 rounded-lg ${
+                    isMovie === null
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  All
+                </button>
+                <button
                   onClick={() => setIsMovie(true)}
                   className={`px-4 py-2 rounded-lg ${
-                    isMovie
+                    isMovie === true
                       ? "bg-orange-500 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                   }`}
@@ -126,7 +140,7 @@ const SearchPage = () => {
                 <button
                   onClick={() => setIsMovie(false)}
                   className={`px-4 py-2 rounded-lg ${
-                    !isMovie
+                    isMovie === false
                       ? "bg-orange-500 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                   }`}
@@ -178,7 +192,9 @@ const SearchPage = () => {
                   <MovieCard
                     key={item.id}
                     movie={item}
-                    onClick={() => router.push(`/${isMovie ? "movie" : "tv"}/${item.id}`)}
+                    onClick={() =>
+                      router.push(`/${item.media_type}/${item.id}`)
+                    }
                   />
                 ))}
               </div>
@@ -193,7 +209,9 @@ const SearchPage = () => {
                   <MovieCard
                     key={item.id}
                     movie={item}
-                    onClick={() => router.push(`/${isMovie ? "movie" : "tv"}/${item.id}`)}
+                    onClick={() =>
+                      router.push(`/${item.media_type}/${item.id}`)
+                    }
                   />
                 ))}
               </div>

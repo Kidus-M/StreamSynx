@@ -3,17 +3,7 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
 import { useRouter } from "next/router";
-// import SearchBar from "./SearchQuery";
-useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    if (searchQuery.trim() !== "") {
-        setSearchQuery(e.target.value);
-      handleSearch();
-    }
-  }, 500); // Delay search execution
 
-  return () => clearTimeout(delayDebounce); // Cleanup on re-render
-}, [searchQuery]);
 export default function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -26,82 +16,107 @@ export default function NavBar() {
 
   const toggleSearchBar = () => {
     setIsSearchBarOpen((prevState) => !prevState);
+    setSearchQuery(""); // Clear search query when toggling
   };
 
-  const handleSearch = () => {
-    router.push(`/search?query=${searchQuery}`);
+  const handleSearch = (e) => {
+    e.preventDefault(); // Prevent default form submission
+    if (searchQuery.trim()) {
+      router.push(`/search?query=${searchQuery}`);
+      setIsSearchBarOpen(false); // Close search bar after search
+    }
   };
+
+  // Close search bar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        isSearchBarOpen &&
+        !e.target.closest(".search-bar") &&
+        !e.target.closest(".search-icon")
+      ) {
+        setIsSearchBarOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchBarOpen]);
 
   return (
     <>
-      <div className="w-full">
-        <nav className="flex justify-between items-center bg-secondary opacity-30 text-primary w-full px-5 py-4">
+      {/* Navbar */}
+      <div className="w-full fixed top-0 left-0 z-50">
+        <nav className="flex justify-between items-center bg-black bg-opacity-30 backdrop-blur-md text-white w-full px-5 py-6 h-20">
           {/* Logo */}
-          <a
+          <button
             className="text-2xl font-dm-display cursor-pointer"
-            onClick={() => {
-              router.push(`/home`);
-            }}
+            onClick={() => router.push(`/home`)}
           >
             StreamSync.
-          </a>
+          </button>
 
           {/* Desktop Menu */}
           <ul className="hidden xl:flex space-x-20 font-semibold">
             <li>
-              <a
-                href="#"
-                className="text-sm cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/watchlist`)}
+                className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
               >
                 WatchList
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-sm cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/history`)}
+                className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
               >
                 History
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-sm cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/favorites`)}
+                className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Favorites
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-sm cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/buddies`)}
+                className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Buddies
-              </a>
+              </button>
             </li>
           </ul>
 
           {/* Profile and Search Icon */}
           <div className="hidden xl:flex items-center gap-4">
-            <div className="rounded-md p-1 bg-primary hover:bg-tertiary">
-              <RiSearchLine
-                className="text-secondary text-xl cursor-pointer"
-                onClick={toggleSearchBar}
-              />
-            </div>
-            <RiAccountCircleFill className="text-3xl cursor-pointer hover:text-tertiary" />
+            <button
+              className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
+              onClick={toggleSearchBar}
+            >
+              <RiSearchLine className="text-black text-xl" />
+            </button>
+            <button
+              onClick={() => router.push(`/profile`)}
+              className="text-3xl cursor-pointer hover:text-orange-500 transition-colors"
+            >
+              <RiAccountCircleFill />
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button className="xl:hidden text-2xl flex justify-between items-center gap-4">
-            <div className="rounded-md p-1 bg-primary hover:bg-tertiary">
-              <RiSearchLine
-                className="text-secondary text-xl cursor-pointer"
-                onClick={toggleSearchBar}
-              />
-            </div>
-            <FaBars onClick={toggleSidebar} />
+            <button
+              className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
+              onClick={toggleSearchBar}
+            >
+              <RiSearchLine className="text-black text-xl" />
+            </button>
+            <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors" />
           </button>
         </nav>
       </div>
@@ -112,88 +127,94 @@ export default function NavBar() {
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         } transition-transform duration-300`}
       >
-        <div className="w-64 h-full bg-primary p-6 shadow-lg">
+        <div className="w-64 h-full bg-gray-900 p-6 shadow-lg">
           {/* Close Button */}
           <div className="flex justify-end">
             <button onClick={toggleSidebar}>
-              <FaXmark className="text-3xl cursor-pointer hover:text-secondary" />
+              <FaXmark className="text-3xl cursor-pointer hover:text-orange-500 transition-colors" />
             </button>
           </div>
 
           {/* Mobile Menu */}
           <ul className="flex flex-col mt-10 space-y-6">
             <li>
-              <a
-                href="#"
-                className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/home`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Home
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/watchlist`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Watch Later
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/history`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Watch History
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/favorites`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Favorites
-              </a>
+              </button>
             </li>
             <li>
-              <a
-                href="#"
-                className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+              <button
+                onClick={() => router.push(`/buddies`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Watch Buddies
-              </a>
+              </button>
             </li>
           </ul>
 
           {/* Profile Section */}
-          <div className="absolute bottom-6 left-6 flex items-center space-x-4 hover:text-secondary cursor-pointer">
-            <RiAccountCircleFill className="text-5xl text-secondary" />
-            <a href="#" className="text-lg text-secondary">
-              Profile
-            </a>
+          <div className="absolute bottom-6 left-6 flex items-center space-x-4 hover:text-orange-500 cursor-pointer transition-colors">
+            <button
+              onClick={() => router.push(`/profile`)}
+              className="flex items-center space-x-2"
+            >
+              <RiAccountCircleFill className="text-5xl text-white" />
+              <span className="text-lg text-white">Profile</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
       <div
-        className={`w-full bg-tertiary ${
-          isSearchBarOpen ? "flex" : "hidden"
-        } transition-all duration-300`}
+        className={`fixed top-0 left-0 w-full bg-gray-900 bg-opacity-95 backdrop-blur-md z-40 transform ${
+          isSearchBarOpen ? "translate-y-0" : "-translate-y-full"
+        } transition-transform duration-300 search-bar`}
       >
-        <div className="flex justify-between items-center w-full px-6 py-3 gap-2">
-          <input
-            type="text"
-            className="w-full text-md h-8 pl-4 shadow-lg rounded-md text-primary"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button
-            className="h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer"
-            onClick={handleSearch}
-          >
-            Search
-          </button>
+        <div className="flex justify-between items-center w-full px-6 py-4 gap-2">
+          <form onSubmit={handleSearch} className="w-full flex gap-2">
+            <input
+              type="text"
+              className="w-full text-md h-10 pl-4 shadow-lg rounded-md text-white bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Search for movies or TV shows..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="h-10 px-4 rounded-md bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 cursor-pointer"
+            >
+              Search
+            </button>
+          </form>
         </div>
       </div>
     </>
