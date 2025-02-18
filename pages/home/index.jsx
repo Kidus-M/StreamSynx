@@ -94,7 +94,7 @@ const MovieList = () => {
   }
 
   return (
-    <div className="bg-primary text-white">
+    <div className="bg-primary text-white pt-24">
       <NavBar />
       {/* Hero Section */}
       <div className="px-6">

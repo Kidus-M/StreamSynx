@@ -119,31 +119,28 @@ const SearchPage = () => {
                 <label className="text-sm">Type:</label>
                 <button
                   onClick={() => setIsMovie(null)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === null
+                  className={`px-4 py-2 rounded-lg ${isMovie === null
                       ? "bg-orange-500 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setIsMovie(true)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === true
+                  className={`px-4 py-2 rounded-lg ${isMovie === true
                       ? "bg-orange-500 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   Movies
                 </button>
                 <button
                   onClick={() => setIsMovie(false)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === false
+                  className={`px-4 py-2 rounded-lg ${isMovie === false
                       ? "bg-orange-500 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   TV Shows
                 </button>
