@@ -96,8 +96,8 @@ export default function NavBar() {
           <div className="hidden xl:flex items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={toggleSearchBar}
-            >
+              onClick={() => router.push(`/search`)}
+              >
               <RiSearchLine className="text-black text-xl" />
             </button>
             <button
@@ -112,8 +112,8 @@ export default function NavBar() {
           <button className="xl:hidden text-2xl flex justify-between items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={toggleSearchBar}
-            >
+              onClick={() => router.push(`/search`)}
+              >
               <RiSearchLine className="text-black text-xl" />
             </button>
             <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors" />
@@ -193,7 +193,7 @@ export default function NavBar() {
       </div>
 
       {/* Search Bar */}
-      <div
+      {/* <div
         className={`fixed top-0 left-0 w-full bg-gray-900 bg-opacity-95 backdrop-blur-md z-40 transform ${
           isSearchBarOpen ? "translate-y-0" : "-translate-y-full"
         } transition-transform duration-300 search-bar`}
@@ -216,7 +216,7 @@ export default function NavBar() {
             </button>
           </form>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

@@ -163,7 +163,7 @@ const TVShowPlayerPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col mt-20">
       <NavBar />
       <main className="flex-1 p-4 space-y-8">
         {/* Video Player Section */}
