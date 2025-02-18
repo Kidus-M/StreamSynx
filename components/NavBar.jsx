@@ -3,12 +3,22 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
 import { useRouter } from "next/router";
-
 export default function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.trim() !== "") {
+        // setSearchQuery(e.target.value);
+        handleSearch();
+      }
+    }, 500); // Delay search execution
+
+    return () => clearTimeout(delayDebounce); // Cleanup on re-render
+  }, [searchQuery]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
@@ -17,6 +27,11 @@ export default function NavBar() {
   const toggleSearchBar = () => {
     setIsSearchBarOpen((prevState) => !prevState);
     setSearchQuery(""); // Clear search query when toggling
+    if (!isSearchBarOpen) {
+      setTimeout(() => {
+        document.getElementById("search").focus();
+      }, 100);
+    }
   };
 
   const handleSearch = (e) => {
@@ -60,7 +75,7 @@ export default function NavBar() {
           <ul className="hidden xl:flex space-x-20 font-semibold">
             <li>
               <button
-                onClick={() => router.push(`/watchlist`)}
+                onClick={() => router.push(`/watchList`)}
                 className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
               >
                 WatchList
@@ -123,9 +138,8 @@ export default function NavBar() {
 
       {/* Sidebar for Mobile */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${
-          isSidebarOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          } transition-transform duration-300`}
       >
         <div className="w-64 h-full bg-gray-900 p-6 shadow-lg">
           {/* Close Button */}
@@ -147,7 +161,7 @@ export default function NavBar() {
             </li>
             <li>
               <button
-                onClick={() => router.push(`/watchlist`)}
+                onClick={() => router.push(`/watchList`)}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Watch Later
