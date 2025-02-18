@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import EpisodeCard from "../../components/EpisodeCard"; // Updated EpisodeCard component
-import SearchCard from "../../components/SearchCard"; // Import SearchCard for recommendations
+import SearchCard from "../../components/MinimalCard"; // Import SearchCard for recommendations
 import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
