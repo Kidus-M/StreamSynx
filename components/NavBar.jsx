@@ -4,21 +4,22 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
 import { useRouter } from "next/router";
 // import SearchBar from "./SearchQuery";
-useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    if (searchQuery.trim() !== "") {
-        setSearchQuery(e.target.value);
-      handleSearch();
-    }
-  }, 500); // Delay search execution
-
-  return () => clearTimeout(delayDebounce); // Cleanup on re-render
-}, [searchQuery]);
 export default function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.trim() !== "") {
+        // setSearchQuery(e.target.value);
+        handleSearch();
+      }
+    }, 500); // Delay search execution
+
+    return () => clearTimeout(delayDebounce); // Cleanup on re-render
+  }, [searchQuery]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
@@ -26,6 +27,11 @@ export default function NavBar() {
 
   const toggleSearchBar = () => {
     setIsSearchBarOpen((prevState) => !prevState);
+    if (!isSearchBarOpen) {
+      setTimeout(() => {
+        document.getElementById("search").focus();
+      }, 100);
+    }
   };
 
   const handleSearch = () => {
@@ -50,8 +56,10 @@ export default function NavBar() {
           <ul className="hidden xl:flex space-x-20 font-semibold">
             <li>
               <a
-                href="#"
                 className="text-sm cursor-pointer hover:text-tertiary"
+                onClick={() => {
+                  router.push(`/watchList`)
+                }}
               >
                 WatchList
               </a>
@@ -108,9 +116,8 @@ export default function NavBar() {
 
       {/* Sidebar for Mobile */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${
-          isSidebarOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          } transition-transform duration-300`}
       >
         <div className="w-64 h-full bg-primary p-6 shadow-lg">
           {/* Close Button */}
@@ -126,14 +133,19 @@ export default function NavBar() {
               <a
                 href="#"
                 className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+                onClick={() => {
+                  router.push(`/home`);
+                }}
               >
                 Home
               </a>
             </li>
             <li>
               <a
-                href="#"
                 className="text-lg text-secondary cursor-pointer hover:text-tertiary"
+                onClick={() => {
+                  router.push(`/watchList`)
+                }}
               >
                 Watch Later
               </a>
@@ -176,21 +188,24 @@ export default function NavBar() {
 
       {/* Search Bar */}
       <div
-        className={`w-full bg-tertiary ${
-          isSearchBarOpen ? "flex" : "hidden"
-        } transition-all duration-300`}
+        className={`w-full bg-tertiary ${isSearchBarOpen ? "flex" : "hidden"
+          } transition-all duration-300`}
       >
         <div className="flex justify-between items-center w-full px-6 py-3 gap-2">
           <input
             type="text"
             className="w-full text-md h-8 pl-4 shadow-lg rounded-md text-primary"
+            id="search"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button
             className="h-8 px-4 rounded-md bg-secondary hover:bg-primary text-primary hover:text-secondary transition-all duration-300 cursor-pointer"
-            onClick={handleSearch}
+            onClick={((e) => {
+              setSearchQuery(e.target.value);
+              handleSearch();
+            })}
           >
             Search
           </button>
