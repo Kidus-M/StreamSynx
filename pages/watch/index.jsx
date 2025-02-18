@@ -105,6 +105,7 @@ const MoviePlayerPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-white">Loading...</p>
       </div>
     );
@@ -113,6 +114,7 @@ const MoviePlayerPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -120,7 +122,9 @@ const MoviePlayerPage = () => {
 
   if (!movie) {
     return (
+      
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-red-500">Movie not found</p>
       </div>
     );

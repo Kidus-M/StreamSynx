@@ -135,6 +135,7 @@ const TVShowPlayerPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-white">Loading...</p>
       </div>
     );
@@ -143,6 +144,7 @@ const TVShowPlayerPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -151,6 +153,7 @@ const TVShowPlayerPage = () => {
   if (!tvShow) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <NavBar />
         <p className="text-red-500">TV Show not found</p>
       </div>
     );
