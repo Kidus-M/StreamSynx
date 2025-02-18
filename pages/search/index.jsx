@@ -1,65 +1,209 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import MovieCard from "../../components/MinimalCard"; // Import your card component
-import NavBar from "../../components/Navbar"; // Import your navbar component
-import Footer from "../../components/Footer"
-import { FaFilter } from "react-icons/fa";
-import { FaGripLinesVertical } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import NavBar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import axios from "axios";
+import MovieCard from "../../components/MinimalCard";
 
-const MovieList = () => {
-    const router = useRouter();
-    const { query } = router;
-    const [movies, setMovies] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-    const searchQuery = query.query || "";
-    const apiUrl = `https://api.themoviedb.org/3/search/multi?query=${searchQuery}&api_key=${apiKey}&page=1`;
+const SearchPage = () => {
+  const [query, setQuery] = useState(""); // Search query
+  const [results, setResults] = useState([]); // Search results
+  const [isMovie, setIsMovie] = useState(true); // Filter: Movie or TV Show
+  const [year, setYear] = useState(""); // Filter: Release year
+  const [genre, setGenre] = useState(""); // Filter: Genre
+  const [genres, setGenres] = useState([]); // List of genres
+  const [loading, setLoading] = useState(false); // Loading state
+  const [mostSearched, setMostSearched] = useState([]); // Most searched shows
 
-    useEffect(() => {
-        const fetchMovies = async () => {
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error("Failed to fetch movies");
-                }
-                const data = await response.json();
-                setMovies(data.results.slice(0, 20)); // Get the first 20 movies
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
+  // Fetch genres on component mount
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/genre/${isMovie ? "movie" : "tv"}/list`,
+          {
+            params: { api_key: API_KEY, language: "en-US" },
+          }
+        );
+        setGenres(response.data.genres);
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    };
+
+    fetchGenres();
+  }, [isMovie]);
+
+  // Fetch most searched shows when no query is entered
+  useEffect(() => {
+    if (!query) {
+      const fetchMostSearched = async () => {
+        try {
+          const response = await axios.get(
+            `${BASE_URL}/trending/${isMovie ? "movie" : "tv"}/week`,
+            {
+              params: { api_key: API_KEY },
             }
-            console.log(movies.map((movie) => movie.movie_id));
-        };
+          );
+          setMostSearched(response.data.results.slice(0, 10)); // Show top 10 trending
+        } catch (error) {
+          console.error("Error fetching most searched shows:", error);
+        }
+      };
 
-        fetchMovies();
-    }, [apiUrl]);
-
-    if (loading) {
-        return <div className="text-center mt-8">Loading movies...</div>;
+      fetchMostSearched();
     }
+  }, [query, isMovie]);
 
-    if (error) {
-        return <div className="text-center mt-8 text-red-500">Error: {error}</div>;
+  // Real-time search functionality
+  useEffect(() => {
+    if (query) {
+      const fetchResults = async () => {
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `${BASE_URL}/search/${isMovie ? "movie" : "tv"}`,
+            {
+              params: {
+                api_key: API_KEY,
+                query: query,
+                year: year,
+                with_genres: genre,
+              },
+            }
+          );
+          setResults(response.data.results);
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const debounceTimer = setTimeout(() => {
+        fetchResults();
+      }, 500); // Debounce to avoid too many API calls
+
+      return () => clearTimeout(debounceTimer);
+    } else {
+      setResults([]); // Clear results when query is empty
     }
+  }, [query, isMovie, year, genre]);
 
-    return (
-        <div>
-            <NavBar />
-            <div className="px-6 my-6 flex justify-between items-center">
-                <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Search results for "{searchQuery}" <FaFilter /></p>
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      <NavBar />
+      <main className="flex-1 p-6">
+        {/* Search Section */}
+        <section className="max-w-4xl mx-auto">
+          <div className="flex flex-col space-y-4">
+            {/* Search Input */}
+            <input
+              type="text"
+              placeholder="Search for movies or TV shows..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4">
+              {/* Movie/TV Show Toggle */}
+              <div className="flex items-center space-x-2">
+                <label className="text-sm">Type:</label>
+                <button
+                  onClick={() => setIsMovie(true)}
+                  className={`px-4 py-2 rounded-lg ${
+                    isMovie
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  Movies
+                </button>
+                <button
+                  onClick={() => setIsMovie(false)}
+                  className={`px-4 py-2 rounded-lg ${
+                    !isMovie
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  TV Shows
+                </button>
+              </div>
+
+              {/* Year Filter */}
+              <div className="flex items-center space-x-2">
+                <label className="text-sm">Year:</label>
+                <input
+                  type="number"
+                  placeholder="Year"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="px-4 py-2 bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* Genre Filter */}
+              <div className="flex items-center space-x-2">
+                <label className="text-sm">Genre:</label>
+                <select
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  className="px-4 py-2 bg-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="">All Genres</option>
+                  {genres.map((genre) => (
+                    <option key={genre.id} value={genre.id}>
+                      {genre.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            {movies.length === 0 && <div className="flex justify-center text-center bg-tertiary mx-6 h-48 rounded-lg items-center py-auto">No movies found.</div>}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6  gap-6 p-6">
-                {movies.map((movie) => (
-                    <MovieCard key={movie.id} movie={movie} />
+          </div>
+        </section>
+
+        {/* Results Section */}
+        <section className="max-w-4xl mx-auto mt-8">
+          {loading ? (
+            <p className="text-center text-gray-300">Loading...</p>
+          ) : query ? (
+            results.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {results.map((item) => (
+                  <MovieCard
+                    key={item.id}
+                    movie={item}
+                    onClick={() => router.push(`/${isMovie ? "movie" : "tv"}/${item.id}`)}
+                  />
                 ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-300">No results found.</p>
+            )
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Most Searched</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {mostSearched.map((item) => (
+                  <MovieCard
+                    key={item.id}
+                    movie={item}
+                    onClick={() => router.push(`/${isMovie ? "movie" : "tv"}/${item.id}`)}
+                  />
+                ))}
+              </div>
             </div>
-            <Footer />
-        </div>
-    );
+          )}
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
-export default MovieList;
+export default SearchPage;
