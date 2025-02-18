@@ -11,6 +11,7 @@
     "dotenv": "^16.4.7",
     "firebase": "^11.3.0",
     "framer-motion": "^12.4.2",
+    "lucide-react": "^0.475.0",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",

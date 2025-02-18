@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import MovieCard from "../../components/SearchCard"; // Import your card component
+import MovieCard from "../../components/MinimalCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import Footer from "../../components/Footer"
 import { FaFilter } from "react-icons/fa";
@@ -52,7 +52,7 @@ const MovieList = () => {
                 <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Search results for "{searchQuery}" <FaFilter /></p>
             </div>
             {movies.length === 0 && <div className="flex justify-center text-center bg-tertiary mx-6 h-48 rounded-lg items-center py-auto">No movies found.</div>}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-6 p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6  gap-6 p-6">
                 {movies.map((movie) => (
                     <MovieCard key={movie.id} movie={movie} />
                 ))}
