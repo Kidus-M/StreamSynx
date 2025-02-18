@@ -1,31 +1,72 @@
 import { useEffect, useState } from "react";
 import MovieCard from "../../components/MinimalCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
-import Footer from "../../components/Footer"
+import Footer from "../../components/Footer";
 import EventCard from "../../components/EventCard2";
-import { FaFilter } from "react-icons/fa";
+import { FaFilter, FaFire, FaEye, FaStar } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
 
-console.log(process.env);
 const MovieList = () => {
-  const [movies, setMovies] = useState([]);
-  const [higestRatedMovies, setHighestRatedMovies] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [mostWatchedMovies, setMostWatchedMovies] = useState([]);
+  const [highestRatedMovies, setHighestRatedMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  const apiUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`;
-  const highRatedApiUrl = `https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=vote_count.desc&api_key=${apiKey}`;
 
+  // Fetch Trending Movies
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchTrendingMovies = async () => {
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(
+          `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`
+        );
         if (!response.ok) {
-          throw new Error("Failed to fetch movies");
+          throw new Error("Failed to fetch trending movies");
         }
         const data = await response.json();
-        setMovies(data.results.slice(0, 20)); // Get the first 20 movies
+        setTrendingMovies(data.results.slice(0, 20)); // Get the first 20 trending movies
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchTrendingMovies();
+  }, [apiKey]);
+
+  // Fetch Most Watched Movies
+  useEffect(() => {
+    const fetchMostWatchedMovies = async () => {
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch most watched movies");
+        }
+        const data = await response.json();
+        setMostWatchedMovies(data.results.slice(0, 20)); // Get the first 20 most watched movies
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchMostWatchedMovies();
+  }, [apiKey]);
+
+  // Fetch Highest Rated Movies
+  useEffect(() => {
+    const fetchHighestRatedMovies = async () => {
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=1000&page=1`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch highest rated movies");
+        }
+        const data = await response.json();
+        setHighestRatedMovies(data.results.slice(0, 20)); // Get the first 20 highest rated movies
       } catch (error) {
         setError(error.message);
       } finally {
@@ -33,54 +74,79 @@ const MovieList = () => {
       }
     };
 
-    const fetchHighestRated = async () => {
-      try {
-        const response = await fetch(highRatedApiUrl);
-        if (!response.ok) {
-          throw new Error("Failed to fetch movies");
-        }
-        const data = await response.json();
-        setHighestRatedMovies(data.results.slice(0, 20)); // Get the first 20 movies
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMovies();
-    fetchHighestRated();
-  }, [apiUrl, highRatedApiUrl]);
+    fetchHighestRatedMovies();
+  }, [apiKey]);
 
   if (loading) {
-    return <div className="text-center mt-8">Loading movies...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen bg-primary text-white">
+        Loading movies...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center mt-8 text-red-500">Error: {error}</div>;
+    return (
+      <div className="flex justify-center items-center h-screen bg-primary text-red-500">
+        Error: {error}
+      </div>
+    );
   }
-  
-    
-  
+
   return (
-    <div className="bg-primary text-white  mt-20">
+    <div className="bg-primary text-white mt-24">
       <NavBar />
+      {/* Hero Section */}
       <div className="px-6">
-        <EventCard movie={movies[0]} />
+        <EventCard movie={trendingMovies[0]} />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 p-6">
-        {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
-      <div className="px-6 my-6 flex justify-start gap-24 items-center">
-        <p className="flex justify-between items-center text-lg gap-4"><FaGripLinesVertical className="text-2xl" />Highest Rated Movies" <FaFilter /></p>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-6 p-6">
-        {higestRatedMovies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
+
+      {/* Trending Movies Section */}
+      <section className="px-6 my-8">
+        <div className="flex items-center gap-4 mb-6">
+          <FaGripLinesVertical className="text-2xl" />
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <FaFire className="text-orange-500" /> Trending Now
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {trendingMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      </section>
+
+      {/* Most Watched Movies Section */}
+      <section className="px-6 my-8">
+        <div className="flex items-center gap-4 mb-6">
+          <FaGripLinesVertical className="text-2xl" />
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <FaEye className="text-blue-500" /> Most Watched
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {mostWatchedMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      </section>
+
+      {/* Highest Rated Movies Section */}
+      <section className="px-6 my-8">
+        <div className="flex items-center gap-4 mb-6">
+          <FaGripLinesVertical className="text-2xl" />
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <FaStar className="text-yellow-500" /> Highest Rated
+          </h2>
+          <FaFilter className="text-gray-400 cursor-pointer hover:text-orange-500" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {highestRatedMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
