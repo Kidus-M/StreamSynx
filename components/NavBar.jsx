@@ -124,7 +124,7 @@ export default function NavBar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="xl:hidden text-2xl flex justify-between items-center gap-4">
+          <div className="xl:hidden text-2xl flex justify-between items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
               onClick={() => router.push(`/search`)}
@@ -132,7 +132,7 @@ export default function NavBar() {
               <RiSearchLine className="text-black text-xl" />
             </button>
             <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors" />
-          </button>
+          </div>
         </nav>
       </div>
 

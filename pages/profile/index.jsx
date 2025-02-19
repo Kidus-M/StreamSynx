@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../../firebase"; // Removed storage import
+import { auth, db, storage } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/router";
 
 export default function Profile() {
