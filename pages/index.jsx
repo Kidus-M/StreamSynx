@@ -199,7 +199,6 @@ function SignUp({ setIsSignUp }) {
         uid: user.uid,
         username: user.displayName || user.email.split("@")[0],
         email: user.email,
-        profilePicture: user.photoURL || "",
       });
 
       router.push("/home");
