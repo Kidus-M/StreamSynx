@@ -1,52 +1,72 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
+import { Plus, Check } from "lucide-react";
+
+const genreMap = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western"
+};
 
 const MovieCard = ({ movie }) => {
   const router = useRouter();
+  const [isAdded, setIsAdded] = useState(false);
 
-  const handleCreateRoom = () => {
-    router.push(`/movie/${user.id}/${movie.id}`);
+  const handleWatch = () => {
+    const url = `/watch?movie_id=${movie.id}`;
+      
+    router.push(url);
   };
 
-  const handleAloneWatch = () => {
-    const url = `/watch?movie_id=${movie.id}`;
-  router.push(url);  };
+  const toggleWatchlist = (e) => {
+    e.stopPropagation(); // Prevent card click when pressing the button
+    setIsAdded((prev) => !prev);
+  };
+
+  const genres = movie.genre_ids?.length > 0 
+    ? movie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ") 
+    : "Unknown Genre";
 
   return (
-    <div className="relative w-full  rounded-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer group">
-      {/* Movie Poster (Smaller Height) */}
+    <div
+      className="relative w-full rounded-xl overflow-hidden transition-transform hover:scale-105 cursor-pointer"
+      onClick={handleWatch}
+    >
+      {/* Movie Poster */}
       <img
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
         alt={`${movie.title} Poster`}
-        className="w-full h-[350px] object-cover rounded-lg"
+        className="w-full h-[400px] object-cover rounded-xl"
       />
 
-      {/* Details Sliding Up */}
-      <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-80 text-white p-3 
-                      transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out">
-        <h2 className="text-sm font-bold mb-1">{movie.title}</h2>
-        <p className="text-xs">{movie.release_date} ⭐ {movie.vote_average}</p>
-        <p className="text-xs mt-1 line-clamp-2">{movie.overview}</p>
-        <div className="flex gap-2 mt-2">
-          <button
-            className="px-3 py-1 text-xs font-semibold rounded-full border border-secondary text-secondary hover:bg-secondary hover:text-white transition-all w-full"
-            onClick={handleCreateRoom}
-          >
-            Room
-          </button>
-          <button
-            className="px-3 py-1 text-xs font-semibold rounded-full border border-secondary text-secondary hover:bg-secondary hover:text-white transition-all w-full"
-            onClick={handleAloneWatch}
-          >
-            Watch
-          </button>
+      {/* Bottom Details */}
+      <div className="absolute bottom-0 left-0 w-full bg-primary bg-opacity-60 text-white p-3 flex justify-between items-center rounded-md">
+        <div>
+          <h2 className="text-sm font-bold">{movie.title}</h2>
+          <p className="text-xs opacity-80">⭐ {movie.vote_average} | {genres}</p>
         </div>
-      </div>
-
-      {/* Title Always Visible, Moving Up on Hover */}
-      <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 px-2 py-1 rounded text-white text-xs 
-                      transition-transform duration-300 ease-in-out group-hover:hidden">
-        {movie.title}
+        <button
+          className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-40"
+          onClick={toggleWatchlist}
+        >
+          {isAdded ? <Check size={18} /> : <Plus size={18} />}
+        </button>
       </div>
     </div>
   );

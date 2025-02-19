@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
 import { MdError } from "react-icons/md";
 import Slideshow from "../components/Slideshow";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase"; // Import Firestore
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore"; // Firestore functions
 
 export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -77,17 +78,14 @@ function SignIn({ setIsSignUp }) {
     const password = e.target.password.value;
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // setErrorLabel(false);
       router.push("/home");
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
         setErrorLabel(true);
         setErrorMessage("No account found with this email.");
-        // alert("No account found with this email.");
       } else if (error.code === 'auth/invalid-credential') {
         setErrorLabel(true);
         setErrorMessage("Username or password is incorrect.");
-        // alert("Username or password is incorrect.");
       } else {
         setErrorLabel(true);
         console.error("Error signing in:", error);
@@ -148,13 +146,35 @@ function SignIn({ setIsSignUp }) {
 function SignUp({ setIsSignUp }) {
   const [errorLabel, setErrorLabel] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const handleSignUp = async (e) => {
     e.preventDefault();
+    const username = e.target.username.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // Check if username already exists
+      const userDoc = await getDoc(doc(db, "users", username));
+      if (userDoc.exists()) {
+        setErrorLabel(true);
+        setErrorMessage("Username already in use.");
+        return;
+      }
+
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save user data in Firestore
+      await setDoc(doc(db, "users", username), {
+        uid: user.uid,
+        username,
+        email,
+        profilePicture: "", // Default empty profile picture
+      });
+
+      router.push("/home");
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
         setErrorLabel(true);
@@ -171,7 +191,18 @@ function SignUp({ setIsSignUp }) {
   const handleGoogleSignUp = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Save user data in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        username: user.displayName || user.email.split("@")[0],
+        email: user.email,
+        profilePicture: user.photoURL || "",
+      });
+
+      router.push("/home");
     } catch (error) {
       console.error("Error with Google sign-up:", error);
     }
@@ -184,9 +215,9 @@ function SignUp({ setIsSignUp }) {
       </h1>
       <form onSubmit={handleSignUp} className="w-full flex flex-col items-center">
         <input
-          name="name"
+          name="username"
           type="text"
-          placeholder="Name"
+          placeholder="Username"
           className="w-full p-3 border rounded mb-4 text-gray-700"
         />
         <input
