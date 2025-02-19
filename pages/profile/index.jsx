@@ -1,5 +1,5 @@
 // import { useState, useEffect } from "react";
-// import { auth, db, storage } from "../firebase";
+// import { auth, db, storage } from "../../firebase";
 // import { doc, getDoc, updateDoc } from "firebase/firestore";
 // import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 // import { useRouter } from "next/router";
