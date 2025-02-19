@@ -2,29 +2,33 @@ import React from "react";
 
 const EpisodeCard = ({ episode, onWatchClick }) => {
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-      <img
-        src={
-          episode.still_path
-            ? `https://image.tmdb.org/t/p/w300${episode.still_path}`
-            : "/placeholder.jpg" // Fallback image if no still_path
-        }
-        alt={episode.name}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-4">
-        <h3 className="text-lg font-semibold truncate">{episode.name}</h3>
-        <p className="text-sm text-gray-300 mt-1">
+    <div
+      className="relative bg-primary border rounded-lg shadow-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+      onClick={() => onWatchClick(episode.episode_number)}
+    >
+      {/* Background Image */}
+      <div
+        className="w-full h-56 bg-cover bg-center rounded-t-lg"
+        style={{
+          backgroundImage: `url(${
+            episode.still_path
+              ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
+              : "/placeholder.jpg"
+          })`,
+        }}
+      ></div>
+
+      {/* Content Overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg"></div>
+
+      {/* Episode Details */}
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <h3 className="text-secondary text-xs uppercase tracking-wide">
           Episode {episode.episode_number}
+        </h3>
+        <p className="text-white text-md font-semibold mt-1">
+          {episode.name}
         </p>
-        <p className="text-sm text-gray-300 mt-2">{episode.air_date}</p>
-        <p className="text-sm text-gray-300 mt-2 truncate">{episode.overview}</p>
-        <button
-          onClick={() => onWatchClick(episode.episode_number)}
-          className="mt-2 w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all"
-        >
-          Watch
-        </button>
       </div>
     </div>
   );

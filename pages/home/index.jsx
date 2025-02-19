@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import MovieCard from "../../components/SmallMovieCard"; // Import your card component
+import MovieCard from "../../components/MovieCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import Footer from "../../components/Footer";
-import EventCard from "../../components/EventCard2";
+import EventCard from "../../components/EventCard";
 import { FaFilter, FaFire, FaEye, FaStar } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
 
