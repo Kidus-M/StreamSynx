@@ -22,11 +22,11 @@ const EpisodeCard = ({ episode, onWatchClick }) => {
       <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg"></div>
 
       {/* Episode Details */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="text-secondary text-xs uppercase tracking-wide">
+      <div className="absolute bg-primary bg-opacity-50 bottom-0 left-0 right-0 p-4">
+        <h3 className="text-secondary text-sm font-bold uppercase tracking-wide">
           Episode {episode.episode_number}
         </h3>
-        <p className="text-white text-md font-semibold mt-1">
+        <p className="text-white text-xs font-semibold mt-1">
           {episode.name}
         </p>
       </div>
