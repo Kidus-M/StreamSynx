@@ -7,7 +7,8 @@ import axios from "axios";
 import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
 import { motion, AnimatePresence } from "framer-motion"; // For smooth animations
-
+import { auth, db } from "../../firebase";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -28,7 +29,62 @@ const TVShowPlayerPage = () => {
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.tv_id || 0;
+  const [rating, setRating] = useState(0);
 
+
+// Inside the component, after selecting an episode:
+useEffect(() => {
+  const saveToHistory = async () => {
+    if (!auth.currentUser || !selectedEpisode || !tvShow) return;
+
+    const historyRef = doc(db, "history", auth.currentUser.uid);
+    const historyDoc = await getDoc(historyRef);
+
+    if (historyDoc.exists()) {
+      await updateDoc(historyRef, {
+        episodes: arrayUnion({
+          tvShowId: tvShow.id,
+          tvShowTitle: tvShow.name,
+          seasonNumber: selectedSeason,
+          episodeNumber: selectedEpisode,
+          watchedAt: new Date().toISOString(),
+        }),
+      });
+    } else {
+      await setDoc(historyRef, {
+        movies: [], // Initialize movies array
+        episodes: [
+          {
+            tvShowId: tvShow.id,
+            tvShowTitle: tvShow.name,
+            seasonNumber: selectedSeason,
+            episodeNumber: selectedEpisode,
+            watchedAt: new Date().toISOString(),
+          },
+        ],
+      });
+    }
+  };
+
+  saveToHistory();
+}, [selectedEpisode, tvShow, selectedSeason]);
+
+  const saveRating = async (tvShowId, rating) => {
+    if (!auth.currentUser) return;
+
+    const ratingsRef = doc(db, "ratings", auth.currentUser.uid);
+    const ratingsDoc = await getDoc(ratingsRef);
+
+    if (ratingsDoc.exists()) {
+      await updateDoc(ratingsRef, {
+        ratings: arrayUnion({ tvShowId, rating }),
+      });
+    } else {
+      await setDoc(ratingsRef, {
+        ratings: [{ tvShowId, rating }],
+      });
+    }
+  };
   // Fetch TV show details
   useEffect(() => {
     if (!id || !apiKey) {
@@ -90,7 +146,9 @@ const TVShowPlayerPage = () => {
           `${BASE_URL}/tv/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
         );
         if (!response.ok) {
-          throw new Error(`Failed to fetch recommended shows: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch recommended shows: ${response.statusText}`
+          );
         }
         const data = await response.json();
         setRecommendedShows(data.results.slice(0, 10)); // Show first 10 recommended shows
@@ -181,7 +239,24 @@ const TVShowPlayerPage = () => {
             ></iframe>
           </div>
         </div>
-
+        {/* // Add a rating input component */}
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-4">Rate this Show</h3>
+          <input
+            type="number"
+            min="0"
+            max="10"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            className="p-2 border rounded"
+          />
+          <button
+            onClick={() => saveRating(tvShow.id, rating)}
+            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            Submit Rating
+          </button>
+        </div>
         {/* TV Show Details Section */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-3xl font-bold mb-4">{tvShow.name}</h2>
@@ -240,7 +315,6 @@ const TVShowPlayerPage = () => {
             </div>
           </div>
         </section>
-
         {/* Season Selection */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h3 className="text-2xl font-bold mb-4">Seasons</h3>
@@ -264,7 +338,6 @@ const TVShowPlayerPage = () => {
             ))}
           </div>
         </section>
-
         {/* Episodes Section */}
         <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
@@ -275,20 +348,24 @@ const TVShowPlayerPage = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-6">
             <AnimatePresence>
-              {(showAllEpisodes ? episodes : episodes.slice(0, 8)).map((episode) => (
-                <motion.div
-                  key={episode.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <EpisodeCard
-                    episode={episode}
-                    onWatchClick={() => handleEpisodeClick(episode.episode_number)}
-                  />
-                </motion.div>
-              ))}
+              {(showAllEpisodes ? episodes : episodes.slice(0, 8)).map(
+                (episode) => (
+                  <motion.div
+                    key={episode.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <EpisodeCard
+                      episode={episode}
+                      onWatchClick={() =>
+                        handleEpisodeClick(episode.episode_number)
+                      }
+                    />
+                  </motion.div>
+                )
+              )}
             </AnimatePresence>
           </div>
           <div className="flex justify-center mt-6">
@@ -311,7 +388,6 @@ const TVShowPlayerPage = () => {
             )}
           </div>
         </section>
-
         {/* Recommended Shows Section */}
         <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">

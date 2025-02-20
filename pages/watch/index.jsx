@@ -5,7 +5,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
-
+import { auth, db } from "../../firebase";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -21,7 +22,58 @@ const MoviePlayerPage = () => {
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.movie_id || 0;
+  const [rating, setRating] = useState(0);
 
+  const saveRating = async (movieId, rating) => {
+    if (!auth.currentUser) return;
+
+    const ratingsRef = doc(db, "ratings", auth.currentUser.uid);
+    const ratingsDoc = await getDoc(ratingsRef);
+
+    if (ratingsDoc.exists()) {
+      await updateDoc(ratingsRef, {
+        ratings: arrayUnion({ movieId, rating }),
+      });
+    } else {
+      await setDoc(ratingsRef, {
+        ratings: [{ movieId, rating }],
+      });
+    }
+  };
+  // Inside the component, after fetching movie details:
+  useEffect(() => {
+    const saveToHistory = async () => {
+      if (!auth.currentUser || !movie) return;
+
+      const historyRef = doc(db, "history", auth.currentUser.uid);
+      const historyDoc = await getDoc(historyRef);
+
+      if (historyDoc.exists()) {
+        await updateDoc(historyRef, {
+          movies: arrayUnion({
+            id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            watchedAt: new Date().toISOString(),
+          }),
+        });
+      } else {
+        await setDoc(historyRef, {
+          movies: [
+            {
+              id: movie.id,
+              title: movie.title,
+              poster_path: movie.poster_path,
+              watchedAt: new Date().toISOString(),
+            },
+          ],
+          episodes: [], // Initialize episodes array
+        });
+      }
+    };
+
+    saveToHistory();
+  }, [movie]);
   // Fetch movie details
   useEffect(() => {
     if (!id || !apiKey) {
@@ -60,7 +112,9 @@ const MoviePlayerPage = () => {
           `${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
         );
         if (!response.ok) {
-          throw new Error(`Failed to fetch recommended movies: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch recommended movies: ${response.statusText}`
+          );
         }
         const data = await response.json();
         setRecommendedMovies(data.results.slice(0, 20));
@@ -122,7 +176,6 @@ const MoviePlayerPage = () => {
 
   if (!movie) {
     return (
-      
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <NavBar />
         <p className="text-red-500">Movie not found</p>
@@ -146,7 +199,24 @@ const MoviePlayerPage = () => {
             ></iframe>
           </div>
         </div>
-
+        {/* // Add a rating input component */}
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-4">Rate this Movie</h3>
+          <input
+            type="number"
+            min="0"
+            max="10"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            className="p-2 border rounded"
+          />
+          <button
+            onClick={() => saveRating(movie.id, rating)}
+            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            Submit Rating
+          </button>
+        </div>
         {/* Movie Details Section */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-3xl font-bold mb-4">{movie.title}</h2>
@@ -205,7 +275,6 @@ const MoviePlayerPage = () => {
             </div>
           </div>
         </section>
-
         {/* Recommended Movies Section */}
         <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
