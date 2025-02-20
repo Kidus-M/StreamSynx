@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import MovieCard from "../../components/MovieCard"; // Import your card component
+import MovieCard from "../../components/MinimalCard"; // Import your card component
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import Footer from "../../components/Footer";
 import EventCard from "../../components/EventCard";

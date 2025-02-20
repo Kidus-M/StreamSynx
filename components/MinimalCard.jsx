@@ -29,9 +29,9 @@ const MovieCard = ({ movie }) => {
   const [isAdded, setIsAdded] = useState(false);
 
   const handleWatch = () => {
-    const url = movie.media_type === "movie"
-      ? `/watch?movie_id=${movie.id}`
-      : `/watchTv?tv_id=${movie.id}`;
+    const url = movie.media_type === "tv"
+      ? `/watchTv?tv_id=${movie.id}`
+      : `/watch?movie_id=${movie.id}`;
     router.push(url);
   };
 
