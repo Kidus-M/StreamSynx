@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Plus, Check } from "lucide-react";
+import { auth, db } from "../firebase"; // Import Firebase
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 const genreMap = {
   28: "Action",
@@ -27,6 +29,21 @@ const genreMap = {
 const MovieCard = ({ movie }) => {
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
+  const userId = auth.currentUser?.uid;
+
+  useEffect(() => {
+    const checkIfAdded = async () => {
+      if (userId) {
+        const watchlistRef = doc(db, "watchlists", userId);
+        const watchlistDoc = await getDoc(watchlistRef);
+        if (watchlistDoc.exists()) {
+          const movies = watchlistDoc.data().movies || [];
+          setIsAdded(movies.some((m) => m.id === movie.id));
+        }
+      }
+    };
+    checkIfAdded();
+  }, [userId, movie.id]);
 
   const handleWatch = () => {
     const url = movie.media_type === "tv"
@@ -35,13 +52,38 @@ const MovieCard = ({ movie }) => {
     router.push(url);
   };
 
-  const toggleWatchlist = (e) => {
-    e.stopPropagation(); // Prevent card click when pressing the button
+  const toggleWatchlist = async (e) => {
+    e.stopPropagation();
+    if (!userId) {
+      router.push("/login"); // Redirect to login if not authenticated
+      return;
+    }
+
+    const watchlistRef = doc(db, "watchlists", userId);
+    const watchlistDoc = await getDoc(watchlistRef);
+
+    if (isAdded) {
+      // Remove movie from watchlist
+      await updateDoc(watchlistRef, {
+        movies: arrayRemove(movie),
+      });
+    } else {
+      // Add movie to watchlist
+      if (watchlistDoc.exists()) {
+        await updateDoc(watchlistRef, {
+          movies: arrayUnion(movie),
+        });
+      } else {
+        await setDoc(watchlistRef, {
+          movies: [movie],
+        });
+      }
+    }
     setIsAdded((prev) => !prev);
   };
 
-  const genres = movie.genre_ids?.length > 0 
-    ? movie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ") 
+  const genres = movie.genre_ids?.length > 0
+    ? movie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ")
     : "Unknown Genre";
 
   return (
@@ -49,14 +91,11 @@ const MovieCard = ({ movie }) => {
       className="relative w-full rounded-xl overflow-hidden transition-transform hover:scale-105 cursor-pointer"
       onClick={handleWatch}
     >
-      {/* Movie Poster */}
       <img
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
         alt={`${movie.title} Poster`}
         className="w-full h-[400px] object-cover rounded-xl"
       />
-
-      {/* Bottom Details */}
       <div className="absolute bottom-0 left-0 w-full bg-primary bg-opacity-60 text-white p-3 flex justify-between items-center rounded-md">
         <div>
           <h2 className="text-sm font-bold">{movie.title}</h2>
