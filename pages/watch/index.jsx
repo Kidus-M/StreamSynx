@@ -14,21 +14,116 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
-const MoviePlayerPage = () => {
-  const router = useRouter();
-  const { query } = router;
+// Custom hook to fetch movie details
+const useMovie = (id, apiKey) => {
   const [movie, setMovie] = useState(null);
-  const [recommendedMovies, setRecommendedMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMovie = async () => {
+      if (!id || !apiKey) {
+        setError("Movie ID or API Key is missing");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch movie: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setMovie(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovie();
+  }, [id, apiKey]);
+
+  return { movie, loading, error };
+};
+
+// Custom hook to fetch recommended movies
+const useRecommendedMovies = (id, apiKey) => {
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
+
+  useEffect(() => {
+    const fetchRecommendedMovies = async () => {
+      if (!id || !apiKey) return;
+
+      try {
+        const response = await fetch(`${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recommended movies: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setRecommendedMovies(data.results.slice(0, 20));
+      } catch (error) {
+        console.error("Error fetching recommended movies:", error);
+      }
+    };
+
+    fetchRecommendedMovies();
+  }, [id, apiKey]);
+
+  return { recommendedMovies };
+};
+
+// Custom hook to fetch additional details (cast and trailer)
+const useAdditionalDetails = (movie, apiKey) => {
   const [cast, setCast] = useState([]);
   const [trailerKey, setTrailerKey] = useState("");
 
+  useEffect(() => {
+    if (!movie || !movie.id || !apiKey) return;
+
+    const fetchAdditionalDetails = async () => {
+      try {
+        const [castResponse, trailerResponse] = await Promise.all([
+          axios.get(`${BASE_URL}/movie/${movie.id}/credits`, {
+            params: { api_key: apiKey, language: "en-US" },
+          }),
+          axios.get(`${BASE_URL}/movie/${movie.id}/videos`, {
+            params: { api_key: apiKey, language: "en-US" },
+          }),
+        ]);
+
+        setCast(castResponse.data.cast.slice(0, 5));
+
+        const trailer = trailerResponse.data.results.find(
+          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+        );
+        setTrailerKey(trailer ? trailer.key : "");
+      } catch (error) {
+        console.error("Error fetching additional movie data:", error);
+      }
+    };
+
+    fetchAdditionalDetails();
+  }, [movie, apiKey]);
+
+  return { cast, trailerKey };
+};
+
+// Main MoviePlayerPage component
+const MoviePlayerPage = () => {
+  const router = useRouter();
+  const { query } = router;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.movie_id || 0;
+
+  const { movie, loading, error } = useMovie(id, apiKey);
+  const { recommendedMovies } = useRecommendedMovies(id, apiKey);
+  const { cast, trailerKey } = useAdditionalDetails(movie, apiKey);
   const [rating, setRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -105,6 +200,7 @@ const MoviePlayerPage = () => {
       });
     }
   };
+
   // Inside the component, after fetching movie details:
   useEffect(() => {
     const saveToHistory = async () => {
@@ -139,86 +235,6 @@ const MoviePlayerPage = () => {
 
     saveToHistory();
   }, [movie]);
-  // Fetch movie details
-  useEffect(() => {
-    if (!id || !apiKey) {
-      setError("Movie ID or API Key is missing");
-      setLoading(false);
-      return;
-    }
-
-    const fetchMovie = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch movie: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setMovie(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovie();
-  }, [id, apiKey]);
-
-  // Fetch recommended movies
-  useEffect(() => {
-    if (!id || !apiKey) return;
-
-    const fetchRecommendedMovies = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch recommended movies: ${response.statusText}`
-          );
-        }
-        const data = await response.json();
-        setRecommendedMovies(data.results.slice(0, 20));
-      } catch (error) {
-        console.error("Error fetching recommended movies:", error);
-      }
-    };
-
-    fetchRecommendedMovies();
-  }, [id, apiKey]);
-
-  // Fetch additional details (cast and trailer)
-  useEffect(() => {
-    if (!movie || !movie.id || !apiKey) return;
-
-    const fetchAdditionalDetails = async () => {
-      try {
-        const [castResponse, trailerResponse] = await Promise.all([
-          axios.get(`${BASE_URL}/movie/${movie.id}/credits`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
-          axios.get(`${BASE_URL}/movie/${movie.id}/videos`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
-        ]);
-
-        setCast(castResponse.data.cast.slice(0, 5));
-
-        const trailer = trailerResponse.data.results.find(
-          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
-        );
-        setTrailerKey(trailer ? trailer.key : "");
-      } catch (error) {
-        console.error("Error fetching additional movie data:", error);
-      }
-    };
-
-    fetchAdditionalDetails();
-  }, [movie, apiKey]);
 
   // Handle loading and error states
   if (loading) {
@@ -249,7 +265,7 @@ const MoviePlayerPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col  mt-20">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col mt-20">
       <NavBar />
       <main className="flex-1 p-4 space-y-8">
         {/* Video Player Section */}
@@ -264,14 +280,16 @@ const MoviePlayerPage = () => {
             ></iframe>
           </div>
         </div>
-        {/* // Add a favorite button */}
+
+        {/* Favorite Button */}
         <button
-        onClick={toggleFavorite}
-        className="mt-4 bg-yellow-500 text-white py-2 px-4 rounded"
-      >
-        {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-      </button>
-        {/* // Add a rating input component */}
+          onClick={toggleFavorite}
+          className="mt-4 bg-secondary text-white py-2 px-4 rounded"
+        >
+          {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+        </button>
+
+        {/* Rating Input */}
         <div className="mt-6">
           <h3 className="text-xl font-bold mb-4">Rate this Movie</h3>
           <input
@@ -280,15 +298,16 @@ const MoviePlayerPage = () => {
             max="10"
             value={rating}
             onChange={(e) => setRating(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 border rounded bg-primary"
           />
           <button
             onClick={() => saveRating(movie.id, rating)}
-            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded"
+            className="ml-2 bg-secondary text-white py-2 px-4 rounded"
           >
             Submit Rating
           </button>
         </div>
+
         {/* Movie Details Section */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-3xl font-bold mb-4">{movie.title}</h2>
@@ -347,6 +366,7 @@ const MoviePlayerPage = () => {
             </div>
           </div>
         </section>
+
         {/* Recommended Movies Section */}
         <section className="w-full">
           <div className="px-6 my-6 flex justify-between items-center">
@@ -356,8 +376,8 @@ const MoviePlayerPage = () => {
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 p-6">
-            {recommendedMovies.map((mov) => (
-              <MovieCard key={mov.id} movie={mov} />
+            {recommendedMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>
         </section>
