@@ -26,7 +26,7 @@ const Watchlist = () => {
     <div>
       <NavBar />
       <main>
-        <section className="w-full">
+        <section className="w-full text-secondary mt-24">
           <div className="px-6 my-6 flex justify-between items-center">
             <p className="flex justify-between items-center text-lg gap-4">
               <FaGripLinesVertical className="text-2xl" />
