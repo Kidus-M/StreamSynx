@@ -6,7 +6,14 @@ import axios from "axios";
 import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
 import { auth, db } from "../../firebase";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -23,6 +30,64 @@ const MoviePlayerPage = () => {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.movie_id || 0;
   const [rating, setRating] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Check if the movie is already in favorites
+  useEffect(() => {
+    const checkIfFavorite = async () => {
+      if (auth.currentUser && movie) {
+        const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
+        const favoritesDoc = await getDoc(favoritesRef);
+        if (favoritesDoc.exists()) {
+          const movies = favoritesDoc.data().movies || [];
+          setIsFavorite(movies.some((m) => m.id === movie.id));
+        }
+      }
+    };
+    checkIfFavorite();
+  }, [movie]);
+
+  // Add/Remove movie from favorites
+  const toggleFavorite = async () => {
+    if (!auth.currentUser || !movie) return;
+
+    const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
+    const favoritesDoc = await getDoc(favoritesRef);
+
+    if (isFavorite) {
+      // Remove from favorites
+      await updateDoc(favoritesRef, {
+        movies: arrayRemove({
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+        }),
+      });
+    } else {
+      // Add to favorites
+      if (favoritesDoc.exists()) {
+        await updateDoc(favoritesRef, {
+          movies: arrayUnion({
+            id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+          }),
+        });
+      } else {
+        await setDoc(favoritesRef, {
+          movies: [
+            {
+              id: movie.id,
+              title: movie.title,
+              poster_path: movie.poster_path,
+            },
+          ],
+          episodes: [], // Initialize episodes array
+        });
+      }
+    }
+    setIsFavorite((prev) => !prev);
+  };
 
   const saveRating = async (movieId, rating) => {
     if (!auth.currentUser) return;
@@ -199,6 +264,13 @@ const MoviePlayerPage = () => {
             ></iframe>
           </div>
         </div>
+        {/* // Add a favorite button */}
+        <button
+        onClick={toggleFavorite}
+        className="mt-4 bg-yellow-500 text-white py-2 px-4 rounded"
+      >
+        {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+      </button>
         {/* // Add a rating input component */}
         <div className="mt-6">
           <h3 className="text-xl font-bold mb-4">Rate this Movie</h3>

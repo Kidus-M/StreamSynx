@@ -8,7 +8,14 @@ import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
 import { motion, AnimatePresence } from "framer-motion"; // For smooth animations
 import { auth, db } from "../../firebase";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -30,44 +37,111 @@ const TVShowPlayerPage = () => {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.tv_id || 0;
   const [rating, setRating] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
 
+  // Check if the episode is already in favorites
+  useEffect(() => {
+    const checkIfFavorite = async () => {
+      if (auth.currentUser && tvShow && selectedEpisode) {
+        const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
+        const favoritesDoc = await getDoc(favoritesRef);
+        if (favoritesDoc.exists()) {
+          const episodes = favoritesDoc.data().episodes || [];
+          setIsFavorite(
+            episodes.some(
+              (e) =>
+                e.tvShowId === tvShow.id &&
+                e.seasonNumber === selectedSeason &&
+                e.episodeNumber === selectedEpisode
+            )
+          );
+        }
+      }
+    };
+    checkIfFavorite();
+  }, [tvShow, selectedSeason, selectedEpisode]);
 
-// Inside the component, after selecting an episode:
-useEffect(() => {
-  const saveToHistory = async () => {
-    if (!auth.currentUser || !selectedEpisode || !tvShow) return;
+  // Add/Remove episode from favorites
+  const toggleFavorite = async () => {
+    if (!auth.currentUser || !tvShow || !selectedEpisode) return;
 
-    const historyRef = doc(db, "history", auth.currentUser.uid);
-    const historyDoc = await getDoc(historyRef);
+    const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
+    const favoritesDoc = await getDoc(favoritesRef);
 
-    if (historyDoc.exists()) {
-      await updateDoc(historyRef, {
-        episodes: arrayUnion({
+    if (isFavorite) {
+      // Remove from favorites
+      await updateDoc(favoritesRef, {
+        episodes: arrayRemove({
           tvShowId: tvShow.id,
           tvShowTitle: tvShow.name,
           seasonNumber: selectedSeason,
           episodeNumber: selectedEpisode,
-          watchedAt: new Date().toISOString(),
         }),
       });
     } else {
-      await setDoc(historyRef, {
-        movies: [], // Initialize movies array
-        episodes: [
-          {
+      // Add to favorites
+      if (favoritesDoc.exists()) {
+        await updateDoc(favoritesRef, {
+          episodes: arrayUnion({
+            tvShowId: tvShow.id,
+            tvShowTitle: tvShow.name,
+            seasonNumber: selectedSeason,
+            episodeNumber: selectedEpisode,
+          }),
+        });
+      } else {
+        await setDoc(favoritesRef, {
+          movies: [], // Initialize movies array
+          episodes: [
+            {
+              tvShowId: tvShow.id,
+              tvShowTitle: tvShow.name,
+              seasonNumber: selectedSeason,
+              episodeNumber: selectedEpisode,
+            },
+          ],
+        });
+      }
+    }
+    setIsFavorite((prev) => !prev);
+  };
+
+  // Inside the component, after selecting an episode:
+  useEffect(() => {
+    const saveToHistory = async () => {
+      if (!auth.currentUser || !selectedEpisode || !tvShow) return;
+
+      const historyRef = doc(db, "history", auth.currentUser.uid);
+      const historyDoc = await getDoc(historyRef);
+
+      if (historyDoc.exists()) {
+        await updateDoc(historyRef, {
+          episodes: arrayUnion({
             tvShowId: tvShow.id,
             tvShowTitle: tvShow.name,
             seasonNumber: selectedSeason,
             episodeNumber: selectedEpisode,
             watchedAt: new Date().toISOString(),
-          },
-        ],
-      });
-    }
-  };
+          }),
+        });
+      } else {
+        await setDoc(historyRef, {
+          movies: [], // Initialize movies array
+          episodes: [
+            {
+              tvShowId: tvShow.id,
+              tvShowTitle: tvShow.name,
+              seasonNumber: selectedSeason,
+              episodeNumber: selectedEpisode,
+              watchedAt: new Date().toISOString(),
+            },
+          ],
+        });
+      }
+    };
 
-  saveToHistory();
-}, [selectedEpisode, tvShow, selectedSeason]);
+    saveToHistory();
+  }, [selectedEpisode, tvShow, selectedSeason]);
 
   const saveRating = async (tvShowId, rating) => {
     if (!auth.currentUser) return;
@@ -239,6 +313,13 @@ useEffect(() => {
             ></iframe>
           </div>
         </div>
+        {/* Episode fav Section */}
+        <button
+        onClick={toggleFavorite}
+        className="mt-4 bg-yellow-500 text-white py-2 px-4 rounded"
+      >
+        {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+      </button>
         {/* // Add a rating input component */}
         <div className="mt-6">
           <h3 className="text-xl font-bold mb-4">Rate this Show</h3>

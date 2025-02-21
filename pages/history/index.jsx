@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NavBar from "../../components/Navbar";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-
+import MovieCard from "../../components/MinimalCard";
 const HistoryPage = () => {
   const [history, setHistory] = useState({ movies: [], episodes: [] });
   const userId = auth.currentUser?.uid;
@@ -32,7 +32,7 @@ const HistoryPage = () => {
   };
 
   return (
-    <div>
+    <div className="text-secondary bg-primary min-h-screen">
       <NavBar />
       <main className="p-6">
         <h1 className="text-2xl font-bold mb-6">Watch History</h1>
@@ -46,14 +46,10 @@ const HistoryPage = () => {
           <h2 className="text-xl font-bold mb-4">Movies</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {history.movies.map((movie) => (
-              <div key={movie.id} className="bg-gray-800 p-4 rounded-lg">
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                  alt={movie.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-                <p className="mt-2 text-sm font-bold">{movie.title}</p>
-                <p className="text-xs text-gray-400">
+              <div>
+                <MovieCard key={movie.id} movie={movie} />
+
+                <p className="text-xs mt-3 text-white">
                   Watched on: {new Date(movie.watchedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -64,7 +60,10 @@ const HistoryPage = () => {
           <h2 className="text-xl font-bold mb-4">Episodes</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {history.episodes.map((episode) => (
-              <div key={`${episode.tvShowId}-${episode.seasonNumber}-${episode.episodeNumber}`} className="bg-gray-800 p-4 rounded-lg">
+              <div
+                key={`${episode.tvShowId}-${episode.seasonNumber}-${episode.episodeNumber}`}
+                className="bg-gray-800 p-4 rounded-lg"
+              >
                 <p className="text-sm font-bold">{episode.tvShowTitle}</p>
                 <p className="text-xs text-gray-400">
                   Season {episode.seasonNumber}, Episode {episode.episodeNumber}
