@@ -27,7 +27,7 @@ const TVShowPlayerPage = () => {
   const [selectedSeason, setSelectedSeason] = useState(1); // Default to season 1
   const [episodes, setEpisodes] = useState([]);
   const [selectedEpisode, setSelectedEpisode] = useState(null); // Track selected episode
-  const [showAllEpisodes, setShowAllEpisodes] = useState(false); // Show all episodes when true
+  const [showAllEpisodes, setShowAllEpisodes] = useState(true); // Show all episodes when true
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cast, setCast] = useState([]);
