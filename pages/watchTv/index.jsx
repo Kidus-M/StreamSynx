@@ -315,11 +315,11 @@ const TVShowPlayerPage = () => {
         </div>
         {/* Episode fav Section */}
         <button
-        onClick={toggleFavorite}
-        className="mt-4 bg-yellow-500 text-white py-2 px-4 rounded"
-      >
-        {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-      </button>
+          onClick={toggleFavorite}
+          className="mt-4 bg-secondary text-white py-2 px-4 rounded"
+        >
+          {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+        </button>
         {/* // Add a rating input component */}
         <div className="mt-6">
           <h3 className="text-xl font-bold mb-4">Rate this Show</h3>
@@ -329,11 +329,11 @@ const TVShowPlayerPage = () => {
             max="10"
             value={rating}
             onChange={(e) => setRating(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 border rounded bg-primary"
           />
           <button
             onClick={() => saveRating(tvShow.id, rating)}
-            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded"
+            className="ml-2 bg-secondary text-white py-2 px-4 rounded"
           >
             Submit Rating
           </button>
