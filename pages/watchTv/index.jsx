@@ -4,7 +4,8 @@ import SearchCard from "../../components/MinimalCard";
 import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
+import { FaVideo, FaGripLinesVertical, FaStar, FaHeart, FaShare } from "react-icons/fa";
+// import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
 import Footer from "../../components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { auth, db } from "../../firebase";
@@ -319,14 +320,37 @@ const TVShowPlayerPage = () => {
             ></iframe>
           </div>
         </div>
+           {/* Action Buttons */}
+        <div className="flex justify-center space-x-4 mt-6">
+          <button
+            onClick={toggleFavorite}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
+            }`}
+          >
+            <FaHeart className={`${isFavorite ? "text-white" : "text-gray-300"}`} />
+            <span>{isFavorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+          </button>
 
-        {/* Favorite Button */}
-        <button onClick={toggleFavorite} className="mt-4 bg-secondary text-white py-2 px-4 rounded">
-          {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-        </button>
+          <button
+            onClick={() => saveRating(tvShow.id, rating)}
+            className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <FaStar className="text-yellow-400" />
+            <span>Submit Rating</span>
+          </button>
 
-        {/* Rating Section */}
-        <div className="mt-6">
+          <button
+            onClick={recommendEpisode}
+            className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <FaShare className="text-white" />
+            <span>Recommend</span>
+          </button>
+        </div>
+
+        {/* Rating Input */}
+        <div className="mt-6 text-center">
           <h3 className="text-xl font-bold mb-4">Rate this Show</h3>
           <input
             type="number"
@@ -334,37 +358,26 @@ const TVShowPlayerPage = () => {
             max="10"
             value={rating}
             onChange={(e) => setRating(e.target.value)}
-            className="p-2 border rounded bg-primary"
+            className="p-2 border rounded bg-gray-700 text-white"
           />
-          <button onClick={() => saveRating(tvShow.id, rating)} className="ml-2 bg-secondary text-white py-2 px-4 rounded">
-            Submit Rating
-          </button>
         </div>
 
-
-
         {/* Recommend to a Friend Section */}
-        <div className="mt-6">
-        <h3 className="text-xl font-bold mb-4">Recommend to Buddy</h3>
-        <select
-          value={selectedFriend}
-          onChange={(e) => setSelectedFriend(e.target.value)}
-          className="p-2 border rounded mb-2"
-        >
-          <option value="">Select a friend</option>
-          {friends.map((friendId) => (
-            <option key={friendId} value={friendId}>
-              {friendId}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={recommendEpisode}
-          className="bg-green-500 text-white py-2 px-4 rounded"
-        >
-          Recommend
-        </button>
-      </div>
+        <div className="mt-6 text-center">
+          <h3 className="text-xl font-bold mb-4">Recommend to a Friend</h3>
+          <select
+            value={selectedFriend}
+            onChange={(e) => setSelectedFriend(e.target.value)}
+            className="p-2 border rounded bg-gray-700 text-white"
+          >
+            <option value="">Select a friend</option>
+            {friends.map((friendId) => (
+              <option key={friendId} value={friendId}>
+                {friendId}
+              </option>
+            ))}
+          </select>
+        </div>
         {/* TV Show Details Section */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-3xl font-bold mb-4">{tvShow.name}</h2>
@@ -447,7 +460,7 @@ const TVShowPlayerPage = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-6">
             <AnimatePresence>
-              {(showAllEpisodes ? episodes : episodes.slice(0, 8)).map((episode) => (
+              {(showAllEpisodes ? episodes : episodes.slice(0, 6)).map((episode) => (
                 <motion.div key={episode.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
                   <EpisodeCard episode={episode} onWatchClick={() => handleEpisodeClick(episode.episode_number)} />
                 </motion.div>
