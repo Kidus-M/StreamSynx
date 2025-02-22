@@ -14,6 +14,11 @@ const HistoryPage = () => {
         const historyDoc = await getDoc(historyRef);
         if (historyDoc.exists()) {
           setHistory(historyDoc.data());
+          setHistory((prevHistory) => ({
+            ...prevHistory,
+            movies: [...prevHistory.movies].reverse(),
+            episodes: [...prevHistory.episodes].reverse(),
+        }));
         }
       }
     };
