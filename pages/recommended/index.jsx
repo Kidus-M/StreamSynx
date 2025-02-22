@@ -35,7 +35,7 @@ const RecommendedPage = () => {
   return (
     <div>
       <NavBar />
-      <main className="p-6">
+      <main className="p-6 mt-24 text-secondary">
         <h1 className="text-2xl font-bold mb-6">Recommended for You</h1>
 
         {/* Recommended Movies */}
