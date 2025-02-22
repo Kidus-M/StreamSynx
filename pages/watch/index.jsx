@@ -33,7 +33,9 @@ const useMovie = (id, apiKey) => {
       }
 
       try {
-        const response = await fetch(`${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`);
+        const response = await fetch(
+          `${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`
+        );
         if (!response.ok) {
           throw new Error(`Failed to fetch movie: ${response.statusText}`);
         }
@@ -61,9 +63,13 @@ const useRecommendedMovies = (id, apiKey) => {
       if (!id || !apiKey) return;
 
       try {
-        const response = await fetch(`${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`);
+        const response = await fetch(
+          `${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
+        );
         if (!response.ok) {
-          throw new Error(`Failed to fetch recommended movies: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch recommended movies: ${response.statusText}`
+          );
         }
         const data = await response.json();
         setRecommendedMovies(data.results.slice(0, 20));
@@ -126,6 +132,38 @@ const MoviePlayerPage = () => {
   const { cast, trailerKey } = useAdditionalDetails(movie, apiKey);
   const [rating, setRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const [friends, setFriends] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState("");
+
+  // Fetch friends
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (auth.currentUser) {
+        const friendsRef = doc(db, "friends", auth.currentUser.uid);
+        const friendsDoc = await getDoc(friendsRef);
+        if (friendsDoc.exists()) {
+          setFriends(friendsDoc.data().friends || []);
+        }
+      }
+    };
+    fetchFriends();
+  }, []);
+
+  // Recommend movie to a friend
+  const recommendMovie = async () => {
+    if (!auth.currentUser || !selectedFriend || !movie) return;
+
+    const recommendationRef = doc(db, "recommendations", selectedFriend);
+    await updateDoc(recommendationRef, {
+      movies: arrayUnion({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        recommendedBy: auth.currentUser.uid,
+      }),
+    });
+  };
 
   // Check if the movie is already in favorites
   useEffect(() => {
@@ -305,6 +343,29 @@ const MoviePlayerPage = () => {
             className="ml-2 bg-secondary text-white py-2 px-4 rounded"
           >
             Submit Rating
+          </button>
+        </div>
+
+        {/* recommeded to buddy section */}
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-4">Recommend to Buddy</h3>
+          <select
+            value={selectedFriend}
+            onChange={(e) => setSelectedFriend(e.target.value)}
+            className="p-2 border rounded mb-2"
+          >
+            <option value="">Select a friend</option>
+            {friends.map((friendId) => (
+              <option key={friendId} value={friendId}>
+                {friendId}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={recommendMovie}
+            className="bg-green-500 text-white py-2 px-4 rounded"
+          >
+            Recommend
           </button>
         </div>
 

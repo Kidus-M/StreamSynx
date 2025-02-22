@@ -40,6 +40,39 @@ const TVShowPlayerPage = () => {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.tv_id || 0;
 
+
+  const [friends, setFriends] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState("");
+
+  // Fetch friends
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (auth.currentUser) {
+        const friendsRef = doc(db, "friends", auth.currentUser.uid);
+        const friendsDoc = await getDoc(friendsRef);
+        if (friendsDoc.exists()) {
+          setFriends(friendsDoc.data().friends || []);
+        }
+      }
+    };
+    fetchFriends();
+  }, []);
+
+  // Recommend episode to a friend
+  const recommendEpisode = async () => {
+    if (!auth.currentUser || !selectedFriend || !tvShow || !selectedEpisode) return;
+
+    const recommendationRef = doc(db, "recommendations", selectedFriend);
+    await updateDoc(recommendationRef, {
+      episodes: arrayUnion({
+        tvShowId: tvShow.id,
+        tvShowTitle: tvShow.name,
+        seasonNumber: selectedSeason,
+        episodeNumber: selectedEpisode,
+        recommendedBy: auth.currentUser.uid,
+      }),
+    });
+  };
   // Fetch TV show details
   useEffect(() => {
     if (!id || !apiKey) {
@@ -308,6 +341,30 @@ const TVShowPlayerPage = () => {
           </button>
         </div>
 
+
+
+        {/* Recommend to a Friend Section */}
+        <div className="mt-6">
+        <h3 className="text-xl font-bold mb-4">Recommend to Buddy</h3>
+        <select
+          value={selectedFriend}
+          onChange={(e) => setSelectedFriend(e.target.value)}
+          className="p-2 border rounded mb-2"
+        >
+          <option value="">Select a friend</option>
+          {friends.map((friendId) => (
+            <option key={friendId} value={friendId}>
+              {friendId}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={recommendEpisode}
+          className="bg-green-500 text-white py-2 px-4 rounded"
+        >
+          Recommend
+        </button>
+      </div>
         {/* TV Show Details Section */}
         <section className="w-full bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-3xl font-bold mb-4">{tvShow.name}</h2>
