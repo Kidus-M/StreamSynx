@@ -3,17 +3,10 @@ import MovieCard from "../../components/MinimalCard";
 import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
+import { FaVideo, FaGripLinesVertical, FaStar, FaHeart, FaShare } from "react-icons/fa";
 import Footer from "../../components/Footer";
 import { auth, db } from "../../firebase";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -33,12 +26,8 @@ const useMovie = (id, apiKey) => {
       }
 
       try {
-        const response = await fetch(
-          `${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch movie: ${response.statusText}`);
-        }
+        const response = await fetch(`${BASE_URL}/movie/${id}?api_key=${apiKey}&language=en-US`);
+        if (!response.ok) throw new Error(`Failed to fetch movie: ${response.statusText}`);
         const data = await response.json();
         setMovie(data);
       } catch (error) {
@@ -63,14 +52,8 @@ const useRecommendedMovies = (id, apiKey) => {
       if (!id || !apiKey) return;
 
       try {
-        const response = await fetch(
-          `${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch recommended movies: ${response.statusText}`
-          );
-        }
+        const response = await fetch(`${BASE_URL}/movie/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`);
+        if (!response.ok) throw new Error(`Failed to fetch recommended movies: ${response.statusText}`);
         const data = await response.json();
         setRecommendedMovies(data.results.slice(0, 20));
       } catch (error) {
@@ -95,19 +78,13 @@ const useAdditionalDetails = (movie, apiKey) => {
     const fetchAdditionalDetails = async () => {
       try {
         const [castResponse, trailerResponse] = await Promise.all([
-          axios.get(`${BASE_URL}/movie/${movie.id}/credits`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
-          axios.get(`${BASE_URL}/movie/${movie.id}/videos`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
+          axios.get(`${BASE_URL}/movie/${movie.id}/credits`, { params: { api_key: apiKey, language: "en-US" } }),
+          axios.get(`${BASE_URL}/movie/${movie.id}/videos`, { params: { api_key: apiKey, language: "en-US" } }),
         ]);
 
         setCast(castResponse.data.cast.slice(0, 5));
 
-        const trailer = trailerResponse.data.results.find(
-          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
-        );
+        const trailer = trailerResponse.data.results.find((vid) => vid.type === "Trailer" && vid.site === "YouTube");
         setTrailerKey(trailer ? trailer.key : "");
       } catch (error) {
         console.error("Error fetching additional movie data:", error);
@@ -132,7 +109,6 @@ const MoviePlayerPage = () => {
   const { cast, trailerKey } = useAdditionalDetails(movie, apiKey);
   const [rating, setRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
-
   const [friends, setFriends] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState("");
 
@@ -163,6 +139,7 @@ const MoviePlayerPage = () => {
         recommendedBy: auth.currentUser.uid,
       }),
     });
+    alert(`Recommended "${movie.title}" to ${selectedFriend}`);
   };
 
   // Check if the movie is already in favorites
@@ -188,7 +165,6 @@ const MoviePlayerPage = () => {
     const favoritesDoc = await getDoc(favoritesRef);
 
     if (isFavorite) {
-      // Remove from favorites
       await updateDoc(favoritesRef, {
         movies: arrayRemove({
           id: movie.id,
@@ -197,7 +173,6 @@ const MoviePlayerPage = () => {
         }),
       });
     } else {
-      // Add to favorites
       if (favoritesDoc.exists()) {
         await updateDoc(favoritesRef, {
           movies: arrayUnion({
@@ -215,7 +190,7 @@ const MoviePlayerPage = () => {
               poster_path: movie.poster_path,
             },
           ],
-          episodes: [], // Initialize episodes array
+          episodes: [],
         });
       }
     }
@@ -237,9 +212,10 @@ const MoviePlayerPage = () => {
         ratings: [{ movieId, rating }],
       });
     }
+    alert(`Rating of ${rating} submitted for "${movie.title}"`);
   };
 
-  // Inside the component, after fetching movie details:
+  // Save movie to history
   useEffect(() => {
     const saveToHistory = async () => {
       if (!auth.currentUser || !movie) return;
@@ -266,7 +242,7 @@ const MoviePlayerPage = () => {
               watchedAt: new Date().toISOString(),
             },
           ],
-          episodes: [], // Initialize episodes array
+          episodes: [],
         });
       }
     };
@@ -319,16 +295,37 @@ const MoviePlayerPage = () => {
           </div>
         </div>
 
-        {/* Favorite Button */}
-        <button
-          onClick={toggleFavorite}
-          className="mt-4 bg-secondary text-white py-2 px-4 rounded"
-        >
-          {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-        </button>
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4 mt-6">
+          <button
+            onClick={toggleFavorite}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
+            }`}
+          >
+            <FaHeart className={`${isFavorite ? "text-white" : "text-gray-300"}`} />
+            <span>{isFavorite ? "Remove from Favorites" : "Add to Favorites"}</span>
+          </button>
+
+          <button
+            onClick={() => saveRating(movie.id, rating)}
+            className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <FaStar className="text-yellow-400" />
+            <span>Submit Rating</span>
+          </button>
+
+          <button
+            onClick={recommendMovie}
+            className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <FaShare className="text-white" />
+            <span>Recommend</span>
+          </button>
+        </div>
 
         {/* Rating Input */}
-        <div className="mt-6">
+        <div className="mt-6 text-center">
           <h3 className="text-xl font-bold mb-4">Rate this Movie</h3>
           <input
             type="number"
@@ -336,23 +333,17 @@ const MoviePlayerPage = () => {
             max="10"
             value={rating}
             onChange={(e) => setRating(e.target.value)}
-            className="p-2 border rounded bg-primary"
+            className="p-2 border rounded bg-gray-700 text-white"
           />
-          <button
-            onClick={() => saveRating(movie.id, rating)}
-            className="ml-2 bg-secondary text-white py-2 px-4 rounded"
-          >
-            Submit Rating
-          </button>
         </div>
 
-        {/* recommeded to buddy section */}
-        <div className="mt-6">
-          <h3 className="text-xl font-bold mb-4">Recommend to Buddy</h3>
+        {/* Recommend to Friend Section */}
+        <div className="mt-6 text-center">
+          <h3 className="text-xl font-bold mb-4">Recommend to a Friend</h3>
           <select
             value={selectedFriend}
             onChange={(e) => setSelectedFriend(e.target.value)}
-            className="p-2 border rounded mb-2"
+            className="p-2 border rounded bg-gray-700 text-white"
           >
             <option value="">Select a friend</option>
             {friends.map((friendId) => (
@@ -361,12 +352,6 @@ const MoviePlayerPage = () => {
               </option>
             ))}
           </select>
-          <button
-            onClick={recommendMovie}
-            className="bg-green-500 text-white py-2 px-4 rounded"
-          >
-            Recommend
-          </button>
         </div>
 
         {/* Movie Details Section */}
