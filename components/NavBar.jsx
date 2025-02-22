@@ -105,6 +105,14 @@ export default function NavBar() {
                 Buddies
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => router.push(`/recommended`)}
+                className="text-sm cursor-pointer hover:text-orange-500 transition-colors"
+              >
+                Recommended
+              </button>
+            </li>
           </ul>
 
           {/* Profile and Search Icon */}
@@ -188,7 +196,15 @@ export default function NavBar() {
                 onClick={() => router.push(`/buddies`)}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
-                Watch Buddies
+                Buddies
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => router.push(`/recommended`)}
+                className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
+              >
+                Recommended
               </button>
             </li>
           </ul>
