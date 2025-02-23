@@ -68,6 +68,12 @@ export default function SignUp({ setIsSignUp }) {
       case 'auth/invalid-email':
         setErrorMessage("Invalid email.");
         break;
+      case 'auth/popup-closed-by-user':
+        // setErrorMessage("Popup closed by user.");
+        break;
+      case 'auth/cancelled-popup-request':
+        // setErrorMessage("Popup closed by user.");
+        break;
       default:
         setErrorMessage("An error occurred. Please try again.");
         console.error("Error signing up:", error);
