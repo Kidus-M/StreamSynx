@@ -43,37 +43,64 @@ const TVShowPlayerPage = () => {
 
 
   const [friends, setFriends] = useState([]);
+  const [friendUsernames, setFriendUsernames] = useState({}); 
   const [selectedFriend, setSelectedFriend] = useState("");
 
-  // Fetch friends
   useEffect(() => {
-    const fetchFriends = async () => {
+    const fetchFriendsAndUsernames = async () => {
       if (auth.currentUser) {
         const friendsRef = doc(db, "friends", auth.currentUser.uid);
         const friendsDoc = await getDoc(friendsRef);
         if (friendsDoc.exists()) {
-          setFriends(friendsDoc.data().friends || []);
+          const friendIds = friendsDoc.data().friends || [];
+          setFriends(friendIds);
+
+          const usernames = {};
+          for (const friendId of friendIds) {
+            const userRef = doc(db, "users", friendId);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+              usernames[friendId] = userDoc.data().username;
+            } else {
+              usernames[friendId] = friendId; // Fallback to ID if username not found
+            }
+          }
+          setFriendUsernames(usernames);
         }
       }
     };
-    fetchFriends();
+    fetchFriendsAndUsernames();
   }, []);
 
-  // Recommend episode to a friend
-  const recommendEpisode = async () => {
-    if (!auth.currentUser || !selectedFriend || !tvShow || !selectedEpisode) return;
+// Recommend episode to a friend
+const recommendEpisode = async () => {
+  if (!auth.currentUser || !selectedFriend || !tvShow || !selectedEpisode) {
+    alert("Please select a friend and an episode to recommend.");
+    return;
+  }
 
+  try {
     const recommendationRef = doc(db, "recommendations", selectedFriend);
-    await updateDoc(recommendationRef, {
-      episodes: arrayUnion({
-        tvShowId: tvShow.id,
-        tvShowTitle: tvShow.name,
-        seasonNumber: selectedSeason,
-        episodeNumber: selectedEpisode,
-        recommendedBy: auth.currentUser.uid,
-      }),
-    });
-  };
+    await setDoc(
+      recommendationRef,
+      {
+        episodes: arrayUnion({
+          tvShowId: tvShow.id,
+          tvShowTitle: tvShow.name,
+          seasonNumber: selectedSeason,
+          episodeNumber: selectedEpisode,
+          recommendedBy: auth.currentUser.uid,
+        }),
+      },
+      { merge: true }
+    );
+    alert(`Episode ${selectedEpisode} of ${tvShow.name} Season ${selectedSeason} recommended to ${friendUsernames[selectedFriend] || selectedFriend}.`);
+  } catch (error) {
+    console.error("Error recommending episode:", error);
+    alert("Failed to recommend episode. Please try again.");
+  }
+};
+
   // Fetch TV show details
   useEffect(() => {
     if (!id || !apiKey) {
@@ -373,7 +400,7 @@ const TVShowPlayerPage = () => {
             <option value="">Select a friend</option>
             {friends.map((friendId) => (
               <option key={friendId} value={friendId}>
-                {friendId}
+                {friendUsernames[friendId] || friendId}
               </option>
             ))}
           </select>
