@@ -118,11 +118,36 @@ const MoviePlayerPage = () => {
       if (auth.currentUser) {
         const friendsRef = doc(db, "friends", auth.currentUser.uid);
         const friendsDoc = await getDoc(friendsRef);
+
         if (friendsDoc.exists()) {
-          setFriends(friendsDoc.data().friends || []);
+          const friendIds = friendsDoc.data().friends || [];
+
+          // Fetch usernames for each friend ID
+          const friendsWithUsernames = await Promise.all(
+            friendIds.map(async (friendId) => {
+              const userRef = doc(db, "users", friendId);
+              const userDoc = await getDoc(userRef);
+
+              if (userDoc.exists()) {
+                return {
+                  uid: friendId,
+                  username: userDoc.data().username,
+                };
+              } else {
+                // Handle the case where the user document doesn't exist
+                return { uid: friendId, username: "Unknown User" }; // or null
+              }
+            })
+          );
+
+          setFriends(friendsWithUsernames);
+        } else {
+          // No friends document found, set friends to an empty array
+          setFriends([]);
         }
       }
     };
+
     fetchFriends();
   }, []);
 
@@ -130,17 +155,29 @@ const MoviePlayerPage = () => {
   const recommendMovie = async () => {
     if (!auth.currentUser || !selectedFriend || !movie) return;
 
-    const recommendationRef = doc(db, "recommendations", selectedFriend);
-    await updateDoc(recommendationRef, {
-      movies: arrayUnion({
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        recommendedBy: auth.currentUser.uid,
-      }),
-    });
-    alert(`Recommended "${movie.title}" to ${selectedFriend}`);
-  };
+    try {
+        const recommendationRef = doc(db, "recommendations", selectedFriend);
+        await setDoc(
+            recommendationRef,
+            {
+                movies: arrayUnion({
+                    id: movie.id,
+                    title: movie.title,
+                    poster_path: movie.poster_path,
+                    recommendedBy: auth.currentUser.uid,
+                }),
+            },
+            { merge: true } // Use setDoc with merge: true
+        );
+
+        // Find the friend's username for the alert message
+        const friend = friends.find((f) => f.uid === selectedFriend);
+        alert(`Recommended "${movie.title}" to ${friend?.username || selectedFriend}`);
+    } catch (error) {
+        console.error("Error recommending movie:", error);
+        alert("Error recommending movie. Please try again.");
+    }
+};
 
   // Check if the movie is already in favorites
   useEffect(() => {
@@ -346,9 +383,9 @@ const MoviePlayerPage = () => {
             className="p-2 border rounded bg-gray-700 text-white"
           >
             <option value="">Select a friend</option>
-            {friends.map((friendId) => (
-              <option key={friendId} value={friendId}>
-                {friendId}
+            {friends.map((friend) => (
+              <option key={friend.uid} value={friend.uid}>
+                {friend.username}
               </option>
             ))}
           </select>
