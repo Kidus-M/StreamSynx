@@ -8,8 +8,8 @@ const RecommendedPage = () => {
   const [recommendations, setRecommendations] = useState({ movies: [], episodes: [] });
   const userId = auth.currentUser?.uid;
   const router = useRouter();
+  const [userUsernames, setUserUsernames] = useState({}); // Store usernames by userId
 
-  // Fetch recommendations
   useEffect(() => {
     const fetchRecommendations = async () => {
       if (userId) {
@@ -23,7 +23,38 @@ const RecommendedPage = () => {
     fetchRecommendations();
   }, [userId]);
 
-  // Navigate to movie or TV show page
+  // Fetch usernames
+  useEffect(() => {
+    const fetchUsernames = async () => {
+      if (recommendations?.movies || recommendations?.episodes) {
+        const recommendedByUserIds = new Set([
+          ...(recommendations.movies?.map((movie) => movie.recommendedBy) || []),
+          ...(recommendations.episodes?.map((episode) => episode.recommendedBy) || []),
+        ]);
+
+        const usernamePromises = Array.from(recommendedByUserIds).map(async (recommendedByUserId) => {
+          if (recommendedByUserId) {
+            const userRef = doc(db, "users", recommendedByUserId);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+              return { userId: recommendedByUserId, username: userDoc.data().username };
+            }
+          }
+          return null;
+        });
+
+        const usernames = (await Promise.all(usernamePromises)).filter(Boolean);
+        const usernamesMap = {};
+        usernames.forEach((user) => {
+          usernamesMap[user.userId] = user.username;
+        });
+        setUserUsernames(usernamesMap);
+      }
+    };
+
+    fetchUsernames();
+  }, [recommendations]);
+
   const handleNavigate = (type, id) => {
     if (type === "movie") {
       router.push(`/watch?movie_id=${id}`);
@@ -41,7 +72,7 @@ const RecommendedPage = () => {
         {/* Recommended Movies */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Recommended Movies</h2>
-          {recommendations.movies.length > 0 ? (
+          {recommendations?.movies?.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {recommendations.movies.map((movie) => (
                 <div
@@ -56,7 +87,7 @@ const RecommendedPage = () => {
                   />
                   <p className="mt-2 text-sm font-bold">{movie.title}</p>
                   <p className="text-xs text-gray-400">
-                    Recommended by: {movie.recommendedBy}
+                    Recommended by: {userUsernames[movie.recommendedBy] || movie.recommendedBy}
                   </p>
                 </div>
               ))}
@@ -69,7 +100,7 @@ const RecommendedPage = () => {
         {/* Recommended Episodes */}
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">Recommended Episodes</h2>
-          {recommendations.episodes.length > 0 ? (
+          {recommendations?.episodes?.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {recommendations.episodes.map((episode) => (
                 <div
@@ -82,7 +113,7 @@ const RecommendedPage = () => {
                     Season {episode.seasonNumber}, Episode {episode.episodeNumber}
                   </p>
                   <p className="text-xs text-gray-400">
-                    Recommended by: {episode.recommendedBy}
+                    Recommended by: {userUsernames[episode.recommendedBy] || episode.recommendedBy}
                   </p>
                 </div>
               ))}
