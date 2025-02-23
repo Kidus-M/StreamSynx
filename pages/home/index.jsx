@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import EventCard from "../../components/EventCard";
 import { FaFilter, FaFire, FaEye, FaStar } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
+import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
 const MovieList = () => {
   const [trendingMovies, setTrendingMovies] = useState([]);
@@ -79,8 +80,8 @@ const MovieList = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-primary text-white">
-        Loading movies...
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
       </div>
     );
   }
