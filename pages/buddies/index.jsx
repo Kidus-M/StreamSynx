@@ -13,6 +13,7 @@ import {
   getDocs,
   onSnapshot,
 } from "firebase/firestore";
+import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
 const BuddiesPage = () => {
   const [friends, setFriends] = useState([]);
@@ -29,7 +30,8 @@ const BuddiesPage = () => {
 
     // Fetch friends
     const friendsRef = doc(db, "friends", userId);
-    const unsubscribeFriends = onSnapshot(friendsRef, async (docSnap) => { //rename doc to docSnap
+    const unsubscribeFriends = onSnapshot(friendsRef, async (docSnap) => {
+      //rename doc to docSnap
       if (docSnap.exists()) {
         const friendIds = docSnap.data().friends || [];
         // Fetch usernames for friends
@@ -37,7 +39,9 @@ const BuddiesPage = () => {
           friendIds.map(async (friendId) => {
             const userDocRef = doc(db, "users", friendId); // Correct usage of doc
             const userDoc = await getDoc(userDocRef);
-            return userDoc.exists() ? { uid: friendId, username: userDoc.data().username } : null;
+            return userDoc.exists()
+              ? { uid: friendId, username: userDoc.data().username }
+              : null;
           })
         );
         setFriends(friendsWithUsernames.filter(Boolean));
@@ -53,7 +57,8 @@ const BuddiesPage = () => {
     );
     const unsubscribeRequests = onSnapshot(requestsQuery, async (snapshot) => {
       const requests = await Promise.all(
-        snapshot.docs.map(async (docSnap) => { // Rename doc to docSnap to avoid confusion
+        snapshot.docs.map(async (docSnap) => {
+          // Rename doc to docSnap to avoid confusion
           const requestData = docSnap.data();
           const userDocRef = doc(db, "users", requestData.fromUserId); // Correct usage of doc
           const userDoc = await getDoc(userDocRef);
@@ -128,17 +133,17 @@ const BuddiesPage = () => {
   // Accept friend request
   const acceptFriendRequest = async (fromUserId) => {
     if (!userId) return;
-  
+
     try {
       // Update friend request status
       await updateDoc(doc(db, "friendRequests", `${fromUserId}_${userId}`), {
         status: "accepted",
       });
-  
+
       // Add to friends list (Check and create if needed)
       const friendsRef = doc(db, "friends", userId);
       const friendsDoc = await getDoc(friendsRef);
-  
+
       if (friendsDoc.exists()) {
         await updateDoc(friendsRef, {
           friends: arrayUnion(fromUserId),
@@ -146,21 +151,27 @@ const BuddiesPage = () => {
       } else {
         await setDoc(friendsRef, { friends: [fromUserId] }, { merge: true }); // Create if it doesn't exist
       }
-  
+
       // Add requester to friends list (Check and create if needed)
       const requesterFriendsRef = doc(db, "friends", fromUserId);
       const requesterFriendsDoc = await getDoc(requesterFriendsRef);
-  
+
       if (requesterFriendsDoc.exists()) {
         await updateDoc(requesterFriendsRef, {
           friends: arrayUnion(userId),
         });
       } else {
-        await setDoc(requesterFriendsRef, { friends: [userId] }, { merge: true }); // Create if it doesn't exist
+        await setDoc(
+          requesterFriendsRef,
+          { friends: [userId] },
+          { merge: true }
+        ); // Create if it doesn't exist
       }
-  
+
       // Update local state
-      setFriendRequests((prev) => prev.filter((req) => req.fromUserId !== fromUserId));
+      setFriendRequests((prev) =>
+        prev.filter((req) => req.fromUserId !== fromUserId)
+      );
     } catch (error) {
       console.error("Error accepting friend request:", error);
     }
@@ -176,7 +187,9 @@ const BuddiesPage = () => {
       });
 
       // Update local state
-      setFriendRequests((prev) => prev.filter((req) => req.fromUserId !== fromUserId));
+      setFriendRequests((prev) =>
+        prev.filter((req) => req.fromUserId !== fromUserId)
+      );
     } catch (error) {
       console.error("Error rejecting friend request:", error);
     }
@@ -190,12 +203,16 @@ const BuddiesPage = () => {
 
         {/* Loading State */}
         {loading ? (
-          <p className="text-gray-400">Loading...</p>
+          <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+            <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
+          </div>
         ) : (
           <>
             {/* Friend Requests Section */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-secondary">Friend Requests</h2>
+              <h2 className="text-2xl font-bold mb-4 text-secondary">
+                Friend Requests
+              </h2>
               {friendRequests.length > 0 ? (
                 friendRequests.map((request) => (
                   <div
@@ -226,7 +243,9 @@ const BuddiesPage = () => {
 
             {/* Friends List Section */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-secondary">Friends</h2>
+              <h2 className="text-2xl font-bold mb-4 text-secondary">
+                Friends
+              </h2>
               {friends.length > 0 ? (
                 friends.map((friend) => (
                   <div
@@ -243,7 +262,9 @@ const BuddiesPage = () => {
 
             {/* Search for Users Section */}
             <section>
-              <h2 className="text-2xl font-bold mb-4 text-secondary">Search for Users</h2>
+              <h2 className="text-2xl font-bold mb-4 text-secondary">
+                Search for Users
+              </h2>
               <input
                 type="text"
                 placeholder="Search by username"
@@ -267,7 +288,9 @@ const BuddiesPage = () => {
                             : "bg-secondary text-white hover:bg-secondary-dark"
                         }`}
                       >
-                        {sentRequests[user.uid] ? "Request Sent" : "Send Friend Request"}
+                        {sentRequests[user.uid]
+                          ? "Request Sent"
+                          : "Send Friend Request"}
                       </button>
                     </div>
                   ))}

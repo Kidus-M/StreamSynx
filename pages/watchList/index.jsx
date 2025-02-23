@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import NavBar from "../../components/Navbar";
 import { FaGripLinesVertical } from "react-icons/fa";
 import MovieCard from "../../components/MinimalCard";
-import { auth, db } from "../../firebase"; // Import Firebase
+import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import {Mosaic} from "react-loading-indicators";
 
 const Watchlist = () => {
   const [watchlistMovies, setWatchlistMovies] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
   const userId = auth.currentUser?.uid;
 
   useEffect(() => {
@@ -18,9 +20,18 @@ const Watchlist = () => {
           setWatchlistMovies(watchlistDoc.data().movies || []);
         }
       }
+      setLoading(false); // Set loading to false after fetching
     };
     fetchWatchlist();
   }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
+      </div>
+    );
+  }
 
   return (
     <div>

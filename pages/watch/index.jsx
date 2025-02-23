@@ -7,6 +7,7 @@ import { FaVideo, FaGripLinesVertical, FaStar, FaHeart, FaShare } from "react-ic
 import Footer from "../../components/Footer";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import Mosaic from "react-loading-indicators";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -292,7 +293,7 @@ const MoviePlayerPage = () => {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <NavBar />
-        <p className="text-white">Loading...</p>
+        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
       </div>
     );
   }

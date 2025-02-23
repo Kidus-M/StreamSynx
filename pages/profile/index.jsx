@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { signOut } from "firebase/auth";
 import NavBar from "../../components/Navbar";
 import StatsCard from "../../components/StatsCard";
+import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -23,7 +24,6 @@ export default function Profile() {
   const router = useRouter();
 
   useEffect(() => {
-
     const fetchUserData = async () => {
       const user = auth.currentUser;
       if (user) {
@@ -41,7 +41,6 @@ export default function Profile() {
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) setUser(userDoc.data());
 
-        // Fetch stats from collections
         const historyDoc = await getDoc(doc(db, "history", user.uid));
         const favoritesDoc = await getDoc(doc(db, "favorites", user.uid));
         const friendsDoc = await getDoc(doc(db, "friends", user.uid));
@@ -50,14 +49,12 @@ export default function Profile() {
         const favoritesData = favoritesDoc.exists() ? favoritesDoc.data() : {};
         const friendsData = friendsDoc.exists() ? friendsDoc.data() : {};
 
-        // Calculate stats
         const moviesWatched = historyData.movies?.length || 0;
         const episodesWatched = historyData.episodes?.length || 0;
         const favoriteMovies = favoritesData.movies?.length || 0;
         const favoriteEpisodes = favoritesData.episodes?.length || 0;
         const buddies = friendsData.friends?.length || 0;
 
-        // Calculate top genre
         const genreCounts = {};
         [...(historyData.movies || []), ...(historyData.episodes || [])].forEach(
           (item) => {
@@ -93,7 +90,6 @@ export default function Profile() {
   const handleSave = async () => {
     const user = auth.currentUser;
     if (user) {
-      // Update user data in Firestore (only username in this case)
       await updateDoc(doc(db, "users", user.uid), {
         username,
       });
@@ -110,7 +106,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-900 text-white">
-        Loading...
+        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
       </div>
     );
   }
