@@ -41,6 +41,12 @@ export default function SignIn({ setIsSignUp }) {
       case 'auth/invalid-credential':
         setErrorMessage("Username or password is incorrect.");
         break;
+      case 'auth/popup-closed-by-user':
+        // setErrorMessage("Popup closed by user.");
+        break;
+      case 'auth/cancelled-popup-request':
+        // setErrorMessage("Popup closed by user.");
+        break;
       default:
         setErrorMessage("An error occurred. Please try again.");
         console.error("Error signing in:", error);
