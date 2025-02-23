@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
+import { auth, db } from "../firebase";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import AuthForm from "./AuthForm";
 
