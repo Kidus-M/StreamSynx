@@ -36,6 +36,7 @@ const MovieCard = ({ movie: initialMovie }) => {
   const userId = auth.currentUser?.uid;
   const [movie, setMovie] = useState(initialMovie);
   const [genres, setGenres] = useState("Unknown Genre");
+  const [mediaType, setMediaType] = useState(initialMovie.media_type || "movie"); // Default to "movie"
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -53,17 +54,21 @@ const MovieCard = ({ movie: initialMovie }) => {
         );
         setMovie(response.data);
 
+        // Set media type based on the fetched data
+        setMediaType(initialMovie.media_type || "movie");
+
         // Extract and set genres
         if (response.data.genres && response.data.genres.length > 0) {
-          const genreNames = response.data.genres.map(genre => genre.name).join(", ");
+          const genreNames = response.data.genres.map((genre) => genre.name).join(", ");
           setGenres(genreNames);
         } else if (initialMovie.genre_ids && initialMovie.genre_ids.length > 0) {
-          const initialGenreNames = initialMovie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ");
+          const initialGenreNames = initialMovie.genre_ids
+            .map((id) => genreMap[id] || "Unknown")
+            .join(", ");
           setGenres(initialGenreNames);
         } else {
           setGenres("Unknown Genre");
         }
-
       } catch (error) {
         console.error("Error fetching movie details:", error);
       }
@@ -87,9 +92,7 @@ const MovieCard = ({ movie: initialMovie }) => {
   }, [userId, movie.id]);
 
   const handleWatch = () => {
-    const url = movie.media_type === "tv"
-      ? `/watchTv?tv_id=${movie.id}`
-      : `/watch?movie_id=${movie.id}`;
+    const url = mediaType === "tv" ? `/watchTv?tv_id=${movie.id}` : `/watch?movie_id=${movie.id}`;
     router.push(url);
   };
 
@@ -133,8 +136,10 @@ const MovieCard = ({ movie: initialMovie }) => {
       />
       <div className="absolute bottom-0 left-0 w-full bg-primary bg-opacity-60 text-white p-3 flex justify-between items-center rounded-md">
         <div>
-          <h2 className="text-sm font-bold">{movie.title}</h2>
-          <p className="text-xs opacity-80">⭐ {movie.vote_average} | {genres}</p>
+          <h2 className="text-sm font-bold">{movie.title || movie.name}</h2>
+          <p className="text-xs opacity-80">
+            ⭐ {movie.vote_average} | {genres}
+          </p>
         </div>
         <button
           className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-40"
