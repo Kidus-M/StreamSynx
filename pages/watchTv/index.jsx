@@ -537,6 +537,8 @@ const TVShowPlayerPage = () => {
                     onWatchClick={() =>
                       setSelectedEpisode(episode.episode_number)
                     }
+                    tvShowId={tvShow.id} // Pass the tvShowId
+                    seasonNumber={selectedSeason}
                   />
                 </motion.div>
               ))}

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-
-const EpisodeCard = ({ episode, onWatchClick }) => {
+import { CheckCircleIcon } from "@heroicons/react/20/solid"; // Correct for v2
+const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber }) => {
   const [isWatched, setIsWatched] = useState(false);
 
   useEffect(() => {
@@ -11,50 +11,66 @@ const EpisodeCard = ({ episode, onWatchClick }) => {
         const historyRef = doc(db, "history", auth.currentUser.uid);
         const historyDoc = await getDoc(historyRef);
         if (historyDoc.exists()) {
-          const episodes = historyDoc.data().episodes || [];
+          const watchedEpisodes = historyDoc.data().episodes || [];
           setIsWatched(
-            episodes.some(
-              (e) =>
-                e.tvShowId === episode.tvShowId &&
-                e.seasonNumber === episode.seasonNumber &&
-                e.episodeNumber === episode.episodeNumber
+            watchedEpisodes.some(
+              (watchedEpisode) =>
+                watchedEpisode.tvShowId === tvShowId &&
+                watchedEpisode.seasonNumber === seasonNumber &&
+                watchedEpisode.episodeNumber === episode.episode_number
             )
           );
         }
       }
     };
     checkIfWatched();
-  }, [episode]);
+  }, [episode, tvShowId, seasonNumber]); // Add tvShowId and seasonNumber to dependency array
+
+  if (!episode) {
+    return null;
+  }
 
   return (
     <div
-      className={`relative bg-primary border rounded-lg shadow-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-xl ${
-        isWatched ? "border-green-500" : ""
+      className={`relative bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-lg ${
+        isWatched ? "ring-2 ring-green-500" : ""
       }`}
       onClick={() => onWatchClick(episode.episode_number)}
     >
-      {/* Background Image */}
-      <div
-        className="w-full h-56 bg-cover bg-center rounded-t-lg"
-        style={{
-          backgroundImage: `url(${
+      <div className="relative aspect-w-16 aspect-h-9">
+        <img
+          src={
             episode.still_path
               ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
               : "/placeholder.jpg"
-          })`,
-        }}
-      ></div>
+          }
+          alt={`Episode ${episode.episode_number}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/placeholder.jpg";
+          }}
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+      </div>
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg"></div>
-
-      {/* Episode Details */}
-      <div className="absolute bg-primary bg-opacity-50 bottom-0 left-0 right-0 p-4">
-        <h3 className="text-secondary text-sm font-bold uppercase tracking-wide">
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+        <h3 className="text-sm font-semibold text-white">
           Episode {episode.episode_number}
         </h3>
-        <p className="text-white text-xs font-semibold mt-1">{episode.name}</p>
+        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+          {episode.name}
+        </p>
       </div>
+
+      {isWatched && (
+        <div className="absolute top-2 right-2">
+          <CheckCircleIcon
+            className="w-6 h-6 text-green-500"
+            aria-hidden="true"
+          />{" "}
+        </div>
+      )}
     </div>
   );
 };
