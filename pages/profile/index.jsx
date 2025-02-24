@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../../firebase";
-import { doc, getDoc, updateDoc, signOut } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
+import { signOut } from "firebase/auth";
 import NavBar from "../../components/Navbar";
 import StatsCard from "../../components/StatsCard";
-import { Mosaic } from "react-loading-indicators";
+import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -24,59 +25,61 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            setUser(userDoc.data());
-            setUsername(userDoc.data().username);
-            setEmail(userDoc.data().email);
-          }
-
-          const historyDoc = await getDoc(doc(db, "history", currentUser.uid));
-          const favoritesDoc = await getDoc(doc(db, "favorites", currentUser.uid));
-          const friendsDoc = await getDoc(doc(db, "friends", currentUser.uid));
-
-          const historyData = historyDoc.exists() ? historyDoc.data() : {};
-          const favoritesData = favoritesDoc.exists() ? favoritesDoc.data() : {};
-          const friendsData = friendsDoc.exists() ? friendsDoc.data() : {};
-
-          const moviesWatched = historyData.movies?.length || 0;
-          const episodesWatched = historyData.episodes?.length || 0;
-          const favoriteMovies = favoritesData.movies?.length || 0;
-          const favoriteEpisodes = favoritesData.episodes?.length || 0;
-          const buddies = friendsData.friends?.length || 0;
-
-          const genreCounts = {};
-          [...(historyData.movies || []), ...(historyData.episodes || [])].forEach(
-            (item) => {
-              item.genre_ids?.forEach((genre) => {
-                genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-              });
-            }
-          );
-          const topGenre = Object.keys(genreCounts).length
-            ? Object.keys(genreCounts).reduce((a, b) =>
-                genreCounts[a] > genreCounts[b] ? a : b
-              )
-            : "None";
-
-          setStats({
-            buddies,
-            moviesWatched,
-            episodesWatched,
-            topGenre: genreMap[topGenre] || "None",
-            favoriteMovies,
-            favoriteEpisodes,
-          });
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        } finally {
-          setLoading(false);
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setUser(userDoc.data());
+          setUsername(userDoc.data().username);
+          setEmail(userDoc.data().email);
         }
-      } else {
-        router.push("/");
+      }
+      if (!user) return router.push("/");
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) setUser(userDoc.data());
+
+        const historyDoc = await getDoc(doc(db, "history", user.uid));
+        const favoritesDoc = await getDoc(doc(db, "favorites", user.uid));
+        const friendsDoc = await getDoc(doc(db, "friends", user.uid));
+
+        const historyData = historyDoc.exists() ? historyDoc.data() : {};
+        const favoritesData = favoritesDoc.exists() ? favoritesDoc.data() : {};
+        const friendsData = friendsDoc.exists() ? friendsDoc.data() : {};
+
+        const moviesWatched = historyData.movies?.length || 0;
+        const episodesWatched = historyData.episodes?.length || 0;
+        const favoriteMovies = favoritesData.movies?.length || 0;
+        const favoriteEpisodes = favoritesData.episodes?.length || 0;
+        const buddies = friendsData.friends?.length || 0;
+
+        const genreCounts = {};
+        [...(historyData.movies || []), ...(historyData.episodes || [])].forEach(
+          (item) => {
+            item.genre_ids?.forEach((genre) => {
+              genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+            });
+          }
+        );
+        const topGenre = Object.keys(genreCounts).length
+          ? Object.keys(genreCounts).reduce((a, b) =>
+              genreCounts[a] > genreCounts[b] ? a : b
+            )
+          : "None";
+
+        setStats({
+          buddies,
+          moviesWatched,
+          episodesWatched,
+          topGenre: genreMap[topGenre] || "None",
+          favoriteMovies,
+          favoriteEpisodes,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -85,29 +88,13 @@ export default function Profile() {
   }, [router]);
 
   const handleSave = async () => {
-    if (loading) {
-      return;
-    }
+    const user = auth.currentUser;
+    if (user) {
+      await updateDoc(doc(db, "users", user.uid), {
+        username,
+      });
 
-    if (!username.trim()) {
-      alert("Username cannot be empty");
-      return;
-    }
-
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
-          username: username.trim(),
-        });
-        setIsEditing(false);
-      } catch (error) {
-        console.error("Error updating username:", error);
-        alert("Failed to update username. Please try again.");
-      }
-    } else {
-      console.error("User not authenticated.");
-      alert("User not authenticated. Please log in.");
+      setIsEditing(false);
     }
   };
 
