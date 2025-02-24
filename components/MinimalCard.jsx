@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Plus, Check } from "lucide-react";
-import { auth, db } from "../firebase"; // Import Firebase
+import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import axios from "axios";
+
+const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 const genreMap = {
   28: "Action",
@@ -23,13 +27,50 @@ const genreMap = {
   10770: "TV Movie",
   53: "Thriller",
   10752: "War",
-  37: "Western"
+  37: "Western",
 };
 
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie: initialMovie }) => {
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
   const userId = auth.currentUser?.uid;
+  const [movie, setMovie] = useState(initialMovie);
+  const [genres, setGenres] = useState("Unknown Genre");
+
+  useEffect(() => {
+    const fetchMovieDetails = async () => {
+      if (!initialMovie) return;
+
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/${initialMovie.media_type === "tv" ? "tv" : "movie"}/${initialMovie.id}`,
+          {
+            params: {
+              api_key: API_KEY,
+              language: "en-US",
+            },
+          }
+        );
+        setMovie(response.data);
+
+        // Extract and set genres
+        if (response.data.genres && response.data.genres.length > 0) {
+          const genreNames = response.data.genres.map(genre => genre.name).join(", ");
+          setGenres(genreNames);
+        } else if (initialMovie.genre_ids && initialMovie.genre_ids.length > 0) {
+          const initialGenreNames = initialMovie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ");
+          setGenres(initialGenreNames);
+        } else {
+          setGenres("Unknown Genre");
+        }
+
+      } catch (error) {
+        console.error("Error fetching movie details:", error);
+      }
+    };
+
+    fetchMovieDetails();
+  }, [initialMovie]);
 
   useEffect(() => {
     const checkIfAdded = async () => {
@@ -55,7 +96,7 @@ const MovieCard = ({ movie }) => {
   const toggleWatchlist = async (e) => {
     e.stopPropagation();
     if (!userId) {
-      router.push("/login"); // Redirect to login if not authenticated
+      router.push("/login");
       return;
     }
 
@@ -63,12 +104,10 @@ const MovieCard = ({ movie }) => {
     const watchlistDoc = await getDoc(watchlistRef);
 
     if (isAdded) {
-      // Remove movie from watchlist
       await updateDoc(watchlistRef, {
         movies: arrayRemove(movie),
       });
     } else {
-      // Add movie to watchlist
       if (watchlistDoc.exists()) {
         await updateDoc(watchlistRef, {
           movies: arrayUnion(movie),
@@ -81,10 +120,6 @@ const MovieCard = ({ movie }) => {
     }
     setIsAdded((prev) => !prev);
   };
-
-  const genres = movie.genre_ids?.length > 0
-    ? movie.genre_ids.map(id => genreMap[id] || "Unknown").join(", ")
-    : "Unknown Genre";
 
   return (
     <div
