@@ -177,7 +177,7 @@ const MovieList = () => {
       </section>
 
       {/* Highest Rated Movies Section */}
-      <section className="px-6 my-8">
+      {/* <section className="px-6 my-8">
         <div className="flex items-center gap-4 mb-6">
           <FaGripLinesVertical className="text-2xl" />
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -190,12 +190,12 @@ const MovieList = () => {
             <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       <TrendingShows />
 
       {/* Highest Rated Shows Section */}
-      <section className="px-6 my-8">
+      {/* <section className="px-6 my-8">
         <div className="flex items-center gap-4 mb-6">
           <FaGripLinesVertical className="text-2xl" />
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -208,7 +208,7 @@ const MovieList = () => {
             <MovieCard key={show.id} movie={{ ...show, media_type: "tv" }} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Trending Shows Section */}
       <section className="px-6 my-8">
