@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../../components/Navbar";
 import { auth, db } from "../../firebase";
+import Navbar from "../../components/NavBar";
 import {
   doc,
   getDoc,
@@ -12,8 +12,9 @@ import {
   where,
   getDocs,
   onSnapshot,
+  arrayRemove,
 } from "firebase/firestore";
-import { Mosaic } from "react-loading-indicators"; // Import Mosaic
+import { Mosaic } from "react-loading-indicators";
 
 const BuddiesPage = () => {
   const [friends, setFriends] = useState([]);
@@ -21,62 +22,64 @@ const BuddiesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sentRequests, setSentRequests] = useState({}); // Track sent requests
+  const [sentRequests, setSentRequests] = useState({});
+  const [interactionLoading, setInteractionLoading] = useState({});
   const userId = auth.currentUser?.uid;
 
-  // Fetch friends and friend requests
   useEffect(() => {
     if (!userId) return;
 
-    // Fetch friends
-    const friendsRef = doc(db, "friends", userId);
-    const unsubscribeFriends = onSnapshot(friendsRef, async (docSnap) => {
-      //rename doc to docSnap
-      if (docSnap.exists()) {
-        const friendIds = docSnap.data().friends || [];
-        // Fetch usernames for friends
-        const friendsWithUsernames = await Promise.all(
-          friendIds.map(async (friendId) => {
-            const userDocRef = doc(db, "users", friendId); // Correct usage of doc
-            const userDoc = await getDoc(userDocRef);
-            return userDoc.exists()
-              ? { uid: friendId, username: userDoc.data().username }
-              : null;
-          })
-        );
-        setFriends(friendsWithUsernames.filter(Boolean));
-      }
-      setLoading(false);
-    });
+    const fetchFriendsAndRequests = async () => {
+      setLoading(true);
 
-    // Fetch friend requests
-    const requestsQuery = query(
-      collection(db, "friendRequests"),
-      where("toUserId", "==", userId),
-      where("status", "==", "pending")
-    );
-    const unsubscribeRequests = onSnapshot(requestsQuery, async (snapshot) => {
-      const requests = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          // Rename doc to docSnap to avoid confusion
-          const requestData = docSnap.data();
-          const userDocRef = doc(db, "users", requestData.fromUserId); // Correct usage of doc
-          const userDoc = await getDoc(userDocRef);
-          return userDoc.exists()
-            ? { ...requestData, username: userDoc.data().username }
-            : null;
-        })
+      const friendsRef = doc(db, "friends", userId);
+      const unsubscribeFriends = onSnapshot(friendsRef, async (docSnap) => {
+        if (docSnap.exists()) {
+          const friendIds = docSnap.data().friends || [];
+          const friendsWithUsernames = await Promise.all(
+            friendIds.map(async (friendId) => {
+              const userDocRef = doc(db, "users", friendId);
+              const userDoc = await getDoc(userDocRef);
+              return userDoc.exists()
+                ? { uid: friendId, ...userDoc.data() }
+                : null;
+            })
+          );
+          setFriends(friendsWithUsernames.filter(Boolean));
+        }
+      });
+
+      const requestsQuery = query(
+        collection(db, "friendRequests"),
+        where("toUserId", "==", userId),
+        where("status", "==", "pending")
       );
-      setFriendRequests(requests.filter(Boolean));
-    });
+      const unsubscribeRequests = onSnapshot(
+        requestsQuery,
+        async (snapshot) => {
+          const requests = await Promise.all(
+            snapshot.docs.map(async (docSnap) => {
+              const requestData = docSnap.data();
+              const userDocRef = doc(db, "users", requestData.fromUserId);
+              const userDoc = await getDoc(userDocRef);
+              return userDoc.exists()
+                ? { ...requestData, ...userDoc.data() }
+                : null;
+            })
+          );
+          setFriendRequests(requests.filter(Boolean));
+        }
+      );
 
-    return () => {
-      unsubscribeFriends();
-      unsubscribeRequests();
+      setLoading(false);
+      return () => {
+        unsubscribeFriends();
+        unsubscribeRequests();
+      };
     };
+    fetchFriendsAndRequests();
   }, [userId]);
 
-  // Search for users in real-time
   useEffect(() => {
     const searchUsers = async () => {
       if (!searchQuery) {
@@ -91,33 +94,28 @@ const BuddiesPage = () => {
       );
       const usersSnapshot = await getDocs(usersQuery);
 
-      // Filter out the current user from search results
       const filteredResults = usersSnapshot.docs
         .map((doc) => ({ uid: doc.id, ...doc.data() }))
         .filter((user) => user.uid !== userId);
 
       setSearchResults(filteredResults);
     };
-
     searchUsers();
   }, [searchQuery, userId]);
 
-  // Send or remove friend request
   const handleFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
-
-    const requestId = `${userId}_${toUserId}`;
+    const requestId = `<span class="math-inline">\{userId\}\_</span>{toUserId}`;
     const isRequestSent = sentRequests[toUserId];
+    setInteractionLoading((prev) => ({ ...prev, [toUserId]: true }));
 
     try {
       if (isRequestSent) {
-        // Remove the request
         await updateDoc(doc(db, "friendRequests", requestId), {
           status: "rejected",
         });
         setSentRequests((prev) => ({ ...prev, [toUserId]: false }));
       } else {
-        // Send the request
         await setDoc(doc(db, "friendRequests", requestId), {
           fromUserId: userId,
           toUserId,
@@ -127,142 +125,224 @@ const BuddiesPage = () => {
       }
     } catch (error) {
       console.error("Error handling friend request:", error);
+    } finally {
+      setInteractionLoading((prev) => ({ ...prev, [toUserId]: false }));
     }
   };
 
-  // Accept friend request
   const acceptFriendRequest = async (fromUserId) => {
     if (!userId) return;
+    setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
 
     try {
-      // Update friend request status
-      await updateDoc(doc(db, "friendRequests", `${fromUserId}_${userId}`), {
-        status: "accepted",
-      });
+      await updateDoc(
+        doc(
+          db,
+          "friendRequests",
+          `<span class="math-inline">\{fromUserId\}\_</span>{userId}`
+        ),
+        { status: "accepted" }
+      );
 
-      // Add to friends list (Check and create if needed)
       const friendsRef = doc(db, "friends", userId);
       const friendsDoc = await getDoc(friendsRef);
 
       if (friendsDoc.exists()) {
-        await updateDoc(friendsRef, {
-          friends: arrayUnion(fromUserId),
-        });
+        await updateDoc(friendsRef, { friends: arrayUnion(fromUserId) });
       } else {
-        await setDoc(friendsRef, { friends: [fromUserId] }, { merge: true }); // Create if it doesn't exist
+        await setDoc(friendsRef, { friends: [fromUserId] }, { merge: true });
       }
 
-      // Add requester to friends list (Check and create if needed)
       const requesterFriendsRef = doc(db, "friends", fromUserId);
       const requesterFriendsDoc = await getDoc(requesterFriendsRef);
 
       if (requesterFriendsDoc.exists()) {
-        await updateDoc(requesterFriendsRef, {
-          friends: arrayUnion(userId),
-        });
+        await updateDoc(requesterFriendsRef, { friends: arrayUnion(userId) });
       } else {
         await setDoc(
           requesterFriendsRef,
           { friends: [userId] },
           { merge: true }
-        ); // Create if it doesn't exist
+        );
       }
 
-      // Update local state
       setFriendRequests((prev) =>
         prev.filter((req) => req.fromUserId !== fromUserId)
       );
     } catch (error) {
       console.error("Error accepting friend request:", error);
+    } finally {
+      setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
   };
 
-  // Reject friend request
   const rejectFriendRequest = async (fromUserId) => {
     if (!userId) return;
+    setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
 
     try {
-      await updateDoc(doc(db, "friendRequests", `${fromUserId}_${userId}`), {
-        status: "rejected",
-      });
-
-      // Update local state
+      await updateDoc(
+        doc(
+          db,
+          "friendRequests",
+          `<span class="math-inline">\{fromUserId\}\_</span>{userId}`
+        ),
+        { status: "rejected" }
+      );
       setFriendRequests((prev) =>
         prev.filter((req) => req.fromUserId !== fromUserId)
       );
     } catch (error) {
       console.error("Error rejecting friend request:", error);
+    } finally {
+      setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
+  };
+
+  const unfriendUser = async (friendId) => {
+    if (!userId) return;
+    setInteractionLoading((prev) => ({ ...prev, [friendId]: true }));
+    try {
+      const friendsRef = doc(db, "friends", userId);
+      await updateDoc(friendsRef, { friends: arrayRemove(friendId) });
+
+      const friendFriendsRef = doc(db, "friends", friendId);
+      await updateDoc(friendFriendsRef, { friends: arrayRemove(userId) });
+    } catch (error) {
+      console.error("Error unfriend user:", error);
+    } finally {
+      setInteractionLoading((prev) => ({ ...prev, [friendId]: false }));
+    }
+  };
+
+  const UserListItem = ({
+    user,
+    request,
+    isFriend,
+    handleRequest,
+    acceptRequest,
+    rejectRequest,
+    isSentRequest,
+    unfriend,
+    loading,
+  }) => {
+    return (
+      <div className="flex items-center justify-between p-4 rounded-lg mb-3 bg-gray-900 border border-gray-800 shadow-md hover:shadow-lg transition-shadow">
+        <div className="flex items-center">
+          <img
+            src={
+              user.avatar ||
+              "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+            }
+            alt="Avatar"
+            className="w-10 h-10 rounded-full mr-3"
+          />
+          <p className="text-lg font-semibold">{user.username}</p>
+        </div>
+        <div>
+          {request && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => acceptRequest(user.uid)}
+                className={`bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loading}
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => rejectRequest(user.uid)}
+                className={`bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loading}
+              >
+                Reject
+              </button>
+            </div>
+          )}
+          {isFriend && (
+            <button
+              onClick={() => unfriend(user.uid)}
+              className={`bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading}
+            >
+              Unfriend
+            </button>
+          )}
+          {!request && !isFriend && (
+            <button
+              onClick={() => handleRequest(user.uid)}
+              className={`py-2 px-4 rounded transition-colors ${
+                isSentRequest
+                  ? "bg-gray-700 text-white hover:bg-gray-800"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={loading}
+            >
+              {isSentRequest ? "Request Sent" : "Add Friend"}
+            </button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="min-h-screen bg-primary text-white">
-      <NavBar />
-      <main className="p-6 mt-24">
-        <h1 className="text-3xl font-bold mb-8 text-secondary">Buddies</h1>
-
-        {/* Loading State */}
+      <Navbar />
+      <main className="p-6 mt-24 max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-white">Buddies</h1>
         {loading ? (
-          <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
-            <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
+          <div className="flex justify-center items-center h-64">
+            <Mosaic color="#4f46e5" size="medium" text="" textColor="" />
           </div>
         ) : (
           <>
-            {/* Friend Requests Section */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-secondary">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-300">
                 Friend Requests
               </h2>
               {friendRequests.length > 0 ? (
                 friendRequests.map((request) => (
-                  <div
+                  <UserListItem
                     key={request.fromUserId}
-                    className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <p className="text-lg font-semibold">{request.username}</p>
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => acceptFriendRequest(request.fromUserId)}
-                        className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => rejectFriendRequest(request.fromUserId)}
-                        className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
+                    user={request}
+                    request
+                    acceptRequest={acceptFriendRequest}
+                    rejectRequest={rejectFriendRequest}
+                    loading={interactionLoading[request.fromUserId]}
+                  />
                 ))
               ) : (
-                <p className="text-gray-400">No pending friend requests.</p>
+                <p className="text-gray-500">No pending friend requests.</p>
               )}
             </section>
 
-            {/* Friends List Section */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-secondary">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-300">
                 Friends
               </h2>
               {friends.length > 0 ? (
                 friends.map((friend) => (
-                  <div
+                  <UserListItem
                     key={friend.uid}
-                    className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <p className="text-lg font-semibold">{friend.username}</p>
-                  </div>
+                    user={friend}
+                    isFriend
+                    unfriend={unfriendUser}
+                    loading={interactionLoading[friend.uid]}
+                  />
                 ))
               ) : (
-                <p className="text-gray-400">No friends yet.</p>
+                <p className="text-gray-500">No friends yet.</p>
               )}
             </section>
 
-            {/* Search for Users Section */}
             <section>
-              <h2 className="text-2xl font-bold mb-4 text-secondary">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-300">
                 Search for Users
               </h2>
               <input
@@ -270,33 +350,22 @@ const BuddiesPage = () => {
                 placeholder="Search by username"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-2 border border-secondary rounded-lg bg-gray-800 text-white focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary"
+                className="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 text-white focus:outline-none focus:border-blue-500"
               />
               {searchResults.length > 0 ? (
                 <div className="mt-4">
                   {searchResults.map((user) => (
-                    <div
+                    <UserListItem
                       key={user.uid}
-                      className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md hover:shadow-lg transition-shadow"
-                    >
-                      <p className="text-lg font-semibold">{user.username}</p>
-                      <button
-                        onClick={() => handleFriendRequest(user.uid)}
-                        className={`mt-2 py-1 px-3 rounded transition-colors ${
-                          sentRequests[user.uid]
-                            ? "bg-gray-500 text-white hover:bg-gray-600"
-                            : "bg-secondary text-white hover:bg-secondary-dark"
-                        }`}
-                      >
-                        {sentRequests[user.uid]
-                          ? "Request Sent"
-                          : "Send Friend Request"}
-                      </button>
-                    </div>
+                      user={user}
+                      handleRequest={handleFriendRequest}
+                      isSentRequest={sentRequests[user.uid]}
+                      loading={interactionLoading[user.uid]}
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 mt-4">No users found.</p>
+                <p className="text-gray-500 mt-4">No users found.</p>
               )}
             </section>
           </>
