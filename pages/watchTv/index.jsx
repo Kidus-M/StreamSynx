@@ -189,28 +189,43 @@ const TVShowPlayerPage = () => {
     if (!tvShow || !tvShow.id || !apiKey) return;
 
     const fetchAdditionalDetails = async () => {
-      try {
-        const [castResponse, trailerResponse] = await Promise.all([
-          axios.get(`${BASE_URL}/tv/${tvShow.id}/credits`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
-          axios.get(`${BASE_URL}/tv/${tvShow.id}/videos`, {
-            params: { api_key: apiKey, language: "en-US" },
-          }),
-        ]);
+        try {
+            const [castResponse, trailerResponse] = await Promise.all([
+                axios.get(`${BASE_URL}/tv/${tvShow.id}/credits`, {
+                    params: { api_key: apiKey, language: "en-US" },
+                }),
+                axios.get(`${BASE_URL}/tv/${tvShow.id}/videos`, {
+                    params: { api_key: apiKey, language: "en-US" },
+                }),
+            ]);
 
-        setCast(castResponse.data.cast.slice(0, 5));
-        const trailer = trailerResponse.data.results.find(
-          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
-        );
-        setTrailerKey(trailer ? trailer.key : "");
-      } catch (error) {
-        console.error("Error fetching additional TV show data:", error);
-      }
+            if (castResponse.status === 200) {
+                setCast(castResponse.data.cast.slice(0, 5));
+            } else if (castResponse.status === 404) {
+                console.warn(`Credits not found for TV show ID: ${tvShow.id}`);
+                setCast([]);
+            } else {
+                console.error(`Error fetching cast data. Status: ${castResponse.status}`);
+            }
+
+            if (trailerResponse.status === 200) {
+                const trailer = trailerResponse.data.results.find(
+                    (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+                );
+                setTrailerKey(trailer ? trailer.key : "");
+            } else if (trailerResponse.status === 404) {
+                console.warn(`Trailers not found for TV show ID: ${tvShow.id}`);
+                setTrailerKey("");
+            } else {
+                console.error(`Error fetching trailer data. Status: ${trailerResponse.status}`);
+            }
+        } catch (error) {
+            console.error("Error fetching additional TV show data:", error);
+        }
     };
 
     fetchAdditionalDetails();
-  }, [tvShow, apiKey]);
+}, [tvShow, apiKey]);
 
   // Check if the episode is already in favorites
   useEffect(() => {

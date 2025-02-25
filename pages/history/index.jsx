@@ -119,8 +119,9 @@ const HistoryPage = () => {
 
           {Object.entries(groupedEpisodes).map(([showId, showData]) => (
             <div key={showId} className="mb-4">
-              <div className="relative">
+              
                 <MovieCard
+                  key={showId}
                   movie={{
                     id: showId,
                     title: showData.title,
@@ -128,25 +129,8 @@ const HistoryPage = () => {
                     media_type: "tv",
                   }}
                 />
-                <button
-                  className="absolute bottom-0 left-0 w-full text-left py-2 px-4 bg-gray-800 rounded-b-xl mt-6"
-                  onClick={() => toggleShowEpisodes(showId)}
-                >
-                  {expandedShows[showId] ? "Collapse Episodes" : "Expand Episodes"}
-                </button>
-              </div>
-              {expandedShows[showId] && (
-                <div className="mt-2">
-                  {showData.episodes.map((episode) => (
-                    <p
-                      key={`${episode.tvShowId}-${episode.seasonNumber}-${episode.episodeNumber}`}
-                      className="text-xs text-white p-2"
-                    >
-                      {`S${episode.seasonNumber}E${episode.episodeNumber} - Watched on: ${new Date(episode.watchedAt).toLocaleDateString()}`}
-                    </p>
-                  ))}
-                </div>
-              )}
+                
+              
             </div>
           ))}
           </div>
