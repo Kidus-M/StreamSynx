@@ -3,6 +3,7 @@ import MovieCard from "../../components/MinimalCard"; // Import your card compon
 import NavBar from "../../components/Navbar"; // Import your navbar component
 import Footer from "../../components/Footer";
 import EventCard from "../../components/EventCard";
+import TrendingCard from "../../components/TrendingCard";
 import { FaFilter, FaFire, FaEye, FaStar } from "react-icons/fa";
 import { FaGripLinesVertical } from "react-icons/fa";
 import { Mosaic } from "react-loading-indicators"; // Import Mosaic
@@ -99,7 +100,8 @@ const MovieList = () => {
       <NavBar />
       {/* Hero Section */}
       <div className="px-6">
-        <EventCard movie={trendingMovies[0]} />
+        {/* <EventCard movie={trendingMovies[0]} /> */}
+        <TrendingCard />
       </div>
 
       {/* Trending Movies Section */}
