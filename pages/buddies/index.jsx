@@ -143,26 +143,17 @@ const BuddiesPage = () => {
       const userFriendsRef = doc(db, "friends", userId);
       const friendFriendsRef = doc(db, "friends", fromUserId);
 
-      await setDoc(
-        userFriendsRef,
-        {
-          friends: arrayUnion(fromUserId),
-        },
-        { merge: true }
-      );
+      await setDoc(userFriendsRef, {
+        friends: arrayUnion(fromUserId),
+      }, { merge: true });
 
-      await setDoc(
-        friendFriendsRef,
-        {
-          friends: arrayUnion(userId),
-        },
-        { merge: true }
-      );
+      await setDoc(friendFriendsRef, {
+        friends: arrayUnion(userId),
+      }, { merge: true });
 
-      setFriends((prevFriends) => [...prevFriends, { uid: fromUserId }]);
-      setFriendRequests((prevRequests) =>
-        prevRequests.filter((req) => req.fromUserId !== fromUserId)
-      );
+      setFriends(prevFriends => [...prevFriends, { uid: fromUserId }]);
+      setFriendRequests(prevRequests => prevRequests.filter(req => req.fromUserId !== fromUserId));
+
     } catch (error) {
       console.error("Error accepting friend request:", error);
       alert("Failed to accept friend request. Please try again.");
@@ -198,9 +189,8 @@ const BuddiesPage = () => {
       const friendFriendsRef = doc(db, "friends", friendId);
       await updateDoc(friendFriendsRef, { friends: arrayRemove(userId) });
 
-      setFriends((prevFriends) =>
-        prevFriends.filter((friend) => friend.uid !== friendId)
-      );
+      setFriends(prevFriends => prevFriends.filter(friend => friend.uid !== friendId));
+
     } catch (error) {
       console.error("Error unfriend user:", error);
     } finally {
