@@ -105,9 +105,9 @@ const BuddiesPage = () => {
 
   const handleFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
-    const requestId = `${userId}_${toUserId}`; // Corrected line
+    const requestId = `${userId}_${toUserId}`;
     setInteractionLoading((prev) => ({ ...prev, [toUserId]: true }));
-  
+
     try {
       if (sentRequests[toUserId]) {
         await updateDoc(doc(db, "friendRequests", requestId), {
@@ -133,27 +133,18 @@ const BuddiesPage = () => {
   const acceptFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
-    const requestId = `<span class="math-inline">\{fromUserId\}\_</span>{userId}`;
+    const requestId = `${fromUserId}_${userId}`;
 
     try {
       await updateDoc(doc(db, "friendRequests", requestId), {
         status: "accepted",
       });
 
-      const userFriendsRef = doc(db, "friends", userId);
-      const friendFriendsRef = doc(db, "friends", fromUserId);
+      const friendsRef = doc(db, "friends", userId);
+      await updateDoc(friendsRef, { friends: arrayUnion(fromUserId) });
 
-      await setDoc(userFriendsRef, {
-        friends: arrayUnion(fromUserId),
-      }, { merge: true });
-
-      await setDoc(friendFriendsRef, {
-        friends: arrayUnion(userId),
-      }, { merge: true });
-
-      setFriends(prevFriends => [...prevFriends, { uid: fromUserId }]);
-      setFriendRequests(prevRequests => prevRequests.filter(req => req.fromUserId !== fromUserId));
-
+      const fromUserFriendsRef = doc(db, "friends", fromUserId);
+      await updateDoc(fromUserFriendsRef, { friends: arrayUnion(userId) });
     } catch (error) {
       console.error("Error accepting friend request:", error);
       alert("Failed to accept friend request. Please try again.");
@@ -165,7 +156,7 @@ const BuddiesPage = () => {
   const rejectFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
-    const requestId = `<span class="math-inline">\{fromUserId\}\_</span>{userId}`;
+    const requestId = `${fromUserId}_${userId}`;
 
     try {
       await updateDoc(doc(db, "friendRequests", requestId), {
@@ -188,9 +179,6 @@ const BuddiesPage = () => {
 
       const friendFriendsRef = doc(db, "friends", friendId);
       await updateDoc(friendFriendsRef, { friends: arrayRemove(userId) });
-
-      setFriends(prevFriends => prevFriends.filter(friend => friend.uid !== friendId));
-
     } catch (error) {
       console.error("Error unfriend user:", error);
     } finally {
@@ -288,7 +276,7 @@ const BuddiesPage = () => {
               <h2 className="text-2xl font-semibold mb-4 text-gray-300">
                 Friend Requests
               </h2>
-              {friendRequests && friendRequests.length > 0 ? (
+              {friendRequests.length > 0 ? (
                 friendRequests.map((request) => (
                   <UserListItem
                     key={request.fromUserId}
@@ -308,7 +296,7 @@ const BuddiesPage = () => {
               <h2 className="text-2xl font-semibold mb-4 text-gray-300">
                 Friends
               </h2>
-              {friends && friends.length > 0 ? (
+              {friends.length > 0 ? (
                 friends.map((friend) => (
                   <UserListItem
                     key={friend.uid}
@@ -334,7 +322,7 @@ const BuddiesPage = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 text-white focus:outline-none focus:border-blue-500"
               />
-              {searchResults && searchResults.length > 0 ? (
+              {searchResults.length > 0 ? (
                 <div className="mt-4">
                   {searchResults.map((user) => (
                     <UserListItem
