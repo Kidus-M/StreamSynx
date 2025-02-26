@@ -154,12 +154,11 @@ const MovieList = () => {
   }
 
   return (
-    <div className="bg-primary text-white pt-24">
+    <div className="bg-primary text-white pt-20">
       <NavBar />
       {/* Hero Section */}
-      <div className="px-6">
         <TrendingCard />
-      </div>
+      
 
       {/* Trending Movies Section */}
       <section className="px-6 my-8">
