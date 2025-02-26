@@ -417,11 +417,11 @@ const MoviePlayerPage = () => {
             </div>
 
             {/* Action Buttons and Inputs */}
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 pt-6 ">
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4 pt-6 ">
               {/* Favorite Button */}
               <button
                 onClick={toggleFavorite}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
                   }`}
               >
                 <FaHeart
@@ -433,19 +433,19 @@ const MoviePlayerPage = () => {
               </button>
 
               {/* Rating Input and Button */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 <input
                   type="number"
                   min="0"
                   max="10"
                   value={rating}
                   onChange={(e) => setRating(e.target.value)}
-                  className="p-2 border rounded bg-gray-700 text-white w-20"
+                  className="p-2 border rounded-l-md bg-gray-700 text-white w-20"
                   placeholder="Rate (0-10)"
                 />
                 <button
                   onClick={() => saveRating(movie.id, rating)}
-                  className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
+                  className="flex border items-center space-x-2 bg-blue-500 px-4 py-2 rounded-r-md hover:bg-blue-600 transition-colors"
                 >
                   <FaStar className="text-yellow-400" />
                   <span className="hidden sm:inline">Rate</span>
@@ -453,11 +453,11 @@ const MoviePlayerPage = () => {
               </div>
 
               {/* Recommend Select and Button */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 <select
                   value={selectedFriend}
                   onChange={(e) => setSelectedFriend(e.target.value)}
-                  className="p-2 border rounded bg-gray-700 text-white w-full sm:w-64"
+                  className="p-2 border rounded-l-md bg-gray-700 text-white w-full sm:w-64"
                 >
                   <option value="">Select a friend</option>
                   {friends.map((friend) => (
@@ -468,7 +468,7 @@ const MoviePlayerPage = () => {
                 </select>
                 <button
                   onClick={recommendMovie}
-                  className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
+                  className="flex border items-center space-x-2 bg-green-500 px-4 py-2 rounded-r-md hover:bg-green-600 transition-colors"
                 >
                   <FaShare className="text-white" />
                   <span className="hidden sm:inline">Share</span>
