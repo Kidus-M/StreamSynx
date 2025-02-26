@@ -105,99 +105,67 @@ const BuddiesPage = () => {
 
   const handleFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
-    const requestId = `<span class="math-inline">\{userId\}\_</span>{toUserId}`;
-    const isRequestSent = sentRequests[toUserId];
+    const requestId = `${userId}_${toUserId}`;
     setInteractionLoading((prev) => ({ ...prev, [toUserId]: true }));
 
     try {
-      if (isRequestSent) {
+        if (sentRequests[toUserId]) {
+            await updateDoc(doc(db, "friendRequests", requestId), {
+                status: "rejected",
+            });
+            setSentRequests((prev) => ({ ...prev, [toUserId]: false }));
+        } else {
+            await setDoc(doc(db, "friendRequests", requestId), {
+                fromUserId: userId,
+                toUserId,
+                status: "pending",
+            });
+            setSentRequests((prev) => ({ ...prev, [toUserId]: true }));
+        }
+    } catch (error) {
+        console.error("Error handling friend request:", error);
+        alert("Failed to send friend request. Please try again.");
+    } finally {
+        setInteractionLoading((prev) => ({ ...prev, [toUserId]: false }));
+    }
+};
+
+const acceptFriendRequest = async (fromUserId) => {
+    if (!userId) return;
+    setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
+    const requestId = `${fromUserId}_${userId}`;
+
+    try {
         await updateDoc(doc(db, "friendRequests", requestId), {
-          status: "rejected",
+            status: "accepted",
         });
-        setSentRequests((prev) => ({ ...prev, [toUserId]: false }));
-      } else {
-        await setDoc(doc(db, "friendRequests", requestId), {
-          fromUserId: userId,
-          toUserId,
-          status: "pending",
-        });
-        setSentRequests((prev) => ({ ...prev, [toUserId]: true }));
-      }
+        // ... (rest of acceptFriendRequest logic)
     } catch (error) {
-      console.error("Error handling friend request:", error);
+        console.error("Error accepting friend request:", error);
+        alert("Failed to accept friend request. Please try again.");
     } finally {
-      setInteractionLoading((prev) => ({ ...prev, [toUserId]: false }));
+        setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
-  };
+};
 
-  const acceptFriendRequest = async (fromUserId) => {
+const rejectFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
+    const requestId = `${fromUserId}_${userId}`;
 
     try {
-      await updateDoc(
-        doc(
-          db,
-          "friendRequests",
-          `<span class="math-inline">\{fromUserId\}\_</span>{userId}`
-        ),
-        { status: "accepted" }
-      );
-
-      const friendsRef = doc(db, "friends", userId);
-      const friendsDoc = await getDoc(friendsRef);
-
-      if (friendsDoc.exists()) {
-        await updateDoc(friendsRef, { friends: arrayUnion(fromUserId) });
-      } else {
-        await setDoc(friendsRef, { friends: [fromUserId] }, { merge: true });
-      }
-
-      const requesterFriendsRef = doc(db, "friends", fromUserId);
-      const requesterFriendsDoc = await getDoc(requesterFriendsRef);
-
-      if (requesterFriendsDoc.exists()) {
-        await updateDoc(requesterFriendsRef, { friends: arrayUnion(userId) });
-      } else {
-        await setDoc(
-          requesterFriendsRef,
-          { friends: [userId] },
-          { merge: true }
-        );
-      }
-
-      setFriendRequests((prev) =>
-        prev.filter((req) => req.fromUserId !== fromUserId)
-      );
+        await updateDoc(doc(db, "friendRequests", requestId), {
+            status: "rejected",
+        });
+        // ... (rest of rejectFriendRequest logic)
     } catch (error) {
-      console.error("Error accepting friend request:", error);
+        console.error("Error rejecting friend request:", error);
+        alert("Failed to reject friend request. Please try again.");
     } finally {
-      setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
+        setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
-  };
+};
 
-  const rejectFriendRequest = async (fromUserId) => {
-    if (!userId) return;
-    setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
-
-    try {
-      await updateDoc(
-        doc(
-          db,
-          "friendRequests",
-          `<span class="math-inline">\{fromUserId\}\_</span>{userId}`
-        ),
-        { status: "rejected" }
-      );
-      setFriendRequests((prev) =>
-        prev.filter((req) => req.fromUserId !== fromUserId)
-      );
-    } catch (error) {
-      console.error("Error rejecting friend request:", error);
-    } finally {
-      setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
-    }
-  };
 
   const unfriendUser = async (friendId) => {
     if (!userId) return;
