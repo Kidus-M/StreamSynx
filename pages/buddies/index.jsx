@@ -105,9 +105,9 @@ const BuddiesPage = () => {
 
   const handleFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
-    const requestId = `<span class="math-inline">\{userId\}\_</span>{toUserId}`;
+    const requestId = `${userId}_${toUserId}`; // Corrected line
     setInteractionLoading((prev) => ({ ...prev, [toUserId]: true }));
-
+  
     try {
       if (sentRequests[toUserId]) {
         await updateDoc(doc(db, "friendRequests", requestId), {
