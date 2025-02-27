@@ -11,14 +11,14 @@ export default function AuthForm({ onSubmit, fields, buttonText, errorLabel, err
             name={field.name}
             type={field.type}
             placeholder={field.placeholder}
-            className="w-96 p-3 border rounded mb-4 text-gray-700"
+            className="md:w-96 w-80 p-3 border rounded mb-4 text-gray-700"
           />
         ))}
         <div className={`w-full items-center justify-start gap-2 mb-4 text-red-600 ${errorLabel ? 'flex' : 'hidden'}`}>
           <MdError className="text-xl" />
           <p className="text-sm">{errorMessage}</p>
         </div>
-        <button type="submit" className="w-96 bg-primary text-white py-3 rounded mb-4 font-poppins">
+        <button type="submit" className="md:w-96 w-80 bg-primary text-white py-3 rounded mb-4 font-poppins">
           {buttonText}
         </button>
       </form>

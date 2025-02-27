@@ -107,7 +107,7 @@ export default function SignIn({ setIsSignUp }) {
       />
       <button
         onClick={handleGoogleSignIn}
-        className="w-96 bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center"
+        className="md:w-96 w-80 bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center"
       >
         <FcGoogle className="text-xl mr-2" />
         Continue With Google
