@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../../components/Navbar";
+import NavBar from "../../components/NavBar";
 import { FaGripLinesVertical } from "react-icons/fa";
 import MovieCard from "../../components/MinimalCard";
 import { auth, db } from "../../firebase";

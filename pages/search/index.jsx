@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "../../components/Navbar";
+import NavBar from "../../components/NavBar";
 import Footer from "../../components/Footer";
 import axios from "axios";
 import MovieCard from "../../components/MinimalCard";
