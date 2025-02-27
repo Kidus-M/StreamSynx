@@ -348,9 +348,9 @@ const MoviePlayerPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <NavBar />
-      <main className="flex-1 p-6 space-y-8 max-w-6xl mx-auto mt-24">
+      <main className="flex p-6 mx-auto mt-24 gap-6">
         {/* Video Player Section */}
-        <div className="w-full rounded-lg overflow-hidden shadow-lg bg-black aspect-video">
+        <div className="w-[130%] rounded-lg overflow-hidden shadow-lg bg-black aspect-video">
           <iframe
             src={`https://vidlink.pro/movie/${movie.id}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
             frameBorder="0"
@@ -359,134 +359,137 @@ const MoviePlayerPage = () => {
             className="w-full h-full"
           ></iframe>
         </div>
-
-        {/* Action Buttons and Inputs */}
-        <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* Favorite Button */}
-          <button
-            onClick={toggleFavorite}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${
-              isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            <FaHeart
-              className={`${isFavorite ? "text-white" : "text-gray-300"}`}
-            />
-            <span className="hidden sm:inline">
-              {isFavorite ? "Remove" : "Favorite"}
-            </span>
-          </button>
-
-          {/* Rating Input and Button */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="number"
-              min="0"
-              max="10"
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
-              className="p-2 border rounded bg-gray-700 text-white w-20"
-              placeholder="Rate (0-10)"
-            />
-            <button
-              onClick={() => saveRating(movie.id, rating)}
-              className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
-            >
-              <FaStar className="text-yellow-400" />
-              <span className="hidden sm:inline">Rate</span>
-            </button>
-          </div>
-
-          {/* Recommend Select and Button */}
-          <div className="flex items-center space-x-2">
-            <select
-              value={selectedFriend}
-              onChange={(e) => setSelectedFriend(e.target.value)}
-              className="p-2 border rounded bg-gray-700 text-white w-full sm:w-64"
-            >
-              <option value="">Select a friend</option>
-              {friends.map((friend) => (
-                <option key={friend.uid} value={friend.uid}>
-                  {friend.username}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={recommendMovie}
-              className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
-            >
-              <FaShare className="text-white" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-          </div>
-        </div>
-        {/* Movie Details Section */}
-        <section className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-3xl font-bold mb-4">{movie.title}</h2>
-          <div className="flex flex-col md:flex-row gap-8">
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-              className="w-full md:w-64 object-cover rounded-lg"
-            />
-            <div className="flex-1">
-              <p className="text-gray-300 mb-4">{movie.overview}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-secondary">Release:</span>{" "}
-                  <p>{movie.release_date}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Rating:</span>{" "}
-                  <p>{movie.vote_average}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Runtime:</span>{" "}
-                  <p>{movie.runtime} mins</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Genres:</span>{" "}
-                  <p className="text-orange-600">
-                    {movie.genres.map((genre) => genre.name).join(", ")}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-secondary">Status:</span>{" "}
-                  <p>{movie.status}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Budget:</span>{" "}
-                  <p>${movie.budget.toLocaleString()}</p>
-                </div>
-              </div>
-              {trailerKey && (
-                <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-4">Trailer</h3>
-                  <div className="relative w-full aspect-video">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${trailerKey}`}
-                      frameBorder="0"
-                      allowFullScreen
-                      className="w-full h-full rounded-lg"
-                      title="Movie Trailer" // Added a title for accessibility
-                    ></iframe>
+        <div className="">
+          {/* Movie Details Section */}
+          <section className="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-3xl font-bold mb-4">{movie.title}</h2>
+            <div className="flex flex-col md:flex-row gap-8">
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                alt={movie.title}
+                className="w-full md:w-64 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <p className="text-gray-300 mb-4">{movie.overview}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-secondary">Release:</span>{" "}
+                    <p>{movie.release_date}</p>
+                  </div>
+                  <div>
+                    <span className="text-secondary">Rating:</span>{" "}
+                    <p>{movie.vote_average}</p>
+                  </div>
+                  <div>
+                    <span className="text-secondary">Runtime:</span>{" "}
+                    <p>{movie.runtime} mins</p>
+                  </div>
+                  <div>
+                    <span className="text-secondary">Genres:</span>{" "}
+                    <p className="text-orange-600">
+                      {movie.genres.map((genre) => genre.name).join(", ")}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-secondary">Status:</span>{" "}
+                    <p>{movie.status}</p>
+                  </div>
+                  <div>
+                    <span className="text-secondary">Budget:</span>{" "}
+                    <p>${movie.budget.toLocaleString()}</p>
                   </div>
                 </div>
-              )}
+                {trailerKey && (
+                  <div className="mt-6">
+                    <h3 className="text-xl font-bold mb-4">Trailer</h3>
+                    <div className="relative w-full aspect-video">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${trailerKey}`}
+                        frameBorder="0"
+                        allowFullScreen
+                        className="w-full h-full rounded-lg"
+                        title="Movie Trailer" // Added a title for accessibility
+                      ></iframe>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+
+            {/* Action Buttons and Inputs */}
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4 pt-6 ">
+              {/* Favorite Button */}
+              <button
+                onClick={toggleFavorite}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+              >
+                <FaHeart
+                  className={`${isFavorite ? "text-white" : "text-gray-300"}`}
+                />
+                <span className="hidden sm:inline">
+                  {isFavorite ? "Remove" : "Favorite"}
+                </span>
+              </button>
+
+              {/* Rating Input and Button */}
+              <div className="flex items-center">
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                  className="p-2 border rounded-l-md bg-gray-700 text-white w-20"
+                  placeholder="Rate (0-10)"
+                />
+                <button
+                  onClick={() => saveRating(movie.id, rating)}
+                  className="flex border items-center space-x-2 bg-blue-500 px-4 py-2 rounded-r-md hover:bg-blue-600 transition-colors"
+                >
+                  <FaStar className="text-yellow-400" />
+                  <span className="hidden sm:inline">Rate</span>
+                </button>
+              </div>
+
+              {/* Recommend Select and Button */}
+              <div className="flex items-center">
+                <select
+                  value={selectedFriend}
+                  onChange={(e) => setSelectedFriend(e.target.value)}
+                  className="p-2 border rounded-l-md bg-gray-700 text-white w-full sm:w-64"
+                >
+                  <option value="">Select a friend</option>
+                  {friends.map((friend) => (
+                    <option key={friend.uid} value={friend.uid}>
+                      {friend.username}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={recommendMovie}
+                  className="flex border items-center space-x-2 bg-green-500 px-4 py-2 rounded-r-md hover:bg-green-600 transition-colors"
+                >
+                  <FaShare className="text-white" />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
 
         {/* Recommended Movies Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Recommended for You</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {recommendedMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
       </main>
+      <section className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Recommended for You</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {recommendedMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      </section>
       <Footer />
     </div>
   );
