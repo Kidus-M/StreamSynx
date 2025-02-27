@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
 import { auth, db } from "../firebase";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import AuthForm from "./AuthForm";
 
 export default function SignIn({ setIsSignUp }) {
@@ -12,40 +13,79 @@ export default function SignIn({ setIsSignUp }) {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
+    setErrorLabel(false);
+    setErrorMessage("");
+
+    const email = e.target.email.value.trim();
     const password = e.target.password.value;
+
+    if (!email || !password) {
+      setErrorLabel(true);
+      setErrorMessage("Email and password are required.");
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/home");
-    } catch (error) {
-      handleAuthError(error);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Fetch user data from Firestore using the uid
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          router.push("/home");
+        } else {
+          setErrorLabel(true);
+          setErrorMessage("User data not found in Firestore.");
+        }
+      } catch (firestoreError) {
+        console.error("Firestore error:", firestoreError);
+        setErrorLabel(true);
+        setErrorMessage("Failed to fetch user data. Please try again.");
+      }
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      handleAuthError(authError);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      router.push("/home");
-    } catch (error) {
-      handleAuthError(error);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Fetch user data from Firestore using the uid
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          router.push("/home");
+        } else {
+          setErrorLabel(true);
+          setErrorMessage("User data not found in Firestore.");
+        }
+      } catch (firestoreError) {
+        console.error("Firestore error:", firestoreError);
+        setErrorLabel(true);
+        setErrorMessage("Failed to fetch user data. Please try again.");
+      }
+    } catch (authError) {
+      console.error("Google sign-in error:", authError);
+      handleAuthError(authError);
     }
   };
 
   const handleAuthError = (error) => {
     setErrorLabel(true);
     switch (error.code) {
-      case 'auth/user-not-found':
+      case "auth/user-not-found":
         setErrorMessage("No account found with this email.");
         break;
-      case 'auth/invalid-credential':
-        setErrorMessage("Username or password is incorrect.");
+      case "auth/wrong-password":
+        setErrorMessage("Incorrect password.");
         break;
-      case 'auth/popup-closed-by-user':
-        // setErrorMessage("Popup closed by user.");
-        break;
-      case 'auth/cancelled-popup-request':
-        // setErrorMessage("Popup closed by user.");
+      case "auth/invalid-email":
+        setErrorMessage("Invalid email.");
         break;
       default:
         setErrorMessage("An error occurred. Please try again.");
@@ -59,14 +99,17 @@ export default function SignIn({ setIsSignUp }) {
       <AuthForm
         onSubmit={handleSignIn}
         fields={[
-          { name: "email", type: "email", placeholder: "email@gmail.com" },
+          { name: "email", type: "email", placeholder: "Email" },
           { name: "password", type: "password", placeholder: "Password" },
         ]}
         buttonText="Sign In"
         errorLabel={errorLabel}
         errorMessage={errorMessage}
       />
-      <button onClick={handleGoogleSignIn} className="w-96 bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center">
+      <button
+        onClick={handleGoogleSignIn}
+        className="w-96 bg-gray-100 text-gray-700 py-3 rounded mb-4 border font-poppins flex items-center justify-center"
+      >
         <FcGoogle className="text-xl mr-2" />
         Continue With Google
       </button>
