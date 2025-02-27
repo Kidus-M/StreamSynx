@@ -15,7 +15,7 @@ const Footer = () => {
           </p>
         </div>
         <div className="text-center md:text-right">
-          <p>&copy; {currentYear} StreamSync. All rights reserved.</p>
+          <p>&copy; {currentYear} ReelTime. All rights reserved.</p>
         </div>
       </div>
     </footer>

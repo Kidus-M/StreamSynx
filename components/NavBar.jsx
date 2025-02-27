@@ -68,7 +68,7 @@ export default function NavBar() {
             className="text-2xl font-dm-display cursor-pointer"
             onClick={() => router.push(`/home`)}
           >
-            StreamSync.
+            ReelTime.
           </button>
 
           {/* Desktop Menu */}
