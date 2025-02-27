@@ -140,6 +140,14 @@ const MoviePlayerPage = () => {
   const [friends, setFriends] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState("");
 
+  // Redirect to home page on error
+  useEffect(() => {
+    if (error) {
+      console.error("Error detected, redirecting to home page:", error);
+      // router.push("/"); // Redirect to home page
+    }
+  }, [error, router]);
+
   // Fetch friends
   useEffect(() => {
     const fetchFriends = async () => {
@@ -323,15 +331,6 @@ const MoviePlayerPage = () => {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <NavBar />
         <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <NavBar />
-        <p className="text-red-500">{error}</p>
       </div>
     );
   }

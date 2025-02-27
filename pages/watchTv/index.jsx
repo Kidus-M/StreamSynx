@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import EpisodeCard from "../../components/EpisodeCard";
 import SearchCard from "../../components/MinimalCard";
-import NavBar from "../../components/Navbar";
+import NavBar from "../../components/NavBar";
 import { useRouter } from "next/router";
 import axios from "axios";
 import {
@@ -34,7 +34,7 @@ const TVShowPlayerPage = () => {
   const [seasons, setSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [episodes, setEpisodes] = useState([]);
-  const [selectedEpisode, setSelectedEpisode] = useState(null);
+  const [selectedEpisode, setSelectedEpisode] = useState(0);
   const [showAllEpisodes, setShowAllEpisodes] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,13 +43,21 @@ const TVShowPlayerPage = () => {
   const [recommendedShows, setRecommendedShows] = useState([]);
   const [rating, setRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
-
+  const seasonSectionRef = useRef(null);
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const id = query.tv_id || 0;
 
   const [friends, setFriends] = useState([]);
   const [friendUsernames, setFriendUsernames] = useState({});
   const [selectedFriend, setSelectedFriend] = useState("");
+
+  // Redirect to home page on error
+  useEffect(() => {
+    if (error) {
+      console.error("Error detected, redirecting to home page:", error);
+      router.push("/home"); // Redirect to home page
+    }
+  }, [error, router]);
 
   useEffect(() => {
     const fetchFriendsAndUsernames = async () => {
@@ -111,6 +119,12 @@ const TVShowPlayerPage = () => {
       alert("Failed to recommend episode. Please try again.");
     }
   };
+
+  useEffect(() => {
+    if (!selectedSeason || !selectedEpisode || selectedEpisode == 0) {
+      seasonSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedSeason, selectedEpisode]);
 
   // Fetch TV show details
   useEffect(() => {
@@ -189,43 +203,47 @@ const TVShowPlayerPage = () => {
     if (!tvShow || !tvShow.id || !apiKey) return;
 
     const fetchAdditionalDetails = async () => {
-        try {
-            const [castResponse, trailerResponse] = await Promise.all([
-                axios.get(`${BASE_URL}/tv/${tvShow.id}/credits`, {
-                    params: { api_key: apiKey, language: "en-US" },
-                }),
-                axios.get(`${BASE_URL}/tv/${tvShow.id}/videos`, {
-                    params: { api_key: apiKey, language: "en-US" },
-                }),
-            ]);
+      try {
+        const [castResponse, trailerResponse] = await Promise.all([
+          axios.get(`${BASE_URL}/tv/${tvShow.id}/credits`, {
+            params: { api_key: apiKey, language: "en-US" },
+          }),
+          axios.get(`${BASE_URL}/tv/${tvShow.id}/videos`, {
+            params: { api_key: apiKey, language: "en-US" },
+          }),
+        ]);
 
-            if (castResponse.status === 200) {
-                setCast(castResponse.data.cast.slice(0, 5));
-            } else if (castResponse.status === 404) {
-                console.warn(`Credits not found for TV show ID: ${tvShow.id}`);
-                setCast([]);
-            } else {
-                console.error(`Error fetching cast data. Status: ${castResponse.status}`);
-            }
-
-            if (trailerResponse.status === 200) {
-                const trailer = trailerResponse.data.results.find(
-                    (vid) => vid.type === "Trailer" && vid.site === "YouTube"
-                );
-                setTrailerKey(trailer ? trailer.key : "");
-            } else if (trailerResponse.status === 404) {
-                console.warn(`Trailers not found for TV show ID: ${tvShow.id}`);
-                setTrailerKey("");
-            } else {
-                console.error(`Error fetching trailer data. Status: ${trailerResponse.status}`);
-            }
-        } catch (error) {
-            console.error("Error fetching additional TV show data:", error);
+        if (castResponse.status === 200) {
+          setCast(castResponse.data.cast.slice(0, 5));
+        } else if (castResponse.status === 404) {
+          console.warn(`Credits not found for TV show ID: ${tvShow.id}`);
+          setCast([]);
+        } else {
+          console.error(
+            `Error fetching cast data. Status: ${castResponse.status}`
+          );
         }
+
+        if (trailerResponse.status === 200) {
+          const trailer = trailerResponse.data.results.find(
+            (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+          );
+          setTrailerKey(trailer ? trailer.key : "");
+        } else if (trailerResponse.status === 404) {
+          console.warn(`Trailers not found for TV show ID: ${tvShow.id}`);
+          setTrailerKey("");
+        } else {
+          console.error(
+            `Error fetching trailer data. Status: ${trailerResponse.status}`
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching additional TV show data:", error);
+      }
     };
 
     fetchAdditionalDetails();
-}, [tvShow, apiKey]);
+  }, [tvShow, apiKey]);
 
   // Check if the episode is already in favorites
   useEffect(() => {
@@ -502,6 +520,7 @@ const TVShowPlayerPage = () => {
                       frameBorder="0"
                       allowFullScreen
                       className="w-full h-full rounded-lg"
+                      ref={seasonSectionRef}
                     ></iframe>
                   </div>
                 </div>
@@ -510,8 +529,8 @@ const TVShowPlayerPage = () => {
           </div>
         </section>
 
-        {/* Season and Episodes Selection (Similar to Movie Player Season and Episodes) */}
-        <section className="w-full">
+        {/* Season and Episodes Selection */}
+        <section className="w-full" > {/* Add ref here */}
           <h3 className="text-2xl font-bold mb-4">Seasons</h3>
           <div className="flex flex-wrap gap-2 mb-6">
             {seasons
