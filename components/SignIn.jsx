@@ -61,12 +61,12 @@ export default function SignIn({ setIsSignUp }) {
             if (userDoc.exists()) {
                 router.push("/home");
             } else {
-                console.error("User data not found in Firestore.");
-                router.push("/home"); //redirect home.
+                alert("User data not found. Please Sign Up first");
+                router.push("/"); //redirect home.
             }
         } catch (firestoreError) {
-            console.error("Firestore error:", firestoreError);
-            router.push("/home"); //redirect home.
+            alert("Firestore error:", firestoreError);
+            router.push("/"); //redirect home.
         }
     } catch (authError) {
         console.error("Google sign-in error:", authError);
