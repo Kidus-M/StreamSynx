@@ -51,29 +51,28 @@ export default function SignIn({ setIsSignUp }) {
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
 
-      // Fetch user data from Firestore using the uid
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          router.push("/home");
-        } else {
-          setErrorLabel(true);
-          setErrorMessage("User data not found in Firestore.");
+        // Fetch user data from Firestore using the uid
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                router.push("/home");
+            } else {
+                console.error("User data not found in Firestore.");
+                router.push("/home"); //redirect home.
+            }
+        } catch (firestoreError) {
+            console.error("Firestore error:", firestoreError);
+            router.push("/home"); //redirect home.
         }
-      } catch (firestoreError) {
-        console.error("Firestore error:", firestoreError);
-        setErrorLabel(true);
-        setErrorMessage("Failed to fetch user data. Please try again.");
-      }
     } catch (authError) {
-      console.error("Google sign-in error:", authError);
-      handleAuthError(authError);
+        console.error("Google sign-in error:", authError);
+        handleAuthError(authError);
     }
-  };
+};
 
   const handleAuthError = (error) => {
     setErrorLabel(true);

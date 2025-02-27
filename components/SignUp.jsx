@@ -69,29 +69,33 @@ export default function SignUp({ setIsSignUp }) {
   const handleGoogleSignUp = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const username = user.displayName || user.email.split("@")[0];
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const username = user.displayName || user.email.split("@")[0];
 
-      // Check if username already exists
-      const usernameQuery = query(collection(db, "users"), where("username", "==", username));
-      const usernameSnapshot = await getDocs(usernameQuery);
+        // Check if username already exists
+        const usernameQuery = query(collection(db, "users"), where("username", "==", username));
+        const usernameSnapshot = await getDocs(usernameQuery);
 
-      if (usernameSnapshot.empty) {
-        // Create user document in Firestore if username does not exist
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          username,
-          email: user.email,
-        });
-      }
+        if (usernameSnapshot.empty) {
+            // Create user document in Firestore if username does not exist
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                username,
+                email: user.email,
+            });
+        } else {
+            console.error("Username already exists.");
+            router.push("/home"); // Redirect to home if username exists
+            return; // Exit the function to prevent further errors
+        }
 
-      router.push("/home");
+        router.push("/home"); // Redirect to home on successful sign-up
     } catch (error) {
-      handleAuthError(error);
+        console.error("Google sign-up error:", error);
+        router.push("/home"); // Redirect to home on any error
     }
-  };
-
+};
   const handleAuthError = (error) => {
     setErrorLabel(true);
     switch (error.code) {
