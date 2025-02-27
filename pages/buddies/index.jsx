@@ -15,6 +15,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { Mosaic } from "react-loading-indicators";
+import { useRouter } from "next/router";
 
 const BuddiesPage = () => {
   const [friends, setFriends] = useState([]);
@@ -25,6 +26,7 @@ const BuddiesPage = () => {
   const [sentRequests, setSentRequests] = useState({});
   const [interactionLoading, setInteractionLoading] = useState({});
   const userId = auth.currentUser?.uid;
+  const router = useRouter();
 
   useEffect(() => {
     if (!userId) return;
@@ -105,9 +107,9 @@ const BuddiesPage = () => {
 
   const handleFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
-    const requestId = `${userId}_${toUserId}`;
+    const requestId = `${userId}_${toUserId}`; // Corrected line
     setInteractionLoading((prev) => ({ ...prev, [toUserId]: true }));
-
+  
     try {
       if (sentRequests[toUserId]) {
         await updateDoc(doc(db, "friendRequests", requestId), {
@@ -129,35 +131,36 @@ const BuddiesPage = () => {
       setInteractionLoading((prev) => ({ ...prev, [toUserId]: false }));
     }
   };
-
+  
   const acceptFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
-    const requestId = `${fromUserId}_${userId}`;
-
+    const requestId = `${fromUserId}_${userId}`; // Corrected line
+  
     try {
       await updateDoc(doc(db, "friendRequests", requestId), {
         status: "accepted",
       });
-
+  
       const friendsRef = doc(db, "friends", userId);
-      await updateDoc(friendsRef, { friends: arrayUnion(fromUserId) });
-
+      await setDoc(friendsRef, { friends: arrayUnion(fromUserId) }, { merge: true });
+  
       const fromUserFriendsRef = doc(db, "friends", fromUserId);
-      await updateDoc(fromUserFriendsRef, { friends: arrayUnion(userId) });
+      await setDoc(fromUserFriendsRef, { friends: arrayUnion(userId) }, { merge: true });
     } catch (error) {
       console.error("Error accepting friend request:", error);
       alert("Failed to accept friend request. Please try again.");
+      router.push("/home");
     } finally {
       setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
   };
-
+  
   const rejectFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [fromUserId]: true }));
-    const requestId = `${fromUserId}_${userId}`;
-
+    const requestId = `${fromUserId}_${userId}`; // Corrected line
+  
     try {
       await updateDoc(doc(db, "friendRequests", requestId), {
         status: "rejected",
@@ -165,22 +168,23 @@ const BuddiesPage = () => {
     } catch (error) {
       console.error("Error rejecting friend request:", error);
       alert("Failed to reject friend request. Please try again.");
+      router.push("/home");
     } finally {
       setInteractionLoading((prev) => ({ ...prev, [fromUserId]: false }));
     }
   };
-
   const unfriendUser = async (friendId) => {
     if (!userId) return;
     setInteractionLoading((prev) => ({ ...prev, [friendId]: true }));
     try {
       const friendsRef = doc(db, "friends", userId);
-      await updateDoc(friendsRef, { friends: arrayRemove(friendId) });
+      await setDoc(friendsRef, { friends: arrayRemove(friendId) }, { merge: true });
 
       const friendFriendsRef = doc(db, "friends", friendId);
-      await updateDoc(friendFriendsRef, { friends: arrayRemove(userId) });
+      await setDoc(friendFriendsRef, { friends: arrayRemove(userId) }, { merge: true });
     } catch (error) {
       console.error("Error unfriend user:", error);
+      router.push("/home");
     } finally {
       setInteractionLoading((prev) => ({ ...prev, [friendId]: false }));
     }
