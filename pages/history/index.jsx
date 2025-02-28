@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
+import NavBar from "../../components/Navbar";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import MovieCard from "../../components/MinimalCard";
@@ -89,7 +89,7 @@ const HistoryPage = () => {
 
   return (
     <div className="text-secondary bg-primary min-h-screen">
-      <Navbar />
+      <NavBar />
       <main className="p-6 mt-24">
         <div className="flex align-middle justify-between">
           <h1 className="text-2xl font-bold mb-6">Watch History</h1>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import MovieCard from "../../components/MinimalCard"; 
-import Navbar from "../../components/Navbar"// Import your card component
+import NavBar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import TrendingCard from "../../components/TrendingCard";
 import TrendingShows from "../../components/TrendingShows";
@@ -155,7 +155,7 @@ const MovieList = () => {
 
   return (
     <div className="bg-primary text-white pt-20">
-      <Navbar />
+      <NavBar />
       {/* Hero Section */}
         <TrendingCard />
       
