@@ -3,7 +3,9 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
 import { useRouter } from "next/router";
-export default function NavBar() {
+
+
+function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
@@ -222,31 +224,7 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      {/* <div
-        className={`fixed top-0 left-0 w-full bg-gray-900 bg-opacity-95 backdrop-blur-md z-40 transform ${
-          isSearchBarOpen ? "translate-y-0" : "-translate-y-full"
-        } transition-transform duration-300 search-bar`}
-      >
-        <div className="flex justify-between items-center w-full px-6 py-4 gap-2">
-          <form onSubmit={handleSearch} className="w-full flex gap-2">
-            <input
-              type="text"
-              className="w-full text-md h-10 pl-4 shadow-lg rounded-md text-white bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              placeholder="Search for movies or TV shows..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="h-10 px-4 rounded-md bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 cursor-pointer"
-            >
-              Search
-            </button>
-          </form>
-        </div>
-      </div> */}
     </>
   );
 }
+export default NavBar;

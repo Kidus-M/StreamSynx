@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
-import Navbar from "../../components/Navbar";
+import NavBar from "../../components/Navbar";
 import {
   doc,
   getDoc,
@@ -267,7 +267,7 @@ const BuddiesPage = () => {
 
   return (
     <div className="min-h-screen bg-primary text-white">
-      <Navbar />
+      <NavBar />
       <main className="p-6 mt-24 max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-white">Buddies</h1>
         {loading ? (
