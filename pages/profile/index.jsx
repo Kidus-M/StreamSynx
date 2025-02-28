@@ -3,7 +3,7 @@ import { auth, db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { signOut } from "firebase/auth";
-import NavBar from "../../components/Navbar";
+import NavBar from "../../components/NavBar";
 import StatsCard from "../../components/StatsCard";
 import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 

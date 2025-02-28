@@ -62,7 +62,7 @@ function NavBar() {
 
   return (
     <>
-      {/* Navbar */}
+      {/* NavBar */}
       <div className="w-full fixed top-0 left-0 z-50">
         <nav className="flex justify-between items-center bg-black bg-opacity-30 backdrop-blur-md text-white w-full px-5 py-6 h-20">
           {/* Logo */}

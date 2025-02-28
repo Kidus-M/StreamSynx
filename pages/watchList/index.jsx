@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import MovieCard from "../../components/MinimalCard";
-import Navbar from "../../components/Navbar"; // Assuming you have a Navbar component
+import NavBar from "../../components/NavBar"; // Assuming you have a NavBar component
 import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
 const WatchlistPage = () => {
@@ -37,7 +37,7 @@ const WatchlistPage = () => {
   if (watchlistItems === null) {
     return (
       <div className="bg-primary min-h-screen">
-        <Navbar />
+        <NavBar />
         <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
       </div>
     );
@@ -45,7 +45,7 @@ const WatchlistPage = () => {
 
   return (
     <div className="bg-primary min-h-screen">
-      <Navbar />
+      <NavBar />
       <div className="p-4 mt-24">
         <h1 className="text-2xl font-bold mb-4 text-white">My Watchlist</h1>
 
