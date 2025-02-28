@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "../../components/MinimalCard";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
 import {

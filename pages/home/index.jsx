@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import MovieCard from "../../components/MinimalCard"; // Import your card component
-import NavBar from "../../components/NavBar"; // Import your navbar component
+import MovieCard from "../../components/MinimalCard"; 
+import NavBar from "../../components/Navbar"// Import your card component
 import Footer from "../../components/Footer";
 import TrendingCard from "../../components/TrendingCard";
 import TrendingShows from "../../components/TrendingShows";

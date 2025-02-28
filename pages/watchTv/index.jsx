@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import EpisodeCard from "../../components/EpisodeCard";
 import SearchCard from "../../components/MinimalCard";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../components/Navbar";
 import { useRouter } from "next/router";
 import axios from "axios";
 import {

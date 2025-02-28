@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../components/Navbar";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import MovieCard from "../../components/MinimalCard";

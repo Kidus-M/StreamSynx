@@ -36,60 +36,50 @@ const MovieCard = ({ movie: initialMovie }) => {
   const userId = auth.currentUser?.uid;
   const [movie, setMovie] = useState(initialMovie);
   const [genres, setGenres] = useState("Unknown Genre");
-  const [mediaType, setMediaType] = useState(initialMovie.media_type || "movie"); // Default to "movie"
+  const [mediaType, setMediaType] = useState(initialMovie.media_type || (initialMovie.first_air_date ? "tv" : "movie"));
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
-      if (!initialMovie) return;
+      if (!initialMovie || !initialMovie.id) return;
 
       try {
-        const response = await axios.get(
-          `${BASE_URL}/${initialMovie.media_type === "tv" ? "tv" : "movie"}/${initialMovie.id}`,
-          {
-            params: {
-              api_key: API_KEY,
-              language: "en-US",
-            },
-          }
-        );
-        setMovie(response.data);
+        const { data } = await axios.get(`${BASE_URL}/${mediaType}/${initialMovie.id}`, {
+          params: {
+            api_key: API_KEY,
+            language: "en-US",
+          },
+        });
 
-        // Set media type based on the fetched data
-        setMediaType(initialMovie.media_type || "movie");
+        setMovie(data);
 
-        // Extract and set genres
-        if (response.data.genres && response.data.genres.length > 0) {
-          const genreNames = response.data.genres.map((genre) => genre.name).join(", ");
-          setGenres(genreNames);
-        } else if (initialMovie.genre_ids && initialMovie.genre_ids.length > 0) {
-          const initialGenreNames = initialMovie.genre_ids
-            .map((id) => genreMap[id] || "Unknown")
-            .join(", ");
-          setGenres(initialGenreNames);
-        } else {
-          setGenres("Unknown Genre");
+        if (data.genres) {
+          setGenres(data.genres.map((genre) => genre.name).join(", "));
+        } else if (initialMovie.genre_ids?.length) {
+          setGenres(initialMovie.genre_ids.map((id) => genreMap[id] || "Unknown").join(", "));
         }
       } catch (error) {
-        console.error("Error fetching movie details:", error);
+        console.error("Error fetching movie/TV details:", error);
       }
     };
 
     fetchMovieDetails();
-  }, [initialMovie]);
+  }, [initialMovie, mediaType]);
 
   useEffect(() => {
     const checkIfAdded = async () => {
-      if (userId) {
+      if (userId && movie.id) {
         const watchlistRef = doc(db, "watchlists", userId);
         const watchlistDoc = await getDoc(watchlistRef);
-        if (watchlistDoc.exists()) {
-          const movies = watchlistDoc.data().movies || [];
-          setIsAdded(movies.some((m) => m.id === movie.id));
+        if (watchlistDoc.exists() && watchlistDoc.data().items) {
+          const items = watchlistDoc.data().items;
+          setIsAdded(items.some((m) => m.id === movie.id && m.media_type === mediaType));
+        } else {
+            setIsAdded(false) //if the doc doesnt exist or items is undefined, then the item is not added.
         }
       }
     };
     checkIfAdded();
-  }, [userId, movie.id]);
+  }, [userId, movie.id, mediaType]);
 
   const handleWatch = () => {
     const url = mediaType === "tv" ? `/watchTv?tv_id=${movie.id}` : `/watch?movie_id=${movie.id}`;
@@ -105,20 +95,21 @@ const MovieCard = ({ movie: initialMovie }) => {
 
     const watchlistRef = doc(db, "watchlists", userId);
     const watchlistDoc = await getDoc(watchlistRef);
+    const item = { ...movie, media_type: mediaType };
 
     if (isAdded) {
       await updateDoc(watchlistRef, {
-        movies: arrayRemove(movie),
+        items: arrayRemove(item),
       });
     } else {
       if (watchlistDoc.exists()) {
         await updateDoc(watchlistRef, {
-          movies: arrayUnion(movie),
+          items: arrayUnion(item),
         });
       } else {
         await setDoc(watchlistRef, {
-          movies: [movie],
-        });
+          items: [item],
+        }, { merge: true });
       }
     }
     setIsAdded((prev) => !prev);
@@ -131,7 +122,7 @@ const MovieCard = ({ movie: initialMovie }) => {
     >
       <img
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={`${movie.title} Poster`}
+        alt={`${movie.title || movie.name} Poster`}
         className="w-full h-[400px] object-cover rounded-xl"
       />
       <div className="absolute bottom-0 left-0 w-full bg-primary bg-opacity-60 text-white p-3 flex justify-between items-center rounded-md">

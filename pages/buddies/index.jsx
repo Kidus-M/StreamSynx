@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
-import Navbar from "../../components/NavBar";
+import Navbar from "../../components/Navbar";
 import {
   doc,
   getDoc,
