@@ -3,7 +3,7 @@ import { auth, db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { signOut } from "firebase/auth";
-import NavBar from "../../components/Navbar";
+import Navbar from "../../components/Navbar";
 import StatsCard from "../../components/StatsCard";
 import { Mosaic } from "react-loading-indicators"; // Import Mosaic
 
@@ -113,7 +113,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-6">
-      <NavBar />
+      <Navbar />
       <div className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-3xl border border-gray-700 flex flex-col items-center mt-24">
         <h1 className="text-3xl font-bold mb-6">Profile</h1>
         <div className="flex flex-col items-center">
