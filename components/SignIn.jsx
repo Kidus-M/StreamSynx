@@ -50,27 +50,33 @@ export default function SignIn({ setIsSignUp }) {
   };
 
   const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
     try {
-        const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
+        const username = user.displayName || user.email.split("@")[0];
 
-        // Fetch user data from Firestore using the uid
-        try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                router.push("/home");
-            } else {
-                alert("User data not found. Please Sign Up first");
-                router.push("/"); //redirect home.
-            }
-        } catch (firestoreError) {
-            alert("Firestore error:", firestoreError);
-            router.push("/"); //redirect home.
+        // Check if username already exists
+        const usernameQuery = query(collection(db, "users"), where("username", "==", username));
+        const usernameSnapshot = await getDocs(usernameQuery);
+
+        if (usernameSnapshot.empty) {
+            // Create user document in Firestore if username does not exist
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                username,
+                email: user.email,
+            });
+        } else {
+            alert("Username already exists. Please go and change it on profile page.");
+            router.push("/home"); // Redirect to home if username exists
+            return; // Exit the function to prevent further errors
         }
-    } catch (authError) {
-        console.error("Google sign-in error:", authError);
-        handleAuthError(authError);
+
+        router.push("/home"); // Redirect to home on successful sign-up
+    } catch (error) {
+        alert("Google sign-up error:", error);
+        router.push("/"); // Redirect to home on any error
     }
 };
 
