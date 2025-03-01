@@ -7,7 +7,7 @@ import SignIn from "../components/SignIn";
 import SignUp from "../components/SignUp";
 
 export default function Home() {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [user, setUser] = useState(null);
   const router = useRouter();
 
