@@ -174,7 +174,7 @@ function NavBar() {
                 onClick={() => router.push(`/watchList`)}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
-                Watch Later
+                WatchList
               </button>
             </li>
             <li>
@@ -182,7 +182,7 @@ function NavBar() {
                 onClick={() => router.push(`/history`)}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
-                Watch History
+              History
               </button>
             </li>
             <li>
