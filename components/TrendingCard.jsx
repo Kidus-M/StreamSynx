@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { Mosaic } from "react-loading-indicators"; // Import Mosaic
+import { Mosaic } from "react-loading-indicators";
+import { useSwipeable } from "react-swipeable"; // For swipe functionality
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -16,6 +17,7 @@ const TrendingMovies = () => {
   const [loading, setLoading] = useState(true);
   const [movieDetails, setMovieDetails] = useState(null);
 
+  // Fetch trending movies
   useEffect(() => {
     const fetchTrending = async () => {
       try {
@@ -29,32 +31,29 @@ const TrendingMovies = () => {
         setLoading(false);
       }
     };
-
     fetchTrending();
+  }, []);
 
+  // Auto-rotate movies every 7 seconds
+  useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentMovieIndex(
-        (prevIndex) => (prevIndex + 1) % (trendingMovies.length || 1)
-      );
+      setCurrentMovieIndex((prevIndex) => (prevIndex + 1) % (trendingMovies.length || 1));
     }, 7000);
-
     return () => clearInterval(intervalId);
   }, [trendingMovies.length]);
 
+  // Fetch details for the current movie
   useEffect(() => {
     if (trendingMovies.length > 0) {
       const currentMovie = trendingMovies[currentMovieIndex];
       const fetchMovieDetails = async () => {
         try {
-          const response = await axios.get(
-            `${BASE_URL}/movie/${currentMovie.id}`,
-            {
-              params: {
-                api_key: API_KEY,
-                append_to_response: "credits,genres",
-              },
-            }
-          );
+          const response = await axios.get(`${BASE_URL}/movie/${currentMovie.id}`, {
+            params: {
+              api_key: API_KEY,
+              append_to_response: "credits,genres",
+            },
+          });
           setMovieDetails(response.data);
         } catch (error) {
           console.error("Error fetching movie details:", error);
@@ -64,6 +63,25 @@ const TrendingMovies = () => {
       fetchMovieDetails();
     }
   }, [trendingMovies, currentMovieIndex]);
+
+  // Swipe handlers for mobile and desktop
+  const handlers = useSwipeable({
+    onSwipedLeft: () => goToNextMovie(),
+    onSwipedRight: () => goToPreviousMovie(),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true, // Enable mouse swipes for desktop
+  });
+
+  // Navigation functions
+  const goToNextMovie = () => {
+    setCurrentMovieIndex((prevIndex) => (prevIndex + 1) % trendingMovies.length);
+  };
+
+  const goToPreviousMovie = () => {
+    setCurrentMovieIndex((prevIndex) =>
+      prevIndex === 0 ? trendingMovies.length - 1 : prevIndex - 1
+    );
+  };
 
   const handleWatch = (movie) => {
     router.push(`/watch?movie_id=${movie.id}`);
@@ -88,7 +106,27 @@ const TrendingMovies = () => {
   const currentMovie = trendingMovies[currentMovieIndex];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden" {...handlers}>
+      {/* Navigation Arrows for Desktop */}
+      <div className="hidden sm:flex absolute inset-y-0 left-0 z-20 items-center justify-start p-4">
+        <button
+          onClick={goToPreviousMovie}
+          className="p-3 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-75 transition-all"
+          aria-label="Previous Movie"
+        >
+          ←
+        </button>
+      </div>
+      <div className="hidden sm:flex absolute inset-y-0 right-0 z-20 items-center justify-end p-4">
+        <button
+          onClick={goToNextMovie}
+          className="p-3 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-75 transition-all"
+          aria-label="Next Movie"
+        >
+          →
+        </button>
+      </div>
+
       <AnimatePresence initial={false} custom={currentMovieIndex}>
         <motion.div
           key={currentMovie.id}
@@ -103,18 +141,18 @@ const TrendingMovies = () => {
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80"></div>
-          <div className="absolute inset-0 flex items-center justify-center p-8">
+          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
             {movieDetails && (
               <motion.div
                 initial={{ opacity: 0, y: 80 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6, ease: "easeInOut" }}
-                className="text-center text-white max-w-3xl"
+                className="text-center text-white max-w-3xl bg-black bg-opacity-50 p-6 rounded-lg"
               >
-                <h2 className="text-5xl font-extrabold mb-4 tracking-tight leading-tight">
+                <h2 className="text-3xl sm:text-5xl font-extrabold mb-4 tracking-tight leading-tight">
                   {movieDetails.title}
                 </h2>
-                <div className="flex justify-center mb-4 space-x-4">
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
                   {movieDetails.genres.map((genre) => (
                     <span
                       key={genre.id}
@@ -124,14 +162,14 @@ const TrendingMovies = () => {
                     </span>
                   ))}
                 </div>
-                <p className="text-xl mb-6 text-gray-300 leading-relaxed">
+                <p className="text-lg sm:text-xl mb-6 text-gray-300 leading-relaxed">
                   {movieDetails.overview}
                 </p>
-                <div className="flex justify-center mb-6 space-x-4 overflow-x-auto">
+                <div className="flex justify-evenly gap-6 mb-6 overflow-x-auto">
                   {movieDetails.credits.cast.slice(0, 5).map((actor) => (
                     <div
                       key={actor.cast_id}
-                      className="text-center flex-shrink-0"
+                      className="text-center flex-shrink-0 flex flex-col items-center"
                     >
                       <img
                         src={
@@ -140,15 +178,15 @@ const TrendingMovies = () => {
                             : "/placeholder.jpg"
                         }
                         alt={actor.name}
-                        className="w-24 h-24 rounded-full object-cover mb-2"
+                        className="w-16 h-16 sm:w-24 sm:h-24 rounded-full object-cover mb-2"
                       />
-                      <p className="text-sm">{actor.name}</p>
+                      <p className="md:text-sm text-xs">{actor.name}</p>
                     </div>
                   ))}
                 </div>
                 <motion.button
                   onClick={() => handleWatch(currentMovie)}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-red-500 hover:to-orange-500 text-white font-semibold py-4 px-12 rounded-full text-lg shadow-lg"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-red-500 hover:to-orange-500 text-white font-semibold py-3 px-8 sm:py-4 sm:px-12 rounded-full text-lg shadow-lg transition-all duration-300"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
