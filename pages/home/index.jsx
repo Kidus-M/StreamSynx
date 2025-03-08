@@ -81,22 +81,7 @@ const MovieList = () => {
     fetchHighestRatedMovies();
   }, [apiKey]);
 
-  const fetchHighestRatedShows = async () => {
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=100&page=1` // Adjusted vote_count for TV shows
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch highest rated shows");
-      }
-      const data = await response.json();
-      setHighestRatedShows(data.results.slice(0, 20)); // Get the first 20 highest rated shows
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
   useEffect(() => {
     const fetchTrendingShows = async () => {
       try {
@@ -154,7 +139,7 @@ const MovieList = () => {
   }
 
   return (
-    <div className="bg-primary text-white pt-20">
+    <div className="bg-primary text-white md:pt-16">
       <NavBar />
       {/* Hero Section */}
         <TrendingCard />

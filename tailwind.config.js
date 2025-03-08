@@ -17,6 +17,7 @@ module.exports = {
       },
       fontFamily: {
         'dm-display': ['"DM Serif Display"', 'serif'],
+        'poppins': ['Poppins', 'sans-serif'],
       },      
     },
   },

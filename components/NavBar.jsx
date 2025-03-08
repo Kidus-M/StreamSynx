@@ -4,7 +4,6 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
 import { useRouter } from "next/router";
 
-
 function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,7 +13,6 @@ function NavBar() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchQuery.trim() !== "") {
-        // setSearchQuery(e.target.value);
         handleSearch();
       }
     }, 500); // Delay search execution
@@ -37,7 +35,7 @@ function NavBar() {
   };
 
   const handleSearch = (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e?.preventDefault(); // Prevent default form submission
     if (searchQuery.trim()) {
       router.push(`/search?query=${searchQuery}`);
       setIsSearchBarOpen(false); // Close search bar after search
@@ -63,18 +61,18 @@ function NavBar() {
   return (
     <>
       {/* NavBar */}
-      <div className="w-full fixed top-0 left-0 z-50">
-        <nav className="flex justify-between items-center bg-black bg-opacity-30 backdrop-blur-md text-white w-full px-5 py-6 h-20">
+      <div className="w-full fixed top-0 left-0 z-50 font-poppins">
+        <nav className="flex justify-between items-center bg-black bg-opacity-30 backdrop-blur-md text-white w-full px-5 py-4 h-16">
           {/* Logo */}
           <button
-            className="text-2xl font-dm-display cursor-pointer"
+            className="text-2xl font-bold cursor-pointer"
             onClick={() => router.push(`/home`)}
           >
             StreamSynx.
           </button>
 
           {/* Desktop Menu */}
-          <ul className="hidden xl:flex space-x-20 font-semibold">
+          <ul className="hidden xl:flex space-x-10 font-medium">
             <li>
               <button
                 onClick={() => router.push(`/watchList`)}
@@ -121,8 +119,8 @@ function NavBar() {
           <div className="hidden xl:flex items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={() => router.push(`/search`)}
-              >
+              onClick={toggleSearchBar}
+            >
               <RiSearchLine className="text-black text-xl" />
             </button>
             <button
@@ -137,19 +135,41 @@ function NavBar() {
           <div className="xl:hidden text-2xl flex justify-between items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={() => router.push(`/search`)}
-              >
+              onClick={toggleSearchBar}
+            >
               <RiSearchLine className="text-black text-xl" />
             </button>
-            <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors" />
+            <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors cursor-pointer" />
           </div>
         </nav>
+
+        {/* Search Bar */}
+        {isSearchBarOpen && (
+          <div className="w-full bg-black bg-opacity-30 backdrop-blur-md p-4 flex justify-center search-bar">
+            <form onSubmit={handleSearch} className="w-full max-w-md flex items-center">
+              <input
+                id="search"
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-l-md bg-white text-black focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-orange-500 text-white rounded-r-md hover:bg-orange-600 transition-colors"
+              >
+                <RiSearchLine className="text-xl" />
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Sidebar for Mobile */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"
-          } transition-transform duration-300`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 xl:hidden`}
       >
         <div className="w-64 h-full bg-gray-900 p-6 shadow-lg">
           {/* Close Button */}
@@ -163,7 +183,10 @@ function NavBar() {
           <ul className="flex flex-col mt-10 space-y-6">
             <li>
               <button
-                onClick={() => router.push(`/home`)}
+                onClick={() => {
+                  router.push(`/home`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Home
@@ -171,7 +194,10 @@ function NavBar() {
             </li>
             <li>
               <button
-                onClick={() => router.push(`/watchList`)}
+                onClick={() => {
+                  router.push(`/watchList`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 WatchList
@@ -179,15 +205,21 @@ function NavBar() {
             </li>
             <li>
               <button
-                onClick={() => router.push(`/history`)}
+                onClick={() => {
+                  router.push(`/history`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
-              History
+                History
               </button>
             </li>
             <li>
               <button
-                onClick={() => router.push(`/favorites`)}
+                onClick={() => {
+                  router.push(`/favorites`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Favorites
@@ -195,7 +227,10 @@ function NavBar() {
             </li>
             <li>
               <button
-                onClick={() => router.push(`/buddies`)}
+                onClick={() => {
+                  router.push(`/buddies`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Buddies
@@ -203,7 +238,10 @@ function NavBar() {
             </li>
             <li>
               <button
-                onClick={() => router.push(`/recommended`)}
+                onClick={() => {
+                  router.push(`/recommended`);
+                  toggleSidebar();
+                }}
                 className="text-lg text-white cursor-pointer hover:text-orange-500 transition-colors"
               >
                 Recommended
@@ -214,7 +252,10 @@ function NavBar() {
           {/* Profile Section */}
           <div className="absolute bottom-6 left-6 flex items-center space-x-4 hover:text-orange-500 cursor-pointer transition-colors">
             <button
-              onClick={() => router.push(`/profile`)}
+              onClick={() => {
+                router.push(`/profile`);
+                toggleSidebar();
+              }}
               className="flex items-center space-x-2"
             >
               <RiAccountCircleFill className="text-5xl text-white" />
@@ -223,8 +264,8 @@ function NavBar() {
           </div>
         </div>
       </div>
-
     </>
   );
 }
+
 export default NavBar;
