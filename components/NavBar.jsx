@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
@@ -7,56 +7,14 @@ import { useRouter } from "next/router";
 function NavBar() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchQuery.trim() !== "") {
-        handleSearch();
-      }
-    }, 500); // Delay search execution
-
-    return () => clearTimeout(delayDebounce); // Cleanup on re-render
-  }, [searchQuery]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
 
-  const toggleSearchBar = () => {
-    setIsSearchBarOpen((prevState) => !prevState);
-    setSearchQuery(""); // Clear search query when toggling
-    if (!isSearchBarOpen) {
-      setTimeout(() => {
-        document.getElementById("search").focus();
-      }, 100);
-    }
+  const handleSearch = () => {
+    router.push(`/search`); // Directly navigate to the search page
   };
-
-  const handleSearch = (e) => {
-    e?.preventDefault(); // Prevent default form submission
-    if (searchQuery.trim()) {
-      router.push(`/search?query=${searchQuery}`);
-      setIsSearchBarOpen(false); // Close search bar after search
-    }
-  };
-
-  // Close search bar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        isSearchBarOpen &&
-        !e.target.closest(".search-bar") &&
-        !e.target.closest(".search-icon")
-      ) {
-        setIsSearchBarOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isSearchBarOpen]);
 
   return (
     <>
@@ -119,7 +77,7 @@ function NavBar() {
           <div className="hidden xl:flex items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={toggleSearchBar}
+              onClick={handleSearch} // Directly navigate to search page
             >
               <RiSearchLine className="text-black text-xl" />
             </button>
@@ -135,41 +93,20 @@ function NavBar() {
           <div className="xl:hidden text-2xl flex justify-between items-center gap-4">
             <button
               className="rounded-md p-1 bg-white hover:bg-orange-500 cursor-pointer search-icon transition-colors"
-              onClick={toggleSearchBar}
+              onClick={handleSearch} // Directly navigate to search page
             >
               <RiSearchLine className="text-black text-xl" />
             </button>
             <FaBars onClick={toggleSidebar} className="hover:text-orange-500 transition-colors cursor-pointer" />
           </div>
         </nav>
-
-        {/* Search Bar */}
-        {isSearchBarOpen && (
-          <div className="w-full bg-black bg-opacity-30 backdrop-blur-md p-4 flex justify-center search-bar">
-            <form onSubmit={handleSearch} className="w-full max-w-md flex items-center">
-              <input
-                id="search"
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-l-md bg-white text-black focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-orange-500 text-white rounded-r-md hover:bg-orange-600 transition-colors"
-              >
-                <RiSearchLine className="text-xl" />
-              </button>
-            </form>
-          </div>
-        )}
       </div>
 
       {/* Sidebar for Mobile */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 xl:hidden`}
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 xl:hidden`}
       >
         <div className="w-64 h-full bg-gray-900 p-6 shadow-lg">
           {/* Close Button */}
