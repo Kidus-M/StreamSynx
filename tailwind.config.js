@@ -11,13 +11,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#121212", // Near Black
-        secondary: "#282828", // Dark Gray
-        accent: "#DAA520", // Goldenrod
-        accentcopper: "#B87333", // Copper
-        accentsoftgold: "#F4BF4F", // Softer Gold
-        textprimary: "#EAEAEA", // Very Light Gray
-        textsecondary: "#A0A0A0", // Medium Gray
+        primary: "#121212",        // Near Black (Page Background)
+        secondary: "#282828",      // Dark Gray (Card/Section Backgrounds)
+        'secondary-light': '#333333', // Lighter Gray (Borders, Subtle Elements)
+        accent: "#DAA520",         // Goldenrod (Buttons, Highlights)
+        'accent-hover': "#C8941A",  // Darker Gold (Hover)
+        'accent-secondary': "#F4BF4F", // Softer Gold (Alternative Accent)
+        textprimary: "#EAEAEA",     // Very Light Gray (Main Text)
+        textsecondary: "#A0A0A0",   // Medium Gray (Subtle Text, Labels)
       },
       fontFamily: {
         'dm-display': ['"DM Serif Display"', 'serif'],
