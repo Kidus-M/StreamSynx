@@ -36,7 +36,7 @@ const WatchlistPage = () => {
 
   if (watchlistItems === null) {
     return (
-      <div className="bg-primary min-h-screen">
+      <div className="bg-primary min-h-screen flex items-center justify-center">
         <NavBar />
         <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
       </div>
