@@ -11,9 +11,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#01151d",
-        secondary: "#ff7f50",
-        tertiary: "#FAF3E0",
+        primary: "#121212",
+        secondary: "#282828",
+        tertiary: "#DAA520",
       },
       fontFamily: {
         'dm-display': ['"DM Serif Display"', 'serif'],
