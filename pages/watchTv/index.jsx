@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
-import EpisodeCard from "../../components/EpisodeCard";
-import SearchCard from "../../components/MinimalCard";
-import NavBar from "../../components/NavBar";
+// pages/tv/[tv_id].jsx (or your watchTv page route)
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { motion } from "framer-motion";
+import NavBar from "../../components/NavBar"; // Adjust path if needed
+import Footer from "../../components/Footer"; // Adjust path if needed
+import EpisodeCard from "../../components/EpisodeCard"; // Adjust path if needed
+import SearchCard from "../../components/MinimalCard"; // Adjust path if needed (using this for recommendations)
 import {
-  FaVideo,
-  FaGripLinesVertical,
   FaStar,
+  FaRegStar,
   FaHeart,
-  FaShare,
+  FaRegHeart,
+  FaShareAlt,
 } from "react-icons/fa";
-// import { FaVideo, FaGripLinesVertical } from "react-icons/fa";
-import Footer from "../../components/Footer";
-import { motion, AnimatePresence } from "framer-motion";
-import { auth, db } from "../../firebase";
+import { auth, db } from "../../firebase"; // Adjust path if needed
 import {
   doc,
   getDoc,
@@ -23,188 +23,114 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+import { Mosaic } from "react-loading-indicators";
+import toast, { Toaster } from "react-hot-toast";
+import { IoClose } from "react-icons/io5";
 
 const BASE_URL = "https://api.themoviedb.org/3";
-const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500";
+const IMAGE_BASE_URL_ORIGINAL = "https://image.tmdb.org/t/p/original";
 
-const TVShowPlayerPage = () => {
-  const router = useRouter();
-  const { query } = router;
+// --- Custom Hooks (Keep as is) ---
+const useTVShow = (id, apiKey) => {
   const [tvShow, setTVShow] = useState(null);
-  const [seasons, setSeasons] = useState([]);
-  const [selectedSeason, setSelectedSeason] = useState(1);
-  const [episodes, setEpisodes] = useState([]);
-  const [selectedEpisode, setSelectedEpisode] = useState(0);
-  const [showAllEpisodes, setShowAllEpisodes] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cast, setCast] = useState([]);
-  const [trailerKey, setTrailerKey] = useState("");
-  const [recommendedShows, setRecommendedShows] = useState([]);
-  const [rating, setRating] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const seasonSectionRef = useRef(null);
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  const id = query.tv_id || 0;
-
-  const [friends, setFriends] = useState([]);
-  const [friendUsernames, setFriendUsernames] = useState({});
-  const [selectedFriend, setSelectedFriend] = useState("");
-
-  // Redirect to home page on error
   useEffect(() => {
-    if (error) {
-      console.error("Error detected, redirecting to home page:", error);
-      router.push("/home"); // Redirect to home page
-    }
-  }, [error, router]);
-
-  useEffect(() => {
-    const fetchFriendsAndUsernames = async () => {
-      if (auth.currentUser) {
-        const friendsRef = doc(db, "friends", auth.currentUser.uid);
-        const friendsDoc = await getDoc(friendsRef);
-        if (friendsDoc.exists()) {
-          const friendIds = friendsDoc.data().friends || [];
-          setFriends(friendIds);
-
-          const usernames = {};
-          for (const friendId of friendIds) {
-            const userRef = doc(db, "users", friendId);
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-              usernames[friendId] = userDoc.data().username;
-            } else {
-              usernames[friendId] = friendId; // Fallback to ID if username not found
-            }
-          }
-          setFriendUsernames(usernames);
-        }
-      }
-    };
-    fetchFriendsAndUsernames();
-  }, []);
-
-  // Recommend episode to a friend
-  const recommendEpisode = async () => {
-    if (!auth.currentUser || !selectedFriend || !tvShow || !selectedEpisode) {
-      alert("Please select a friend and an episode to recommend.");
-      return;
-    }
-
-    try {
-      const recommendationRef = doc(db, "recommendations", selectedFriend);
-      await setDoc(
-        recommendationRef,
-        {
-          episodes: arrayUnion({
-            tvShowId: tvShow.id,
-            tvShowTitle: tvShow.name,
-            seasonNumber: selectedSeason,
-            episodeNumber: selectedEpisode,
-            recommendedBy: auth.currentUser.uid,
-          }),
-        },
-        { merge: true }
-      );
-      alert(
-        `Episode ${selectedEpisode} of ${
-          tvShow.name
-        } Season ${selectedSeason} recommended to ${
-          friendUsernames[selectedFriend] || selectedFriend
-        }.`
-      );
-    } catch (error) {
-      console.error("Error recommending episode:", error);
-      alert("Failed to recommend episode. Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    if (!selectedSeason || !selectedEpisode || selectedEpisode == 0) {
-      seasonSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [selectedSeason, selectedEpisode]);
-
-  // Fetch TV show details
-  useEffect(() => {
-    if (!id || !apiKey) {
-      setError("TV Show ID or API Key is missing");
-      setLoading(false);
-      return;
-    }
-
     const fetchTVShow = async () => {
+      setLoading(true);
+      setTVShow(null);
+      setError(null);
+      if (!id || !apiKey || id === "0") {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch(
-          `${BASE_URL}/tv/${id}?api_key=${apiKey}&language=en-US`
-        );
-        if (!response.ok)
-          throw new Error(`Failed to fetch TV show: ${response.statusText}`);
-        const data = await response.json();
-        setTVShow(data);
-        setSeasons(data.seasons);
-      } catch (error) {
-        setError(error.message);
+        const response = await axios.get(`${BASE_URL}/tv/${id}`, {
+          params: { api_key: apiKey, language: "en-US" },
+        });
+        if (response.data) setTVShow(response.data);
+        else throw new Error(`TV Show with ID ${id} not found.`);
+      } catch (err) {
+        console.error("Error in useTVShow:", err);
+        setError(err.message || "Failed to fetch TV show data.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTVShow();
+    if (id && id !== "0") fetchTVShow();
+    else setLoading(false);
   }, [id, apiKey]);
-
-  // Fetch episodes for the selected season
+  return { tvShow, loading, error };
+};
+const useTVSeasonsEpisodes = (id, seasonNumber, apiKey) => {
+  const [episodes, setEpisodes] = useState([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    if (!id || !apiKey || !selectedSeason) return;
-
     const fetchEpisodes = async () => {
+      if (!id || !apiKey || !seasonNumber || seasonNumber === 0) {
+        setEpisodes([]);
+        return;
+      }
+      setLoading(true);
       try {
-        const response = await fetch(
-          `${BASE_URL}/tv/${id}/season/${selectedSeason}?api_key=${apiKey}&language=en-US`
+        const response = await axios.get(
+          `${BASE_URL}/tv/${id}/season/${seasonNumber}`,
+          { params: { api_key: apiKey, language: "en-US" } }
         );
-        if (!response.ok)
-          throw new Error(`Failed to fetch episodes: ${response.statusText}`);
-        const data = await response.json();
-        setEpisodes(data.episodes);
+        setEpisodes(response.data.episodes || []);
       } catch (error) {
         console.error("Error fetching episodes:", error);
+        setEpisodes([]);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchEpisodes();
-  }, [id, apiKey, selectedSeason]);
-
-  // Fetch recommended TV shows
+  }, [id, apiKey, seasonNumber]);
+  return { episodes, loadingEpisodes: loading };
+};
+const useRecommendedShows = (id, apiKey) => {
+  const [recommendedShows, setRecommendedShows] = useState([]);
   useEffect(() => {
-    if (!id || !apiKey) return;
-
     const fetchRecommendedShows = async () => {
+      if (!id || !apiKey || id === "0") {
+        setRecommendedShows([]);
+        return;
+      }
       try {
-        const response = await fetch(
-          `${BASE_URL}/tv/${id}/recommendations?api_key=${apiKey}&language=en-US&page=1`
+        const response = await axios.get(
+          `${BASE_URL}/tv/${id}/recommendations`,
+          { params: { api_key: apiKey, language: "en-US", page: 1 } }
         );
-        if (!response.ok)
-          throw new Error(
-            `Failed to fetch recommended shows: ${response.statusText}`
-          );
-        const data = await response.json();
-        setRecommendedShows(data.results.slice(0, 10));
+        const filtered = response.data.results
+          .filter((s) => s.poster_path)
+          .slice(0, 10);
+        setRecommendedShows(filtered);
       } catch (error) {
         console.error("Error fetching recommended shows:", error);
+        setRecommendedShows([]);
       }
     };
-
-    fetchRecommendedShows();
+    if (id && id !== "0") fetchRecommendedShows();
+    else setRecommendedShows([]);
   }, [id, apiKey]);
-
-  // Fetch additional details (cast and trailer)
+  return { recommendedShows };
+};
+const useTVAdditionalDetails = (tvShow, apiKey) => {
+  const [cast, setCast] = useState([]);
+  const [trailerKey, setTrailerKey] = useState("");
+  const [creator, setCreator] = useState(null);
   useEffect(() => {
-    if (!tvShow || !tvShow.id || !apiKey) return;
-
+    if (!tvShow || !tvShow.id || !apiKey) {
+      setCast([]);
+      setTrailerKey("");
+      setCreator(null);
+      return;
+    }
     const fetchAdditionalDetails = async () => {
       try {
-        const [castResponse, trailerResponse] = await Promise.all([
+        const [creditsResponse, videosResponse] = await Promise.all([
           axios.get(`${BASE_URL}/tv/${tvShow.id}/credits`, {
             params: { api_key: apiKey, language: "en-US" },
           }),
@@ -212,383 +138,684 @@ const TVShowPlayerPage = () => {
             params: { api_key: apiKey, language: "en-US" },
           }),
         ]);
-
-        if (castResponse.status === 200) {
-          setCast(castResponse.data.cast.slice(0, 5));
-        } else if (castResponse.status === 404) {
-          console.warn(`Credits not found for TV show ID: ${tvShow.id}`);
-          setCast([]);
-        } else {
-          console.error(
-            `Error fetching cast data. Status: ${castResponse.status}`
-          );
-        }
-
-        if (trailerResponse.status === 200) {
-          const trailer = trailerResponse.data.results.find(
-            (vid) => vid.type === "Trailer" && vid.site === "YouTube"
-          );
-          setTrailerKey(trailer ? trailer.key : "");
-        } else if (trailerResponse.status === 404) {
-          console.warn(`Trailers not found for TV show ID: ${tvShow.id}`);
-          setTrailerKey("");
-        } else {
-          console.error(
-            `Error fetching trailer data. Status: ${trailerResponse.status}`
-          );
-        }
+        setCast(creditsResponse.data.cast.slice(0, 6));
+        const creatorData = tvShow.created_by?.[0];
+        setCreator(creatorData || null);
+        const trailer = videosResponse.data.results.find(
+          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+        );
+        setTrailerKey(trailer ? trailer.key : "");
       } catch (error) {
         console.error("Error fetching additional TV show data:", error);
+        setCast([]);
+        setTrailerKey("");
+        setCreator(null);
       }
     };
-
     fetchAdditionalDetails();
   }, [tvShow, apiKey]);
+  return { cast, trailerKey, creator };
+};
 
-  // Check if the episode is already in favorites
+// --- Main Component ---
+const TVShowPlayerPage = () => {
+  const router = useRouter();
+  const { tv_id: id } = router.query;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+
+  const isRouterReady = router.isReady;
+  const validId = isRouterReady ? id || null : null;
+
+  const { tvShow, loading: loadingShow, error } = useTVShow(validId, apiKey);
+  const { recommendedShows } = useRecommendedShows(validId, apiKey);
+  const { cast, trailerKey, creator } = useTVAdditionalDetails(tvShow, apiKey);
+
+  const [selectedSeason, setSelectedSeason] = useState(1);
+  const [selectedEpisode, setSelectedEpisode] = useState(1);
+  const { episodes, loadingEpisodes } = useTVSeasonsEpisodes(
+    validId,
+    selectedSeason,
+    apiKey
+  );
+
+  const [rating, setRating] = useState(0);
+  const [savedRating, setSavedRating] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState("");
+  const [showRecommend, setShowRecommend] = useState(false);
+
+  const currentUser = auth.currentUser;
+  const seasonSectionRef = useRef(null);
+
+  // Fetch User-Specific Data (keep as is)
   useEffect(() => {
-    const checkIfFavorite = async () => {
-      if (auth.currentUser && tvShow && selectedEpisode) {
-        const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
-        const favoritesDoc = await getDoc(favoritesRef);
-        if (favoritesDoc.exists()) {
-          const episodes = favoritesDoc.data().episodes || [];
-          setIsFavorite(
-            episodes.some(
-              (e) =>
-                e.tvShowId === tvShow.id &&
-                e.seasonNumber === selectedSeason &&
-                e.episodeNumber === selectedEpisode
-            )
-          );
-        }
+    if (!currentUser || !validId) {
+      setIsFavorite(false);
+      setSavedRating(null);
+      setFriends([]);
+      return;
+    }
+    const fetchData = async () => {
+      const favoritesRef = doc(db, "favorites", currentUser.uid);
+      const favoritesDoc = await getDoc(favoritesRef);
+      if (favoritesDoc.exists())
+        setIsFavorite(
+          (favoritesDoc.data().shows || []).some(
+            (s) => s.id === parseInt(validId)
+          )
+        );
+      else setIsFavorite(false);
+      const ratingsRef = doc(db, "ratings", currentUser.uid);
+      const ratingsDoc = await getDoc(ratingsRef);
+      let foundRating = null;
+      if (ratingsDoc.exists()) {
+        const showRating = (ratingsDoc.data().ratings || []).find(
+          (r) => r.tvShowId === parseInt(validId)
+        );
+        if (showRating) foundRating = showRating.rating;
+      }
+      setSavedRating(foundRating);
+      setRating(foundRating || 0);
+      const friendsRef = doc(db, "friends", currentUser.uid);
+      const friendsDoc = await getDoc(friendsRef);
+      if (friendsDoc.exists()) {
+        const friendIds = friendsDoc.data().friends || [];
+        const friendsData = await Promise.all(
+          friendIds.map(async (friendId) => {
+            const userRef = doc(db, "users", friendId);
+            const userDoc = await getDoc(userRef);
+            return userDoc.exists()
+              ? { uid: friendId, username: userDoc.data().username }
+              : null;
+          })
+        );
+        setFriends(friendsData.filter(Boolean));
+      } else {
+        setFriends([]);
       }
     };
-    checkIfFavorite();
-  }, [tvShow, selectedSeason, selectedEpisode]);
+    fetchData();
+  }, [currentUser, validId]);
 
-  // Add/Remove episode from favorites
-  const toggleFavorite = async () => {
-    if (!auth.currentUser || !tvShow || !selectedEpisode) return;
-
-    const favoritesRef = doc(db, "favorites", auth.currentUser.uid);
-    const favoritesDoc = await getDoc(favoritesRef);
-
-    if (isFavorite) {
-      await updateDoc(favoritesRef, {
-        episodes: arrayRemove({
-          tvShowId: tvShow.id,
-          tvShowTitle: tvShow.name,
-          seasonNumber: selectedSeason,
-          episodeNumber: selectedEpisode,
-        }),
-      });
-    } else {
-      if (favoritesDoc.exists()) {
-        await updateDoc(favoritesRef, {
-          episodes: arrayUnion({
-            tvShowId: tvShow.id,
-            tvShowTitle: tvShow.name,
-            seasonNumber: selectedSeason,
-            episodeNumber: selectedEpisode,
-          }),
+  // Actions (toggleFavoriteShow, handleShowRating, saveShowRating, recommendShow - keep as is)
+  const toggleFavoriteShow = async () => {
+    if (!currentUser || !tvShow) return toast.error("Please log in.");
+    const favoritesRef = doc(db, "favorites", currentUser.uid);
+    const showData = {
+      id: tvShow.id,
+      name: tvShow.name,
+      poster_path: tvShow.poster_path,
+    };
+    try {
+      if (isFavorite) {
+        await updateDoc(favoritesRef, { shows: arrayRemove(showData) });
+        toast.success(`Removed "${tvShow.name}" from favorites`);
+      } else {
+        await setDoc(
+          favoritesRef,
+          { shows: arrayUnion(showData) },
+          { merge: true }
+        );
+        toast.success(`Added "${tvShow.name}" to favorites`);
+      }
+      setIsFavorite((prev) => !prev);
+    } catch (err) {
+      console.error("Error toggling show favorite:", err);
+      toast.error("Failed to update favorites.");
+    }
+  };
+  const handleShowRating = (newRating) => {
+    setRating(newRating);
+    saveShowRating(tvShow.id, newRating);
+  };
+  const saveShowRating = async (tvShowId, newRating) => {
+    if (!currentUser || newRating === 0) return;
+    const ratingsRef = doc(db, "ratings", currentUser.uid);
+    const ratingData = { tvShowId: parseInt(tvShowId), rating: newRating };
+    try {
+      const ratingsDoc = await getDoc(ratingsRef);
+      if (ratingsDoc.exists()) {
+        const currentRatings = ratingsDoc.data().ratings || [];
+        const filteredRatings = currentRatings.filter(
+          (r) => r.tvShowId !== parseInt(tvShowId)
+        );
+        await updateDoc(ratingsRef, {
+          ratings: [...filteredRatings, ratingData],
         });
       } else {
-        await setDoc(favoritesRef, {
-          movies: [],
-          episodes: [
-            {
-              tvShowId: tvShow.id,
-              tvShowTitle: tvShow.name,
-              seasonNumber: selectedSeason,
-              episodeNumber: selectedEpisode,
-            },
-          ],
-        });
+        await setDoc(ratingsRef, { ratings: [ratingData] });
       }
+      setSavedRating(newRating);
+      toast.success(`Rated "${tvShow.name}" ${newRating}/10`);
+    } catch (err) {
+      console.error("Error saving show rating:", err);
+      toast.error("Failed to save rating.");
+      setRating(savedRating || 0);
     }
-    setIsFavorite((prev) => !prev);
+  };
+  const recommendShow = async () => {
+    if (!currentUser || !selectedFriend || !tvShow)
+      return toast.error("Please select a friend.");
+    const recommendationRef = doc(db, "recommendations", selectedFriend);
+    const showData = {
+      id: tvShow.id,
+      name: tvShow.name,
+      poster_path: tvShow.poster_path,
+      recommendedBy: currentUser.uid,
+      recommendedAt: new Date().toISOString(),
+      type: "tv",
+    };
+    try {
+      await setDoc(
+        recommendationRef,
+        { recommendations: arrayUnion(showData) },
+        { merge: true }
+      );
+      const friend = friends.find((f) => f.uid === selectedFriend);
+      toast.success(
+        `Recommended "${tvShow.name}" to ${friend?.username || "friend"}`
+      );
+      setSelectedFriend("");
+      setShowRecommend(false);
+    } catch (error) {
+      console.error("Error recommending show:", error);
+      toast.error("Error recommending show.");
+    }
   };
 
-  // Save watched episode to history
+  // Save to History (keep as is)
   useEffect(() => {
     const saveToHistory = async () => {
-      if (!auth.currentUser || !selectedEpisode || !tvShow) return;
-
-      const historyRef = doc(db, "history", auth.currentUser.uid);
-      const historyDoc = await getDoc(historyRef);
-
-      if (historyDoc.exists()) {
-        await updateDoc(historyRef, {
-          episodes: arrayUnion({
-            tvShowId: tvShow.id,
-            tvShowTitle: tvShow.name,
-            seasonNumber: selectedSeason,
-            episodeNumber: selectedEpisode,
-            watchedAt: new Date().toISOString(),
-          }),
-        });
-      } else {
-        await setDoc(historyRef, {
-          movies: [],
-          episodes: [
-            {
-              tvShowId: tvShow.id,
-              tvShowTitle: tvShow.name,
-              seasonNumber: selectedSeason,
-              episodeNumber: selectedEpisode,
-              watchedAt: new Date().toISOString(),
-            },
-          ],
-        });
+      if (
+        !currentUser ||
+        !tvShow ||
+        !selectedSeason ||
+        !selectedEpisode ||
+        selectedEpisode === 0
+      )
+        return;
+      const historyRef = doc(db, "history", currentUser.uid);
+      const episodeData = {
+        tvShowId: tvShow.id,
+        tvShowName: tvShow.name,
+        seasonNumber: selectedSeason,
+        episodeNumber: selectedEpisode,
+        watchedAt: new Date().toISOString(),
+        poster_path: tvShow.poster_path,
+      };
+      try {
+        const historyDoc = await getDoc(historyRef);
+        if (historyDoc.exists()) {
+          const recentEpisodes = (historyDoc.data().episodes || []).slice(-10);
+          const alreadyExists = recentEpisodes.some(
+            (e) =>
+              e.tvShowId === tvShow.id &&
+              e.seasonNumber === selectedSeason &&
+              e.episodeNumber === selectedEpisode
+          );
+          if (!alreadyExists)
+            await updateDoc(historyRef, { episodes: arrayUnion(episodeData) });
+        } else {
+          await setDoc(historyRef, { movies: [], episodes: [episodeData] });
+        }
+      } catch (err) {
+        console.error("Error saving episode to history:", err);
       }
     };
+    if (selectedEpisode && selectedEpisode > 0) saveToHistory();
+  }, [tvShow, selectedSeason, selectedEpisode, currentUser]);
 
-    saveToHistory();
-  }, [selectedEpisode, tvShow, selectedSeason]);
-
-  // Save rating for the TV show
-  const saveRating = async (tvShowId, rating) => {
-    if (!auth.currentUser) return;
-
-    const ratingsRef = doc(db, "ratings", auth.currentUser.uid);
-    const ratingsDoc = await getDoc(ratingsRef);
-
-    if (ratingsDoc.exists()) {
-      await updateDoc(ratingsRef, {
-        ratings: arrayUnion({ tvShowId, rating }),
-      });
-    } else {
-      await setDoc(ratingsRef, {
-        ratings: [{ tvShowId, rating }],
-      });
-    }
-  };
-
-  // Handle loading and error states
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <NavBar />
-        <p className="text-white">Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <NavBar />
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (!tvShow) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <NavBar />
-        <p className="text-red-500">TV Show not found</p>
-      </div>
-    );
-  }
-
-  // Scroll to top when an episode is selected
+  // --- Episode Click Handler (with Scroll to Top) ---
   const handleEpisodeClick = (episodeNumber) => {
     setSelectedEpisode(episodeNumber);
+    // Scroll window to top smoothly
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // --- Season Change Handler (keep as is) ---
+  const handleSeasonChange = (seasonNum) => {
+    setSelectedSeason(seasonNum);
+    setSelectedEpisode(1); // Reset episode selection
+  };
+
+  // --- Render States ---
+  if (!isRouterReady || loadingShow) {
+    return (
+      <div className="min-h-screen mt-16 bg-primary flex items-center justify-center">
+        {" "}
+        <NavBar /> <Mosaic color="#DAA520" size="medium" />{" "}
+      </div>
+    );
+  } // Added mt-16
+  if (error) {
+    return (
+      <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4">
+        {" "}
+        <NavBar />{" "}
+        <div className="text-center">
+          {" "}
+          <h2 className="text-2xl text-red-500 mb-4">
+            Error Loading Show
+          </h2>{" "}
+          <p className="text-textsecondary mb-6">{error}</p>{" "}
+          <button
+            onClick={() => router.push("/home")}
+            className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"
+          >
+            {" "}
+            Go to Home{" "}
+          </button>{" "}
+        </div>{" "}
+        <Footer />{" "}
+      </div>
+    );
+  } // Added mt-16
+  if (!tvShow) {
+    return (
+      <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4">
+        {" "}
+        <NavBar />{" "}
+        <div className="text-center">
+          {" "}
+          <h2 className="text-2xl text-yellow-500 mb-4">
+            TV Show Not Found
+          </h2>{" "}
+          <p className="text-textsecondary mb-6">
+            The requested TV show could not be found.
+          </p>{" "}
+          <button
+            onClick={() => router.push("/home")}
+            className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"
+          >
+            {" "}
+            Go to Home{" "}
+          </button>{" "}
+        </div>{" "}
+        <Footer />{" "}
+      </div>
+    );
+  } // Added mt-16
+
+  // --- Main Render ---
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col pt-20">
+    // --- ADDED MARGIN TOP (mt-16) ---
+    <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col font-poppins">
+      <Toaster
+        position="bottom-center"
+        toastOptions={{ className: "bg-secondary text-textprimary" }}
+      />
       <NavBar />
-      <main className="flex-1 p-6 space-y-8 max-w-6xl mx-auto">
-        {/* Video Player Section (Similar to Movie Player) */}
-        <div className="w-full rounded-lg overflow-hidden shadow-lg bg-black aspect-video">
+      {/* Optional: Blurred backdrop */}
+      {tvShow.backdrop_path && (
+        <div
+          className="absolute top-0 left-0 w-full h-[50vh] md:h-[60vh] -z-10 overflow-hidden"
+          aria-hidden="true"
+        >
+          {" "}
+          <img
+            src={`${IMAGE_BASE_URL_ORIGINAL}${tvShow.backdrop_path}`}
+            alt=""
+            className="w-full h-full object-cover opacity-20 blur-md scale-110"
+          />{" "}
+          <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/50"></div>{" "}
+        </div>
+      )}
+
+      {/* Reverted main padding, outer div has margin */}
+      <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-6xl mx-auto w-full">
+        {/* --- IFRAME PLAYER SECTION --- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full rounded-lg overflow-hidden shadow-lg bg-black aspect-video border border-secondary-light"
+        >
+          {/* WARNING: Using vidlink.pro can be unreliable/insecure/infringing. */}
           <iframe
-            src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=63b8bc&secondaryColor=a2a2a2&iconColor=eefdec&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
+            // Use TV show link with updated theme colors
+            src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA`}
             frameBorder="0"
             allowFullScreen
-            sandbox
+            // sandbox="allow-scripts allow-same-origin"
             className="w-full h-full"
+            title={`${tvShow.name} Player - S${selectedSeason} E${selectedEpisode}`} // More specific title
           ></iframe>
-        </div>
+        </motion.div>
+        {/* --- END IFRAME PLAYER SECTION --- */}
 
-        {/* Action Buttons (Similar to Movie Player) */}
-        <div className="flex flex-col items-center space-y-4 sm:space-y-0 sm:flex-row sm:justify-center sm:space-x-4">
-          <button
-            onClick={toggleFavorite}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${
-              isFavorite ? "bg-red-500" : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            <FaHeart
-              className={`${isFavorite ? "text-white" : "text-gray-300"}`}
-            />
-            <span className="hidden sm:inline">
-              {isFavorite ? "Remove" : "Favorite"}
-            </span>
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="number"
-              min="0"
-              max="10"
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
-              className="p-2 border rounded bg-gray-700 text-white w-20"
-              placeholder="Rate (0-10)"
-            />
-            <button
-              onClick={() => saveRating(tvShow.id, rating)}
-              className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
-            >
-              <FaStar className="text-yellow-400" />
-              <span className="hidden sm:inline">Rate</span>
-            </button>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <select
-              value={selectedFriend}
-              onChange={(e) => setSelectedFriend(e.target.value)}
-              className="p-2 border rounded bg-gray-700 text-white w-full sm:w-64"
-            >
-              <option value="">Select a friend</option>
-              {friends.map((friendId) => (
-                <option key={friendId} value={friendId}>
-                  {friendUsernames[friendId] || friendId}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={recommendEpisode}
-              className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
-            >
-              <FaShare className="text-white" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-          </div>
-        </div>
-
-        {/* TV Show Details Section (Similar to Movie Player Details) */}
-        <section className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-3xl font-bold mb-4">{tvShow.name}</h2>
-          <div className="flex flex-col md:flex-row gap-8">
-            <img
-              src={`${IMAGE_BASE_URL}${tvShow.poster_path}`}
-              alt={tvShow.name}
-              className="w-full md:w-64 object-cover rounded-lg"
-            />
+        {/* TV Show Details & Actions Section */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-secondary rounded-lg shadow-lg p-4 md:p-6"
+        >
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+            {/* Left Side: Poster */}
+            <div className="flex-shrink-0 w-full md:w-48 lg:w-64 mx-auto md:mx-0">
+              <img
+                src={`${IMAGE_BASE_URL_W500}${tvShow.poster_path}`}
+                alt={`${tvShow.name} Poster`}
+                className="w-full h-auto object-cover rounded-md shadow-md"
+              />
+            </div>
+            {/* Right Side: Info & Actions */}
             <div className="flex-1">
-              <p className="text-gray-300 mb-4">{tvShow.overview}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-secondary">First Air Date:</span>
-                  <p>{tvShow.first_air_date}</p>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-textprimary mb-1">
+                {tvShow.name}
+              </h1>
+              {tvShow.tagline && (
+                <p className="text-sm md:text-md italic text-textsecondary mb-3">
+                  {tvShow.tagline}
+                </p>
+              )}
+              {/* Metadata row */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 text-sm">
+                {tvShow.genres?.map((genre) => (
+                  <span
+                    key={genre.id}
+                    className="text-xs uppercase font-medium text-textsecondary border border-secondary-light px-2 py-0.5 rounded"
+                  >
+                    {genre.name}
+                  </span>
+                ))}
+                <span className="text-textsecondary">•</span>
+                <div className="flex items-center gap-1 text-accent">
+                  <FaStar />{" "}
+                  <span className="font-semibold text-textprimary">
+                    {tvShow.vote_average?.toFixed(1)}
+                  </span>{" "}
+                  <span className="text-xs text-textsecondary">
+                    ({tvShow.vote_count?.toLocaleString()})
+                  </span>{" "}
                 </div>
-                <div>
-                  <span className="text-secondary">Rating:</span>
-                  <p>{tvShow.vote_average}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Genres:</span>
-                  <p className="text-orange-600">
-                    {tvShow.genres.map((genre) => genre.name).join(", ")}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-secondary">Status:</span>
-                  <p>{tvShow.status}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Seasons:</span>
-                  <p>{tvShow.number_of_seasons}</p>
-                </div>
-                <div>
-                  <span className="text-secondary">Episodes:</span>
-                  <p>{tvShow.number_of_episodes}</p>
-                </div>
+                <span className="text-textsecondary">•</span>
+                <span className="text-textsecondary">
+                  {tvShow.first_air_date?.substring(0, 4)}
+                </span>
+                <span className="text-textsecondary">•</span>
+                <span className="text-textsecondary">
+                  {tvShow.number_of_seasons} Season
+                  {tvShow.number_of_seasons !== 1 ? "s" : ""}
+                </span>
               </div>
-              {trailerKey && (
-                <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-4">Trailer</h3>
-                  <div className="relative w-full aspect-video">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${trailerKey}`} // Correct URL
-                      frameBorder="0"
-                      allowFullScreen
-                      className="w-full h-full rounded-lg"
-                      ref={seasonSectionRef}
-                    ></iframe>
-                  </div>
+              {/* Action Buttons (Operating on SHOW level) */}
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={toggleFavoriteShow}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-200 ${
+                    isFavorite
+                      ? "bg-accent/20 text-accent border border-accent"
+                      : "bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light"
+                  }`}
+                  title={
+                    isFavorite ? "Remove from Favorites" : "Add to Favorites"
+                  }
+                >
+                  {" "}
+                  {isFavorite ? <FaHeart /> : <FaRegHeart />}{" "}
+                  <span>Favorite</span>{" "}
+                </motion.button>
+                <div className="flex items-center gap-1 bg-secondary-light/50 px-3 py-1.5 rounded-md border border-transparent group">
+                  {" "}
+                  <span className="text-sm text-textsecondary mr-1">
+                    Rate:
+                  </span>{" "}
+                  {[...Array(5)].map((_, index) => {
+                    const ratingValue = index + 1;
+                    return (
+                      <motion.button
+                        key={ratingValue}
+                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.2, y: -2 }}
+                        onClick={() => handleShowRating(ratingValue * 2)}
+                        className="text-lg transition-colors duration-150"
+                        title={`Rate ${ratingValue * 2}/10`}
+                      >
+                        {" "}
+                        {ratingValue * 2 <= rating ? (
+                          <FaStar className="text-accent" />
+                        ) : (
+                          <FaRegStar className="text-textsecondary group-hover:text-accent/70" />
+                        )}{" "}
+                      </motion.button>
+                    );
+                  })}{" "}
+                  {savedRating && (
+                    <span className="ml-2 text-xs text-accent">
+                      ({savedRating}/10 saved)
+                    </span>
+                  )}{" "}
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowRecommend(!showRecommend)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light transition-all duration-200"
+                  title="Recommend to a friend"
+                >
+                  {" "}
+                  <FaShareAlt /> <span>Recommend</span>{" "}
+                </motion.button>
+              </div>
+              {/* Recommend Friend Section (Conditional) */}
+              {showRecommend && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-secondary-light p-3 rounded-md mt-3 mb-5 overflow-hidden"
+                >
+                  {" "}
+                  <label
+                    htmlFor="friendSelect"
+                    className="block text-xs text-textsecondary mb-1"
+                  >
+                    Select friend:
+                  </label>{" "}
+                  <div className="flex items-center gap-2">
+                    {" "}
+                    <select
+                      id="friendSelect"
+                      value={selectedFriend}
+                      onChange={(e) => setSelectedFriend(e.target.value)}
+                      className="flex-grow p-2 border-none rounded bg-secondary text-textprimary text-sm focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
+                      style={{
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        appearance: "none",
+                      }}
+                    >
+                      {" "}
+                      <option value="">-- Select --</option>{" "}
+                      {friends.map((friend) => (
+                        <option key={friend.uid} value={friend.uid}>
+                          {friend.username}
+                        </option>
+                      ))}{" "}
+                    </select>{" "}
+                    <button
+                      onClick={recommendShow}
+                      disabled={!selectedFriend}
+                      className="flex-shrink-0 bg-accent hover:bg-accent-hover text-primary font-semibold px-4 py-2 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Send
+                    </button>{" "}
+                  </div>{" "}
+                </motion.div>
+              )}
+              {/* Overview */}
+              <div>
+                <h2 className="text-lg font-semibold text-textprimary mb-2">
+                  Overview
+                </h2>
+                <p className="text-sm text-textsecondary leading-relaxed">
+                  {tvShow.overview}
+                </p>
+              </div>
+              {/* Creator */}
+              {creator && (
+                <div className="mt-4">
+                  {" "}
+                  <h3 className="text-base font-semibold text-textprimary">
+                    Created by
+                  </h3>{" "}
+                  <p className="text-sm text-textsecondary">{creator.name}</p>{" "}
                 </div>
               )}
             </div>
           </div>
-        </section>
+
+          {/* Cast Section */}
+          {cast.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-secondary-light">
+              {" "}
+              <h3 className="text-lg font-semibold text-textprimary mb-3">
+                Top Cast
+              </h3>{" "}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                {" "}
+                {cast.map((actor) => (
+                  <div key={actor.cast_id} className="text-center">
+                    {" "}
+                    <img
+                      src={
+                        actor.profile_path
+                          ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                          : "/placeholder.jpg"
+                      }
+                      alt={actor.name}
+                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover mx-auto mb-1 shadow-md border-2 border-secondary-light"
+                    />{" "}
+                    <p className="text-xs md:text-sm text-textprimary font-medium line-clamp-1">
+                      {actor.name}
+                    </p>{" "}
+                    <p className="text-xs text-textsecondary line-clamp-1">
+                      {actor.character}
+                    </p>{" "}
+                  </div>
+                ))}{" "}
+              </div>{" "}
+            </div>
+          )}
+
+          {/* Relocated & Resized Trailer Section */}
+          {trailerKey && (
+            <div className="mt-6 pt-6 border-t border-secondary-light">
+              {" "}
+              <h3 className="text-lg font-semibold text-textprimary mb-3">
+                Trailer
+              </h3>{" "}
+              <div className="relative max-w-xl mx-auto aspect-video rounded-lg overflow-hidden shadow-md border border-secondary-light">
+                {" "}
+                <iframe
+                  src={`https://www.youtube.com/embed/${trailerKey}`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                  title={`${tvShow.name} Trailer`}
+                ></iframe>{" "}
+              </div>{" "}
+            </div>
+          )}
+        </motion.section>
 
         {/* Season and Episodes Selection */}
-        <section className="w-full" > {/* Add ref here */}
-          <h3 className="text-2xl font-bold mb-4">Seasons</h3>
-          <div className="flex flex-wrap gap-2 mb-6">
-            {seasons
-              .filter((season) => season.season_number !== 0) // Filter out season 0
-              .map((season) => (
-                <button
-                  key={season.id}
-                  onClick={() => {
-                    setSelectedSeason(season.season_number);
-                    setSelectedEpisode(null);
-                  }}
-                  className={`px-4 py-2 rounded-lg ${
-                    selectedSeason === season.season_number
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  Season {season.season_number}
-                </button>
-              ))}
+        <section
+          ref={seasonSectionRef}
+          className="bg-secondary rounded-lg shadow-lg p-4 md:p-6"
+        >
+          <div className="mb-6">
+            <h3 className="text-xl md:text-2xl font-bold mb-4 text-textprimary">
+              Seasons
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {(tvShow.seasons || [])
+                .filter(
+                  (season) =>
+                    season.season_number !== 0 && season.episode_count > 0
+                )
+                .map((season) => (
+                  <button
+                    key={season.id}
+                    onClick={() => handleSeasonChange(season.season_number)}
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      selectedSeason === season.season_number
+                        ? "bg-accent text-primary shadow-md"
+                        : "bg-secondary-light text-textsecondary hover:bg-secondary-light/70 hover:text-textprimary"
+                    }`}
+                  >
+                    {" "}
+                    Season {season.season_number}{" "}
+                  </button>
+                ))}
+            </div>
           </div>
-          <h3 className="text-2xl font-bold mb-4">
-            Episodes (Season {selectedSeason})
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <AnimatePresence>
-              {episodes.map((episode) => (
-                <motion.div
-                  key={episode.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={() => handleEpisodeClick(episode.episode_number)}
-                >
+          <div>
+            <h3 className="text-xl md:text-2xl font-bold mb-4 text-textprimary">
+              {" "}
+              Episodes {selectedSeason ? `(Season ${selectedSeason})` : ""}{" "}
+            </h3>
+            {loadingEpisodes ? (
+              <div className="flex justify-center items-center h-40">
+                <Mosaic color="#DAA520" size="small" />
+              </div>
+            ) : episodes.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {episodes.map((episode) => (
                   <EpisodeCard
+                    key={episode.id}
                     episode={episode}
-                    onWatchClick={() =>
-                      setSelectedEpisode(episode.episode_number)
-                    }
-                    tvShowId={tvShow.id} // Pass the tvShowId
+                    showId={tvShow.id}
                     seasonNumber={selectedSeason}
+                    isSelected={selectedEpisode === episode.episode_number}
+                    onWatchClick={() =>
+                      handleEpisodeClick(episode.episode_number)
+                    }
+                    // Pass theme colors if needed by EpisodeCard
+                    theme={{
+                      accent: "accent",
+                      secondary: "secondary-light",
+                      textPrimary: "text-textprimary",
+                      textSecondary: "text-textsecondary",
+                    }}
                   />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                ))}
+              </div>
+            ) : (
+              <p className="text-textsecondary italic">
+                No episodes found for this season.
+              </p>
+            )}
           </div>
         </section>
 
-        {/* Recommended Shows Section (Similar to Movie Player Recommended) */}
-        <section className="w-full">
-          <h2 className="text-2xl font-bold mb-4">Recommended Shows</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {recommendedShows.map((show) => (
-              <SearchCard key={show.id} movie={show} />
-            ))}
-          </div>
-        </section>
+        {/* Recommended Shows Section */}
+        {recommendedShows.length > 0 && (
+          <section className="mt-6 md:mt-8">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-textprimary">
+              Recommended Shows
+            </h2>
+            {/* Added scrollbar-hide */}
+            <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent scrollbar-hide">
+              {recommendedShows.map((recShow) => (
+                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44">
+                  <SearchCard
+                    movie={{
+                      ...recShow,
+                      media_type: "tv",
+                      poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}`,
+                    }}
+                    onClick={() => router.push(`/tv/${recShow.id}`)}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
