@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+// pages/buddies.js (or wherever it resides)
+import React, { useState, useEffect, useCallback } from "react";
 import { auth, db } from "../../firebase"; // Assuming firebase config is correct
 import NavBar from "../../components/NavBar"; // Assuming NavBar component exists
 import {
@@ -6,7 +7,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteDoc, // Added for cancelling requests
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   collection,
@@ -14,12 +15,22 @@ import {
   where,
   getDocs,
   onSnapshot,
-  limit
+  limit,
 } from "firebase/firestore";
-import { Mosaic } from "react-loading-indicators"; // Or your preferred loader
+import { Toaster } from 'react-hot-toast';
+import { Mosaic } from "react-loading-indicators";
 import { useRouter } from "next/router";
+import {
+  FaUserPlus,
+  FaUserCheck,
+  FaUserTimes,
+  FaUserClock,
+  FaCheck,
+  FaTimes,
+  FaTrashAlt,
+} from "react-icons/fa"; // Import icons
 
-// Consistent User List Item Component (Minor refinement for clarity)
+// --- Updated UserListItem with Theme ---
 const UserListItem = ({
   user,
   type, // 'friend', 'request', 'search'
@@ -27,92 +38,122 @@ const UserListItem = ({
   onReject,
   onUnfriend,
   onAddFriend,
-  onCancelRequest, // Added for cancelling
+  onCancelRequest,
   isRequestSent,
   isLoading,
 }) => {
   const handleAction = (action, userId) => {
-    if (!isLoading) {
-      action(userId);
+    if (!isLoading) action(userId);
+  };
+
+  // Define button styles based on type and state using theme colors
+  const getButtonConfig = () => {
+    switch (type) {
+      case "request":
+        return [
+          {
+            label: "Accept",
+            action: onAccept,
+            icon: FaCheck,
+            userId: user.fromUserId,
+            className:
+              "bg-emerald-600/80 hover:bg-emerald-600 text-white border border-emerald-600",
+          },
+          {
+            label: "Reject",
+            action: onReject,
+            icon: FaTimes,
+            userId: user.fromUserId,
+            className:
+              "bg-red-600/80 hover:bg-red-600 text-white border border-red-600",
+          },
+          // Alternative subtle style:
+          // { label: "Accept", action: onAccept, icon: FaCheck, userId: user.fromUserId, className: "bg-green-700/20 text-green-300 border border-green-600/50 hover:bg-green-600/30 hover:text-green-200"},
+          // { label: "Reject", action: onReject, icon: FaTimes, userId: user.fromUserId, className: "bg-red-700/20 text-red-300 border border-red-600/50 hover:bg-red-600/30 hover:text-red-200" },
+        ];
+      case "friend":
+        return [
+          {
+            label: "Unfriend",
+            action: onUnfriend,
+            icon: FaUserTimes,
+            userId: user.uid,
+            className:
+              "bg-red-600/80 hover:bg-red-600 text-white border border-red-600",
+          },
+          // Alternative subtle style:
+          // { label: "Unfriend", action: onUnfriend, icon: FaTrashAlt, userId: user.uid, className: "bg-red-700/20 text-red-300 border border-red-600/50 hover:bg-red-600/30 hover:text-red-200" }
+        ];
+      case "search":
+        if (isRequestSent) {
+          return [
+            {
+              label: "Cancel Request",
+              action: onCancelRequest,
+              icon: FaUserClock,
+              userId: user.uid,
+              className:
+                "bg-secondary-light text-textsecondary hover:bg-secondary hover:text-textprimary border border-secondary-light",
+            },
+          ];
+        } else {
+          return [
+            {
+              label: "Add Friend",
+              action: onAddFriend,
+              icon: FaUserPlus,
+              userId: user.uid,
+              className:
+                "bg-accent hover:bg-accent-hover text-primary border border-transparent",
+            },
+          ]; // Accent for Add
+        }
+      default:
+        return [];
     }
   };
 
+  const buttons = getButtonConfig();
+
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg mb-3 bg-gray-800 border border-gray-700 shadow-sm hover:bg-gray-750 transition-colors duration-150 ease-in-out">
+    // Themed list item background, border, hover
+    <div className="flex items-center justify-between p-3 md:p-4 rounded-lg mb-3 bg-secondary border border-secondary-light shadow-sm hover:bg-secondary-light transition-colors duration-150 ease-in-out">
       <div className="flex items-center overflow-hidden mr-3">
         <img
           src={
             user.avatar ||
-            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" // Default avatar
+            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
           }
           alt={`${user.username}'s Avatar`}
-          className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
+          className="w-10 h-10 rounded-full mr-3 flex-shrink-0 border-2 border-secondary-light" // Added border
         />
-        <p className="text-md font-medium text-gray-100 truncate">
+        {/* Themed text */}
+        <p className="text-md font-medium text-textprimary truncate">
           {user.username || "Unknown User"}
         </p>
       </div>
-      <div className="flex-shrink-0 flex gap-2">
-        {type === "request" && (
-          <>
-            <button
-              onClick={() => handleAction(onAccept, user.fromUserId)} // Use fromUserId for requests
-              className={`bg-green-600 text-white py-1 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={isLoading}
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => handleAction(onReject, user.fromUserId)} // Use fromUserId for requests
-              className={`bg-red-600 text-white py-1 px-3 rounded text-sm font-medium hover:bg-red-700 transition-colors ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={isLoading}
-            >
-              Reject
-            </button>
-          </>
-        )}
-        {type === "friend" && (
+      {/* Buttons Section */}
+      <div className="flex-shrink-0 flex items-center gap-2">
+        {buttons.map((btn) => (
           <button
-            onClick={() => handleAction(onUnfriend, user.uid)}
-            className={`bg-red-600 text-white py-1 px-3 rounded text-sm font-medium hover:bg-red-700 transition-colors ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            key={btn.label}
+            onClick={() => handleAction(btn.action, btn.userId)}
+            // Themed button styles, consistent padding/text size
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out ${
+              btn.className
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={isLoading}
+            title={btn.label} // Tooltip for icon buttons
           >
-            Unfriend
+            {/* Optionally hide text on smaller screens */}
+            <btn.icon /> <span className="hidden sm:inline">{btn.label}</span>
           </button>
-        )}
-        {type === "search" && !isRequestSent && (
-          <button
-            onClick={() => handleAction(onAddFriend, user.uid)}
-            className={`bg-blue-600 text-white py-1 px-3 rounded text-sm font-medium hover:bg-blue-700 transition-colors ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={isLoading}
-          >
-            Add Friend
-          </button>
-        )}
-        {type === "search" && isRequestSent && (
-           <button
-            onClick={() => handleAction(onCancelRequest, user.uid)} // Use cancel action
-            className={`bg-gray-600 text-white py-1 px-3 rounded text-sm font-medium hover:bg-gray-700 transition-colors ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={isLoading}
-          >
-            Cancel Request
-          </button>
-        )}
+        ))}
       </div>
     </div>
   );
 };
-
+// --- End UserListItem ---
 
 const BuddiesPage = () => {
   const [friends, setFriends] = useState([]);
@@ -120,333 +161,275 @@ const BuddiesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sentRequests, setSentRequests] = useState({}); // Stores { userId: true } for sent requests
-  const [interactionLoading, setInteractionLoading] = useState({}); // { userId: true } while interacting
-  const [activeTab, setActiveTab] = useState("friends"); // 'friends', 'requests', 'add'
+  const [sentRequests, setSentRequests] = useState({});
+  const [interactionLoading, setInteractionLoading] = useState({});
+  const [activeTab, setActiveTab] = useState("friends");
 
   const userId = auth.currentUser?.uid;
   const router = useRouter();
 
-  // --- Data Fetching ---
-
+  // Data Fetching (Keep as is, uses onSnapshot)
   useEffect(() => {
     if (!userId) {
-      // Optional: Redirect to login if not authenticated
-      // router.push('/login');
-      setLoading(false); // Stop loading if no user
+      setLoading(false);
       return;
     }
-
     setLoading(true);
     let combinedLoading = { friends: true, requests: true, sent: true };
-
     const updateCombinedLoading = (key, value) => {
-        combinedLoading[key] = value;
-        if (!combinedLoading.friends && !combinedLoading.requests && !combinedLoading.sent) {
-            setLoading(false);
-        }
-    }
-
-    // Listener for Friends
-    const friendsRef = doc(db, "friends", userId);
-    const unsubscribeFriends = onSnapshot(friendsRef, async (docSnap) => {
-      if (docSnap.exists()) {
-        const friendIds = docSnap.data().friends || [];
-        const friendsData = await Promise.all(
-          friendIds.map(async (friendId) => {
-            const userDocRef = doc(db, "users", friendId);
-            const userDoc = await getDoc(userDocRef);
-            return userDoc.exists()
-              ? { uid: friendId, ...userDoc.data() }
-              : null;
-          })
-        );
-        setFriends(friendsData.filter(Boolean));
-      } else {
-        setFriends([]); // Handle case where friend doc doesn't exist yet
+      combinedLoading[key] = value;
+      if (
+        !combinedLoading.friends &&
+        !combinedLoading.requests &&
+        !combinedLoading.sent
+      ) {
+        setLoading(false);
       }
-      updateCombinedLoading('friends', false);
-    }, (error) => {
+    };
+    const friendsRef = doc(db, "friends", userId);
+    const unsubscribeFriends = onSnapshot(
+      friendsRef,
+      async (docSnap) => {
+        if (docSnap.exists()) {
+          const friendIds = docSnap.data().friends || [];
+          const friendsData = await Promise.all(
+            friendIds.map(async (friendId) => {
+              const userDocRef = doc(db, "users", friendId);
+              const userDoc = await getDoc(userDocRef);
+              return userDoc.exists()
+                ? { uid: friendId, ...userDoc.data() }
+                : null;
+            })
+          );
+          setFriends(friendsData.filter(Boolean));
+        } else {
+          setFriends([]);
+        }
+        updateCombinedLoading("friends", false);
+      },
+      (error) => {
         console.error("Error fetching friends:", error);
-        updateCombinedLoading('friends', false); // Ensure loading state updates on error
-    });
-
-    // Listener for Incoming Friend Requests
+        updateCombinedLoading("friends", false);
+      }
+    );
     const incomingRequestsQuery = query(
       collection(db, "friendRequests"),
       where("toUserId", "==", userId),
       where("status", "==", "pending")
     );
-    const unsubscribeRequests = onSnapshot(incomingRequestsQuery, async (snapshot) => {
-      const requestsData = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const requestData = docSnap.data();
-          const userDocRef = doc(db, "users", requestData.fromUserId);
-          const userDoc = await getDoc(userDocRef);
-          // Combine request data with user data (username, avatar etc.)
-          return userDoc.exists()
-            ? { ...requestData, uid: requestData.fromUserId, ...userDoc.data(), id: docSnap.id } // Add request ID
-            : null;
-        })
-      );
-      setFriendRequests(requestsData.filter(Boolean));
-      updateCombinedLoading('requests', false);
-    }, (error) => {
-        console.error("Error fetching friend requests:", error);
-        updateCombinedLoading('requests', false);
-    });
-
-     // Fetch Outgoing Pending Requests (run once on load or use listener if needed)
-     const fetchOutgoingRequests = async () => {
-        const outgoingRequestsQuery = query(
-            collection(db, "friendRequests"),
-            where("fromUserId", "==", userId),
-            where("status", "==", "pending")
+    const unsubscribeRequests = onSnapshot(
+      incomingRequestsQuery,
+      async (snapshot) => {
+        const requestsData = await Promise.all(
+          snapshot.docs.map(async (docSnap) => {
+            const requestData = docSnap.data();
+            const userDocRef = doc(db, "users", requestData.fromUserId);
+            const userDoc = await getDoc(userDocRef);
+            return userDoc.exists()
+              ? {
+                  ...requestData,
+                  uid: requestData.fromUserId,
+                  ...userDoc.data(),
+                  id: docSnap.id,
+                }
+              : null;
+          })
         );
-        try {
-            const snapshot = await getDocs(outgoingRequestsQuery);
-            const sentMap = {};
-            snapshot.docs.forEach(doc => {
-                sentMap[doc.data().toUserId] = true; // Store as { toUserId: true }
-            });
-            setSentRequests(sentMap);
-        } catch (error) {
-            console.error("Error fetching outgoing requests:", error);
-        } finally {
-            updateCombinedLoading('sent', false);
-        }
-     }
-     fetchOutgoingRequests();
-
-
-    // Cleanup listeners on component unmount
+        setFriendRequests(requestsData.filter(Boolean));
+        updateCombinedLoading("requests", false);
+      },
+      (error) => {
+        console.error("Error fetching friend requests:", error);
+        updateCombinedLoading("requests", false);
+      }
+    );
+    const fetchOutgoingRequests = async () => {
+      const outgoingRequestsQuery = query(
+        collection(db, "friendRequests"),
+        where("fromUserId", "==", userId),
+        where("status", "==", "pending")
+      );
+      try {
+        const snapshot = await getDocs(outgoingRequestsQuery);
+        const sentMap = {};
+        snapshot.docs.forEach((doc) => {
+          sentMap[doc.data().toUserId] = true;
+        });
+        setSentRequests(sentMap);
+      } catch (error) {
+        console.error("Error fetching outgoing requests:", error);
+      } finally {
+        updateCombinedLoading("sent", false);
+      }
+    };
+    fetchOutgoingRequests();
     return () => {
       unsubscribeFriends();
       unsubscribeRequests();
     };
-  }, [userId]); // Re-run if userId changes
+  }, [userId]);
 
-  // --- User Search ---
-
-   // --- User Search ---
-   useEffect(() => {
+  // User Search (Keep client-side search logic as is)
+  useEffect(() => {
     const searchUsers = async () => {
       const trimmedQuery = searchQuery.trim();
-      console.log("[Search Debug] Triggered with query:", trimmedQuery);
-
       if (!trimmedQuery) {
         setSearchResults([]);
-        console.log("[Search Debug] Query empty, clearing results.");
         return;
       }
-
-      // Ensure userId is available
-      if (!userId) {
-          console.log("[Search Debug] No user ID, aborting search.");
-          return;
-      }
-
+      if (!userId) return;
       const lowerCaseQuery = trimmedQuery.toLowerCase();
-      console.log("[Search Debug] Lowercase query for client filtering:", lowerCaseQuery);
-
-      // --- !!! WARNING: Client-Side Filtering Approach !!! ---
-      // This approach fetches potentially MANY users and filters in the browser.
-      // It is INEFFICIENT and DOES NOT SCALE for large user bases, leading to
-      // higher costs and slower performance. Storing a lowercase field or using
-      // a dedicated search service (like Algolia) is STRONGLY recommended.
-      // We are adding a limit(100) as a safety measure during development.
-      // Remove or adjust this limit cautiously for production.
-      // ---------------------------------------------------------
-
-      // Query without case-specific filtering - potentially fetches many documents!
-      const usersQuery = query(
-        collection(db, "users"),
-        limit(100) // IMPORTANT: Limit fetched documents for this inefficient method!
-                   // Adjust or remove only if you understand the performance/cost implications.
-      );
-
+      const usersQuery = query(collection(db, "users"), limit(100));
       try {
-        console.log("[Search Debug] Executing Firestore query (fetching potentially many users for client filtering)...");
         const usersSnapshot = await getDocs(usersQuery);
-        console.log("[Search Debug] Firestore query executed. Fetched raw docs:", usersSnapshot.size);
-
-        // Map all fetched documents
-        const allFetchedUsers = usersSnapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
-
-        // Perform case-insensitive filtering *client-side* using JavaScript
-        const filteredResults = allFetchedUsers.filter(user => {
+        const allFetchedUsers = usersSnapshot.docs.map((doc) => ({
+          uid: doc.id,
+          ...doc.data(),
+        }));
+        const filteredResults = allFetchedUsers.filter((user) => {
           const isCurrentUser = user.uid === userId;
-
-          // Check if username exists and is a string before calling toLowerCase
-          const usernameString = user.username || ""; // Default to empty string if null/undefined
-          const usernameLower = typeof usernameString === 'string' ? usernameString.toLowerCase() : "";
-
-          // Check if the lowercase username starts with the lowercase query
+          const usernameString = user.username || "";
+          const usernameLower =
+            typeof usernameString === "string"
+              ? usernameString.toLowerCase()
+              : "";
           const matchesQuery = usernameLower.startsWith(lowerCaseQuery);
-
-          // Return true if it's not the current user AND the username matches the query
           return !isCurrentUser && matchesQuery;
         });
-
-        console.log("[Search Debug] Client-side filtered results:", filteredResults);
         setSearchResults(filteredResults);
-
       } catch (error) {
-        console.error("[Search Debug] Error fetching or filtering users:", error);
-        alert("An error occurred while searching for users. Check the console for details.");
-        setSearchResults([]); // Clear results on error
+        console.error(
+          "[Search Debug] Error fetching or filtering users:",
+          error
+        );
+        setSearchResults([]);
       }
     };
-
-    // Debounce timer remains the same
-    const timerId = setTimeout(() => {
-        searchUsers();
-    }, 300);
-
+    const timerId = setTimeout(searchUsers, 300);
     return () => clearTimeout(timerId);
+  }, [searchQuery, userId, db]); // Added db dependency
 
-  }, [searchQuery, userId, db]); // Include db in dependencies
-
-  // --- Interaction Handlers (Keep original logic, adapt where needed) ---
-
+  // Interaction Handlers (Keep logic as is)
   const setLoadingState = (targetUserId, isLoading) => {
     setInteractionLoading((prev) => ({ ...prev, [targetUserId]: isLoading }));
   };
-
-  // Send Friend Request
   const handleSendFriendRequest = async (toUserId) => {
     if (!userId || !toUserId) return;
     setLoadingState(toUserId, true);
-    const requestId = `${userId}_${toUserId}`; // Unique ID for the request
-
+    const requestId = `${userId}_${toUserId}`;
     try {
       await setDoc(doc(db, "friendRequests", requestId), {
         fromUserId: userId,
         toUserId,
         status: "pending",
-        createdAt: new Date(), // Optional: timestamp
+        createdAt: new Date(),
       });
-      // Optimistically update UI
       setSentRequests((prev) => ({ ...prev, [toUserId]: true }));
+      toast.success("Friend request sent!"); // Added toast
     } catch (error) {
       console.error("Error sending friend request:", error);
-      alert("Failed to send friend request. Please try again.");
+      toast.error("Failed to send request."); // Use toast
     } finally {
       setLoadingState(toUserId, false);
     }
   };
-
-  // Cancel Friend Request
   const handleCancelFriendRequest = async (toUserId) => {
-      if (!userId || !toUserId) return;
-      setLoadingState(toUserId, true);
-      const requestId = `${userId}_${toUserId}`; // ID of the request to cancel
-
-      try {
-          await deleteDoc(doc(db, "friendRequests", requestId));
-          // Optimistically update UI
-          setSentRequests((prev) => {
-              const updated = { ...prev };
-              delete updated[toUserId]; // Remove from sent requests map
-              return updated;
-          });
-      } catch (error) {
-          console.error("Error cancelling friend request:", error);
-          alert("Failed to cancel friend request. Please try again.");
-      } finally {
-          setLoadingState(toUserId, false);
-      }
+    if (!userId || !toUserId) return;
+    setLoadingState(toUserId, true);
+    const requestId = `${userId}_${toUserId}`;
+    try {
+      await deleteDoc(doc(db, "friendRequests", requestId));
+      setSentRequests((prev) => {
+        const updated = { ...prev };
+        delete updated[toUserId];
+        return updated;
+      });
+      toast.success("Request cancelled."); // Added toast
+    } catch (error) {
+      console.error("Error cancelling friend request:", error);
+      toast.error("Failed to cancel request."); // Use toast
+    } finally {
+      setLoadingState(toUserId, false);
+    }
   };
-
-
-  // Accept Friend Request
   const acceptFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setLoadingState(fromUserId, true);
     const requestId = `${fromUserId}_${userId}`;
-
     try {
-      // Update request status
       await updateDoc(doc(db, "friendRequests", requestId), {
         status: "accepted",
       });
-
-      // Add friend to both users' friend lists (use setDoc with merge:true to create if not exists)
       const currentUserFriendsRef = doc(db, "friends", userId);
-      await setDoc(currentUserFriendsRef, { friends: arrayUnion(fromUserId) }, { merge: true });
-
+      await setDoc(
+        currentUserFriendsRef,
+        { friends: arrayUnion(fromUserId) },
+        { merge: true }
+      );
       const senderFriendsRef = doc(db, "friends", fromUserId);
-      await setDoc(senderFriendsRef, { friends: arrayUnion(userId) }, { merge: true });
-
-      // No need to manually update friendRequests state, listener will do it.
+      await setDoc(
+        senderFriendsRef,
+        { friends: arrayUnion(userId) },
+        { merge: true }
+      );
+      toast.success("Friend request accepted!"); // Added toast
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      alert("Failed to accept friend request. Please try again.");
-      // Consider removing router.push('/home') on failure, keep user on page
+      toast.error("Failed to accept request."); // Use toast
     } finally {
       setLoadingState(fromUserId, false);
     }
   };
-
-  // Reject Friend Request
   const rejectFriendRequest = async (fromUserId) => {
     if (!userId) return;
     setLoadingState(fromUserId, true);
     const requestId = `${fromUserId}_${userId}`;
-
     try {
-      // Option 1: Update status to 'rejected' (keeps a record)
-       await updateDoc(doc(db, "friendRequests", requestId), {
-         status: "rejected",
-       });
-      // Option 2: Delete the request document (cleaner, no record)
-      // await deleteDoc(doc(db, "friendRequests", requestId));
-
-      // Listener will update the UI by removing the request from the list.
+      await updateDoc(doc(db, "friendRequests", requestId), {
+        status: "rejected",
+      });
+      toast.info("Friend request rejected."); // Added toast
     } catch (error) {
       console.error("Error rejecting friend request:", error);
-      alert("Failed to reject friend request. Please try again.");
+      toast.error("Failed to reject request."); // Use toast
     } finally {
       setLoadingState(fromUserId, false);
     }
   };
-
-  // Unfriend User
   const unfriendUser = async (friendId) => {
     if (!userId || !friendId) return;
-
-    // Optional: Confirmation dialog
-    // if (!window.confirm(`Are you sure you want to unfriend ${friends.find(f => f.uid === friendId)?.username}?`)) {
-    //     return;
-    // }
-
+    if (
+      !window.confirm(
+        `Are you sure you want to unfriend ${
+          friends.find((f) => f.uid === friendId)?.username || "this user"
+        }?`
+      )
+    )
+      return;
     setLoadingState(friendId, true);
     try {
-      // Remove from current user's list
       const currentUserFriendsRef = doc(db, "friends", userId);
-      await updateDoc(currentUserFriendsRef, { friends: arrayRemove(friendId) }); // Use updateDoc assuming doc exists
-
-      // Remove from the other user's list
+      await updateDoc(currentUserFriendsRef, {
+        friends: arrayRemove(friendId),
+      });
       const friendFriendsRef = doc(db, "friends", friendId);
       await updateDoc(friendFriendsRef, { friends: arrayRemove(userId) });
-
-       // Listener will update the friends list UI.
+      toast.info("Friend removed."); // Added toast
     } catch (error) {
       console.error("Error unfriending user:", error);
-       alert("Failed to unfriend user. Please try again.");
-       // Consider handling cases where friend doc might not exist or removing router.push
+      toast.error("Failed to unfriend user."); // Use toast
     } finally {
       setLoadingState(friendId, false);
     }
   };
 
   // --- Render Logic ---
-
   const renderTabContent = () => {
+    // Use Themed Loader
     if (loading) {
       return (
         <div className="flex justify-center items-center h-64">
-          <Mosaic color="#4f46e5" size="medium" text="" textColor="" />
+          <Mosaic color="#DAA520" size="medium" />
         </div>
       );
     }
@@ -455,14 +438,15 @@ const BuddiesPage = () => {
       case "requests":
         return (
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-300">
+            {/* Themed text */}
+            <h2 className="text-xl font-semibold mb-4 text-textprimary">
               Friend Requests ({friendRequests.length})
             </h2>
             {friendRequests.length > 0 ? (
               friendRequests.map((request) => (
                 <UserListItem
-                  key={request.id} // Use unique request ID
-                  user={request} // Contains user data like username, avatar + fromUserId
+                  key={request.id}
+                  user={request}
                   type="request"
                   onAccept={acceptFriendRequest}
                   onReject={rejectFriendRequest}
@@ -470,7 +454,10 @@ const BuddiesPage = () => {
                 />
               ))
             ) : (
-              <p className="text-gray-500 text-center py-6">No pending friend requests.</p>
+              // Themed empty state text
+              <p className="text-textsecondary text-center py-6 italic">
+                No pending friend requests.
+              </p>
             )}
           </div>
         );
@@ -478,45 +465,57 @@ const BuddiesPage = () => {
       case "add":
         return (
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-300">
+            {/* Themed text */}
+            <h2 className="text-xl font-semibold mb-4 text-textprimary">
               Add Friends
             </h2>
+            {/* Themed input */}
             <input
               type="text"
               placeholder="Search by username..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-3 mb-6 bg-gray-800 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full p-3 mb-6 bg-primary rounded-lg border border-secondary-light text-textprimary placeholder-textsecondary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent" // Updated styles
             />
-             {/* Display Search Results */}
-             {searchQuery.trim() && searchResults.length === 0 && (
-                 <p className="text-gray-500 text-center py-6">No users found matching "{searchQuery}".</p>
-             )}
-             {searchResults.length > 0 && (
-                 <div className="space-y-3">
-                    {searchResults.map((user) => {
-                        const isFriend = friends.some(friend => friend.uid === user.uid);
-                        const hasIncomingRequest = friendRequests.some(req => req.fromUserId === user.uid);
-                        // Prevent adding if already friends or if there's an incoming request from them
-                        if (isFriend || hasIncomingRequest) return null;
-
-                        return (
-                           <UserListItem
-                            key={user.uid}
-                            user={user}
-                            type="search"
-                            onAddFriend={handleSendFriendRequest}
-                            onCancelRequest={handleCancelFriendRequest}
-                            isRequestSent={!!sentRequests[user.uid]} // Check if request is already sent
-                            isLoading={interactionLoading[user.uid]}
-                          />
-                        )
-                     })}
-                 </div>
-             )}
-              {!searchQuery.trim() && (
-                 <p className="text-gray-500 text-center py-6">Enter a username to find users.</p>
-              )}
+            {/* Display Search Results */}
+            {searchQuery.trim() && searchResults.length === 0 && (
+              <p className="text-textsecondary text-center py-6 italic">
+                No users found matching "{searchQuery}".
+              </p>
+            )}
+            {searchResults.length > 0 && (
+              <div className="space-y-2">
+                {" "}
+                {/* Reduced space slightly */}
+                {searchResults.map((user) => {
+                  const isFriend = friends.some(
+                    (friend) => friend.uid === user.uid
+                  );
+                  const hasIncomingRequest = friendRequests.some(
+                    (req) => req.fromUserId === user.uid
+                  );
+                  // Exclude self, friends, and those with pending incoming requests
+                  if (user.uid === userId || isFriend || hasIncomingRequest)
+                    return null;
+                  return (
+                    <UserListItem
+                      key={user.uid}
+                      user={user}
+                      type="search"
+                      onAddFriend={handleSendFriendRequest}
+                      onCancelRequest={handleCancelFriendRequest}
+                      isRequestSent={!!sentRequests[user.uid]}
+                      isLoading={interactionLoading[user.uid]}
+                    />
+                  );
+                })}
+              </div>
+            )}
+            {!searchQuery.trim() && (
+              <p className="text-textsecondary text-center py-6 italic">
+                Enter a username to find users.
+              </p>
+            )}
           </div>
         );
 
@@ -524,7 +523,8 @@ const BuddiesPage = () => {
       default:
         return (
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-300">
+            {/* Themed text */}
+            <h2 className="text-xl font-semibold mb-4 text-textprimary">
               Friends ({friends.length})
             </h2>
             {friends.length > 0 ? (
@@ -538,7 +538,10 @@ const BuddiesPage = () => {
                 />
               ))
             ) : (
-              <p className="text-gray-500 text-center py-6">You haven't added any friends yet. Go to the 'Add Friends' tab to find users!</p>
+              // Themed empty state text
+              <p className="text-textsecondary text-center py-6 italic">
+                You haven't added any friends yet. Use the 'Add Friends' tab!
+              </p>
             )}
           </div>
         );
@@ -546,59 +549,71 @@ const BuddiesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary to-black text-gray-200">
+    // Themed background and text
+    <div className="min-h-screen bg-primary text-textprimary font-poppins">
+      <Toaster
+        position="bottom-center"
+        toastOptions={{ className: "bg-secondary text-textprimary" }}
+      />
       <NavBar />
-      <main className="pt-20 pb-12 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-6 text-white text-center sm:text-left">Buddies</h1>
+      {/* Adjusted padding and max-width */}
+      <main className="pt-20 pb-12 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* Themed heading */}
+        <h1 className="text-3xl font-bold mb-6 text-textprimary text-center sm:text-left">
+          Buddies
+        </h1>
 
-        {/* Tab Navigation */}
-        <div className="mb-6 border-b border-gray-700">
+        {/* Tab Navigation - Themed */}
+        <div className="mb-6 border-b border-secondary-light">
+          {" "}
+          {/* Themed border */}
           <nav className="-mb-px flex space-x-6" aria-label="Tabs">
             <button
               onClick={() => setActiveTab("friends")}
-              className={`${
+              className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out ${
                 activeTab === "friends"
-                  ? "border-indigo-500 text-indigo-400"
-                  : "border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500"
-              } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  ? "border-accent text-accent" // Accent color for active
+                  : "border-transparent text-textsecondary hover:text-textprimary hover:border-secondary-light" // Themed inactive/hover
+              }`}
             >
-              Friends
+              {" "}
+              Friends{" "}
             </button>
             <button
               onClick={() => setActiveTab("requests")}
-              className={`${
+              className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out relative ${
                 activeTab === "requests"
-                  ? "border-indigo-500 text-indigo-400"
-                  : "border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500"
-              } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors relative`} // Added relative positioning
+                  ? "border-accent text-accent" // Accent color for active
+                  : "border-transparent text-textsecondary hover:text-textprimary hover:border-secondary-light" // Themed inactive/hover
+              }`}
             >
+              {" "}
               Requests
-              {/* Badge for request count */}
               {friendRequests.length > 0 && (
-                 <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full absolute -top-1 -right-3 transform translate-x-1/2 -translate-y-1/2">
-                    {friendRequests.length}
-                 </span>
-               )}
-
+                // Keep badge red or use accent? Let's keep red for notification standard. Adjusted styling slightly.
+                <span className="ml-1.5 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/3">
+                  {friendRequests.length}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab("add")}
-              className={`${
+              className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out ${
                 activeTab === "add"
-                  ? "border-indigo-500 text-indigo-400"
-                  : "border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500"
-              } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  ? "border-accent text-accent" // Accent color for active
+                  : "border-transparent text-textsecondary hover:text-textprimary hover:border-secondary-light" // Themed inactive/hover
+              }`}
             >
-              Add Friends
+              {" "}
+              Add Friends{" "}
             </button>
           </nav>
         </div>
 
-        {/* Tab Content Area */}
-        <div className="bg-gray-850 shadow-xl rounded-lg p-5 md:p-8">
-             {renderTabContent()}
+        {/* Tab Content Area - Themed */}
+        <div className="bg-secondary shadow-xl rounded-lg p-4 md:p-6">
+          {renderTabContent()}
         </div>
-
       </main>
     </div>
   );
