@@ -1,214 +1,167 @@
+// pages/index.js or pages/home.js (or wherever MovieList is)
 import { useEffect, useState } from "react";
-import MovieCard from "../../components/MinimalCard"; 
-import NavBar from "../../components/NavBar";
-import Footer from "../../components/Footer";
-import TrendingCard from "../../components/TrendingCard";
-import TrendingShows from "../../components/TrendingShows";
-import { FaFilter, FaFire, FaEye, FaStar } from "react-icons/fa";
-import { FaGripLinesVertical } from "react-icons/fa";
-import { Mosaic } from "react-loading-indicators"; // Import Mosaic
+import MovieCard from "../../components/MinimalCard"; // Adjust path
+import NavBar from "../../components/NavBar";       // Adjust path
+import Footer from "../../components/Footer";       // Adjust path
+import TrendingMovies from "../../components/TrendingMovies"; // Adjust path
+import TrendingShows from "../../components/TrendingShows";   // Adjust path
+import { FaFire, FaStar } from "react-icons/fa"; // Removed unused icons
+import { Mosaic } from "react-loading-indicators";
+import axios from "axios"; // Using axios for consistency
+import { motion } from "framer-motion";
+import { useRouter } from "next/router";
 
 const MovieList = () => {
   const [trendingMovies, setTrendingMovies] = useState([]);
-  const [mostWatchedMovies, setMostWatchedMovies] = useState([]);
+  // const [mostWatchedMovies, setMostWatchedMovies] = useState([]); // Optional
   const [highestRatedMovies, setHighestRatedMovies] = useState([]);
+  const [trendingShows, setTrendingShows] = useState([]);
+  const [highestRatedShows, setHighestRatedShows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [highestRatedShows, setHighestRatedShows] = useState([]);
-  const [trendingShows, setTrendingShows] = useState([]);
 
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  const BASE_URL = "https://api.themoviedb.org/3";
 
-  // Fetch Trending Movies
+  // Consolidated Data Fetching
   useEffect(() => {
-    const fetchTrendingMovies = async () => {
+    if (!apiKey) {
+        setError("API Key is missing.");
+        setLoading(false);
+        return;
+    }
+    setLoading(true);
+    setError(null);
+
+    const fetchAllData = async () => {
       try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`
+        const endpoints = [
+          `${BASE_URL}/trending/movie/week?api_key=${apiKey}&language=en-US&page=1`,
+          `${BASE_URL}/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=1000&page=1`,
+          `${BASE_URL}/trending/tv/week?api_key=${apiKey}&language=en-US&page=1`,
+          `${BASE_URL}/discover/tv?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=500&page=1`,
+          // Optional: Popular Movies endpoint
+          // `${BASE_URL}/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`,
+        ];
+
+        const responses = await Promise.all(
+            endpoints.map(url => axios.get(url))
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch trending movies");
-        }
-        const data = await response.json();
-        setTrendingMovies(data.results.slice(0, 20)); // Get the first 20 trending movies
-      } catch (error) {
-        setError(error.message);
-      }
-    };
 
-    fetchTrendingMovies();
-  }, [apiKey]);
+        const filterAndSlice = (results) => (results || []).filter(item => item.poster_path).slice(0, 15);
 
-  // Fetch Most Watched Movies
-  useEffect(() => {
-    const fetchMostWatchedMovies = async () => {
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=popularity.desc&page=1`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch most watched movies");
-        }
-        const data = await response.json();
-        setMostWatchedMovies(data.results.slice(0, 20)); // Get the first 20 most watched movies
-      } catch (error) {
-        setError(error.message);
-      }
-    };
+        setTrendingMovies(filterAndSlice(responses[0]?.data?.results));
+        setHighestRatedMovies(filterAndSlice(responses[1]?.data?.results));
+        setTrendingShows(filterAndSlice(responses[2]?.data?.results));
+        setHighestRatedShows(filterAndSlice(responses[3]?.data?.results));
+        // if (responses[4]) setMostWatchedMovies(filterAndSlice(responses[4]?.data?.results));
 
-    fetchMostWatchedMovies();
-  }, [apiKey]);
-
-  // Fetch Highest Rated Movies
-  useEffect(() => {
-    const fetchHighestRatedMovies = async () => {
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=1000&page=1`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch highest rated movies");
-        }
-        const data = await response.json();
-        setHighestRatedMovies(data.results.slice(0, 20)); // Get the first 20 highest rated movies
-      } catch (error) {
-        setError(error.message);
+      } catch (err) {
+        console.error("Error fetching homepage data:", err);
+        if (err.response) { setError(`API Error: ${err.response.data?.status_message || err.message}`); }
+        else if (err.request) { setError("Network error. Please check your connection."); }
+        else { setError(`Failed to load data: ${err.message}`); }
+        setTrendingMovies([]); setHighestRatedMovies([]); setTrendingShows([]); setHighestRatedShows([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHighestRatedMovies();
+    fetchAllData();
   }, [apiKey]);
 
- 
-  useEffect(() => {
-    const fetchTrendingShows = async () => {
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/trending/tv/day?api_key=${apiKey}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch trending shows");
-        }
-        const data = await response.json();
-        setTrendingShows(data.results.slice(0, 20)); // Get the first 20 trending shows
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Card hover variants
+  const cardHoverVariants = {
+     rest: { scale: 1, transition: { duration: 0.2 } },
+     hover: { scale: 1.05, y: -5, transition: { duration: 0.2 } }
+  }
 
-    const fetchHighestRatedShows = async () => {
-      try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=100&page=1`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch highest rated shows");
-        }
-        const data = await response.json();
-        setHighestRatedShows(data.results.slice(0, 20)); // Get the first 20 highest rated shows
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Helper component for Carousel Section
+  const CarouselSection = ({ title, icon: Icon, data, mediaType }) => {
+    const router = useRouter();
+    if (!data || data.length === 0) return null;
+    
+    const handleCardClick = (item) => { 
+      router.push(`/${mediaType}/${item.id}`); 
+    }
+  
+    return (
+      <section className="mb-10 md:mb-12">
+        <div className="flex items-center gap-3 mb-4 px-4 md:px-0">
+          <Icon className="text-accent text-xl md:text-2xl" />
+          <h2 className="text-xl md:text-2xl font-semibold text-textprimary">{title}</h2>
+        </div>
+        
+        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 scrollbar-hide pl-4 md:pl-0 hide-scrollbar" >
+          {data.map((item) => (
+            <motion.div
+              key={`${mediaType}-${item.id}`}
+              className="flex-shrink-0 w-36 md:w-44 lg:w-48 cursor-pointer"
+              variants={cardHoverVariants}
+              initial="rest"
+              whileHover="hover"
+              onClick={() => handleCardClick(item)}
+            >
+              <MovieCard
+                movie={item}
+                media_type={mediaType}
+              />
+            </motion.div>
+          ))}
+          <div className="flex-shrink-0 w-1"></div>
+        </div>
+      </section>
+    );
+  };
 
-    // Call both functions
-    fetchHighestRatedShows();
-    fetchTrendingShows();
-  }, [apiKey]);
+  // --- Render ---
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
-        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-primary text-red-500">
-        Error: {error}
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-center">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+            <Mosaic color="#DAA520" size="medium" /> {/* Accent Color */}
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="bg-primary text-white">
+    // Themed background and text
+    <div className="bg-primary text-textprimary min-h-screen flex flex-col font-poppins">
       <NavBar />
-      {/* Hero Section */}
-        <TrendingCard />
-      
 
-      {/* Trending Movies Section */}
-      <section className="px-6 my-8">
-        <div className="flex items-center gap-4 mb-6">
-          <FaGripLinesVertical className="text-2xl" />
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <FaFire className="text-orange-500" /> Trending Now
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {trendingMovies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
+      {/* Wrapper with pt-16 to offset fixed NavBar */}
+      <div className="flex-grow">
 
-      {/* Highest Rated Movies Section */}
-      {/* <section className="px-6 my-8">
-        <div className="flex items-center gap-4 mb-6">
-          <FaGripLinesVertical className="text-2xl" />
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <FaStar className="text-yellow-500" /> Highest Rated
-          </h2>
-          <FaFilter className="text-gray-400 cursor-pointer hover:text-orange-500" />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {highestRatedMovies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section> */}
+        {/* Hero Sections - Assuming these have mt-16 internally */}
+        {/* If not, remove pt-16 above and add mt-16 to these two */}
+        <TrendingMovies />
+        
 
-      <TrendingShows />
+        {/* Main content area with padding */}
+        <main className="px-4 md:px-6 lg:px-8 py-8 md:py-10 max-w-full mx-auto">
+           {error && ( // Themed error display
+             <div className="mb-8 p-4 bg-red-900/30 border border-red-700/50 text-red-300 rounded-md text-center">
+               Error loading some sections: {error}
+             </div>
+           )}
 
-      {/* Highest Rated Shows Section */}
-      {/* <section className="px-6 my-8">
-        <div className="flex items-center gap-4 mb-6">
-          <FaGripLinesVertical className="text-2xl" />
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <FaStar className="text-yellow-500" /> Highest Rated Shows
-          </h2>
-          <FaFilter className="text-gray-400 cursor-pointer hover:text-orange-500" />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {highestRatedShows.map((show) => (
-            <MovieCard key={show.id} movie={{ ...show, media_type: "tv" }} />
-          ))}
-        </div>
-      </section> */}
+            {/* Carousel Sections */}
+            <CarouselSection title="Trending Movies" icon={FaFire} data={trendingMovies} mediaType="movie" />
+            <CarouselSection title="Highest Rated Movies" icon={FaStar} data={highestRatedMovies} mediaType="movie" />
+            <TrendingShows />
+            <CarouselSection title="Trending Shows" icon={FaFire} data={trendingShows} mediaType="tv" />
+            <CarouselSection title="Highest Rated Shows" icon={FaStar} data={highestRatedShows} mediaType="tv" />
 
-      {/* Trending Shows Section */}
-      <section className="px-6 my-8">
-        <div className="flex items-center gap-4 mb-6">
-          <FaGripLinesVertical className="text-2xl" />
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <FaStar className="text-yellow-500" /> Trending Shows
-          </h2>
-          <FaFilter className="text-gray-400 cursor-pointer hover:text-orange-500" />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {trendingShows.map((show) => (
-            <MovieCard key={show.id} movie={{ ...show, media_type: "tv" }} />
-          ))}
-        </div>
-      </section>
+            {/* Add Most Watched/Popular section if desired */}
+            {/* <CarouselSection title="Most Popular Movies" icon={FaEye} data={mostWatchedMovies} mediaType="movie" /> */}
+
+        </main>
+      </div>
+
       <Footer />
     </div>
   );
