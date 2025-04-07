@@ -546,7 +546,7 @@ const BuddiesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
+    <div className="min-h-screen bg-gradient-to-b from-primary to-black text-gray-200">
       <NavBar />
       <main className="pt-20 pb-12 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold mb-6 text-white text-center sm:text-left">Buddies</h1>
