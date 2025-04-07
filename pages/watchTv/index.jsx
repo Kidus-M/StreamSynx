@@ -196,122 +196,182 @@ const TVShowPlayerPage = () => {
       setFriends([]);
       return;
     }
-    const fetchData = async () => {
-      const favoritesRef = doc(db, "favorites", currentUser.uid);
-      const favoritesDoc = await getDoc(favoritesRef);
-      if (favoritesDoc.exists())
+  
+    const fetchUserData = async () => {
+      try {
+        // Fetch favorites
+        const favoritesRef = doc(db, "favorites", currentUser.uid);
+        const favoritesDoc = await getDoc(favoritesRef);
         setIsFavorite(
-          (favoritesDoc.data().shows || []).some(
-            (s) => s.id === parseInt(validId)
+          favoritesDoc.exists() && 
+          (favoritesDoc.data().episodes || []).some(
+            (ep) => ep.tvShowId === parseInt(validId)
           )
         );
-      else setIsFavorite(false);
-      const ratingsRef = doc(db, "ratings", currentUser.uid);
-      const ratingsDoc = await getDoc(ratingsRef);
-      let foundRating = null;
-      if (ratingsDoc.exists()) {
-        const showRating = (ratingsDoc.data().ratings || []).find(
-          (r) => r.tvShowId === parseInt(validId)
-        );
-        if (showRating) foundRating = showRating.rating;
-      }
-      setSavedRating(foundRating);
-      setRating(foundRating || 0);
-      const friendsRef = doc(db, "friends", currentUser.uid);
-      const friendsDoc = await getDoc(friendsRef);
-      if (friendsDoc.exists()) {
-        const friendIds = friendsDoc.data().friends || [];
-        const friendsData = await Promise.all(
-          friendIds.map(async (friendId) => {
-            const userRef = doc(db, "users", friendId);
-            const userDoc = await getDoc(userRef);
-            return userDoc.exists()
-              ? { uid: friendId, username: userDoc.data().username }
-              : null;
-          })
-        );
-        setFriends(friendsData.filter(Boolean));
-      } else {
-        setFriends([]);
+  
+        // Fetch ratings
+        const ratingsRef = doc(db, "ratings", currentUser.uid);
+        const ratingsDoc = await getDoc(ratingsRef);
+        if (ratingsDoc.exists()) {
+          const showRating = (ratingsDoc.data().episodes || []).find(
+            (ep) => ep.tvShowId === parseInt(validId)
+          );
+          setSavedRating(showRating?.rating || null);
+          setRating(showRating?.rating || 0);
+        }
+  
+        // Fetch friends
+        const friendsRef = doc(db, "friends", currentUser.uid);
+        const friendsDoc = await getDoc(friendsRef);
+        if (friendsDoc.exists()) {
+          const friendIds = friendsDoc.data().friends || [];
+          const friendsData = await Promise.all(
+            friendIds.map(async (friendId) => {
+              const userRef = doc(db, "users", friendId);
+              const userDoc = await getDoc(userRef);
+              return userDoc.exists()
+                ? { uid: friendId, username: userDoc.data().username }
+                : null;
+            })
+          );
+          setFriends(friendsData.filter(Boolean));
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
     };
-    fetchData();
+  
+    fetchUserData();
   }, [currentUser, validId]);
 
   // Actions (toggleFavoriteShow, handleShowRating, saveShowRating, recommendShow - keep as is)
   const toggleFavoriteShow = async () => {
-    if (!currentUser || !tvShow) return toast.error("Please log in.");
+    if (!currentUser) return toast.error("Please log in.");
+    if (!tvShow) return toast.error("Show data not loaded.");
+    
     const favoritesRef = doc(db, "favorites", currentUser.uid);
-    const showData = {
-      id: tvShow.id,
-      name: tvShow.name,
+    const episodeData = {
+      tvShowId: tvShow.id,
+      tvShowName: tvShow.name,
       poster_path: tvShow.poster_path,
+      type: "tv",
+      favoritedAt: new Date().toISOString()
     };
+  
     try {
-      if (isFavorite) {
-        await updateDoc(favoritesRef, { shows: arrayRemove(showData) });
-        toast.success(`Removed "${tvShow.name}" from favorites`);
+      const favoritesDoc = await getDoc(favoritesRef);
+      
+      if (favoritesDoc.exists()) {
+        const currentEpisodes = favoritesDoc.data().episodes || [];
+        const isFavorite = currentEpisodes.some(ep => ep.tvShowId === tvShow.id);
+        
+        if (isFavorite) {
+          await updateDoc(favoritesRef, {
+            episodes: currentEpisodes.filter(ep => ep.tvShowId !== tvShow.id)
+          });
+          toast.success(`Removed "${tvShow.name}" from favorites`);
+          setIsFavorite(false);
+        } else {
+          await updateDoc(favoritesRef, {
+            episodes: arrayUnion(episodeData)
+          });
+          toast.success(`Added "${tvShow.name}" to favorites`);
+          setIsFavorite(true);
+        }
       } else {
-        await setDoc(
-          favoritesRef,
-          { shows: arrayUnion(showData) },
-          { merge: true }
-        );
+        await setDoc(favoritesRef, { episodes: [episodeData] });
         toast.success(`Added "${tvShow.name}" to favorites`);
+        setIsFavorite(true);
       }
-      setIsFavorite((prev) => !prev);
     } catch (err) {
-      console.error("Error toggling show favorite:", err);
+      console.error("Error toggling favorite:", err);
       toast.error("Failed to update favorites.");
     }
   };
   const handleShowRating = (newRating) => {
+    if (!currentUser) {
+      toast.error("Please log in to rate shows.");
+      return;
+    }
     setRating(newRating);
-    saveShowRating(tvShow.id, newRating);
+    saveShowRating(newRating);
   };
-  const saveShowRating = async (tvShowId, newRating) => {
-    if (!currentUser || newRating === 0) return;
+  
+  const saveShowRating = async (newRating) => {
+    if (!currentUser || !tvShow) return;
+    
     const ratingsRef = doc(db, "ratings", currentUser.uid);
-    const ratingData = { tvShowId: parseInt(tvShowId), rating: newRating };
+    const ratingData = {
+      tvShowId: tvShow.id,
+      tvShowName: tvShow.name,
+      rating: newRating,
+      type: "tv",
+      poster_path: tvShow.poster_path,
+      ratedAt: new Date().toISOString()
+    };
+  
     try {
       const ratingsDoc = await getDoc(ratingsRef);
+      
       if (ratingsDoc.exists()) {
-        const currentRatings = ratingsDoc.data().ratings || [];
-        const filteredRatings = currentRatings.filter(
-          (r) => r.tvShowId !== parseInt(tvShowId)
-        );
-        await updateDoc(ratingsRef, {
-          ratings: [...filteredRatings, ratingData],
-        });
+        const currentEpisodes = ratingsDoc.data().episodes || [];
+        const existingIndex = currentEpisodes.findIndex(ep => ep.tvShowId === tvShow.id);
+        
+        if (existingIndex >= 0) {
+          // Create new array with updated rating
+          const updatedEpisodes = [...currentEpisodes];
+          updatedEpisodes[existingIndex] = ratingData;
+          
+          await updateDoc(ratingsRef, {
+            episodes: updatedEpisodes
+          });
+        } else {
+          await updateDoc(ratingsRef, {
+            episodes: arrayUnion(ratingData)
+          });
+        }
       } else {
-        await setDoc(ratingsRef, { ratings: [ratingData] });
+        await setDoc(ratingsRef, { episodes: [ratingData] });
       }
+      
       setSavedRating(newRating);
       toast.success(`Rated "${tvShow.name}" ${newRating}/10`);
     } catch (err) {
-      console.error("Error saving show rating:", err);
+      console.error("Error saving rating:", err);
       toast.error("Failed to save rating.");
       setRating(savedRating || 0);
     }
   };
   const recommendShow = async () => {
-    if (!currentUser || !selectedFriend || !tvShow)
-      return toast.error("Please select a friend.");
+    if (!currentUser) {
+      toast.error("Please log in to recommend shows.");
+      return;
+    }
+    if (!selectedFriend) {
+      toast.error("Please select a friend.");
+      return;
+    }
+    if (!tvShow) {
+      toast.error("Show data not loaded.");
+      return;
+    }
+  
     const recommendationRef = doc(db, "recommendations", selectedFriend);
-    const showData = {
-      id: tvShow.id,
-      name: tvShow.name,
+    const episodeData = {
+      tvShowId: tvShow.id,
+      tvShowName: tvShow.name,
       poster_path: tvShow.poster_path,
       recommendedBy: currentUser.uid,
+      recommendedByUsername: currentUser.displayName || "Anonymous",
       recommendedAt: new Date().toISOString(),
-      type: "tv",
+      type: "tv"
     };
+  
     try {
-      await setDoc(
-        recommendationRef,
-        { recommendations: arrayUnion(showData) },
-        { merge: true }
-      );
+      await updateDoc(recommendationRef, {
+        episodes: arrayUnion(episodeData)
+      }, { merge: true });
+  
       const friend = friends.find((f) => f.uid === selectedFriend);
       toast.success(
         `Recommended "${tvShow.name}" to ${friend?.username || "friend"}`
@@ -320,7 +380,7 @@ const TVShowPlayerPage = () => {
       setShowRecommend(false);
     } catch (error) {
       console.error("Error recommending show:", error);
-      toast.error("Error recommending show.");
+      toast.error("Failed to send recommendation.");
     }
   };
 
