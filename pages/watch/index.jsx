@@ -192,16 +192,57 @@ const MovieDetailPage = () => {
         } catch (err) { console.error("Error saving rating:", err); toast.error("Failed to save rating."); setRating(savedRating || 0); }
     };
     const recommendMovie = async () => {
-        if (!currentUser || !selectedFriend || !movie) return toast.error("Please select a friend.");
+        if (!currentUser) {
+          toast.error("Please log in to recommend movies.");
+          return;
+        }
+        if (!selectedFriend) {
+          toast.error("Please select a friend.");
+          return;
+        }
+        if (!movie) {
+          toast.error("Movie data not loaded.");
+          return;
+        }
+      
         const recommendationRef = doc(db, "recommendations", selectedFriend);
-        const movieData = { id: movie.id, title: movie.title, poster_path: movie.poster_path, recommendedBy: currentUser.uid, recommendedAt: new Date().toISOString(), type: 'movie' };
+        const movieData = {
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          recommendedBy: currentUser.uid,
+          recommendedByUsername: currentUser.displayName || "Anonymous",
+          recommendedAt: new Date().toISOString(),
+          type: "movie"
+        };
+      
         try {
-            await setDoc(recommendationRef, { recommendations: arrayUnion(movieData) }, { merge: true });
-            const friend = friends.find((f) => f.uid === selectedFriend);
-            toast.success(`Recommended "${movie.title}" to ${friend?.username || 'friend'}`);
-            setSelectedFriend(""); setShowRecommend(false);
-        } catch (error) { console.error("Error recommending movie:", error); toast.error("Error recommending movie."); }
-    };
+          // First get the current document
+          const recommendationDoc = await getDoc(recommendationRef);
+          
+          if (recommendationDoc.exists()) {
+            // If document exists, update the movies array
+            await updateDoc(recommendationRef, {
+              movies: arrayUnion(movieData)
+            });
+          } else {
+            // If document doesn't exist, create it with the movies array
+            await setDoc(recommendationRef, {
+              movies: [movieData]
+            });
+          }
+      
+          const friend = friends.find((f) => f.uid === selectedFriend);
+          toast.success(
+            `Recommended "${movie.title}" to ${friend?.username || "friend"}`
+          );
+          setSelectedFriend("");
+          setShowRecommend(false);
+        } catch (error) {
+          console.error("Error recommending movie:", error);
+          toast.error("Failed to send recommendation.");
+        }
+      };
 
   // Save to History (keep as is)
    useEffect(() => {
