@@ -139,7 +139,7 @@ const MovieList = () => {
   }
 
   return (
-    <div className="bg-primary text-white md:pt-16">
+    <div className="bg-primary text-white">
       <NavBar />
       {/* Hero Section */}
         <TrendingCard />
