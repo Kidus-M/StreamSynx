@@ -113,27 +113,28 @@ const RoomPage = () => {
         return () => unsubscribe();
     }, []);
 
-    // --- Fetch Current User's Friends List ---
-    useEffect(() => {
-        if (!currentUser) {
-            setCurrentUserFriends([]);
-            return;
-        }
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        getDoc(userDocRef)
-            .then((docSnap) => {
-                if (docSnap.exists()) {
-                    // **IMPORTANT**: Ensure 'friendUids' is the correct field name in your 'users' collection
-                    setCurrentUserFriends(docSnap.data()?.friendUids || []);
-                } else {
-                    setCurrentUserFriends([]);
-                }
-            })
-            .catch((err) => {
-                console.error('Error fetching user friends:', err);
-                setCurrentUserFriends([]);
-            });
-    }, [currentUser]);
+   // --- Fetch Current User's Friends List --- [cite: 29]
+ useEffect(() => {
+    if (!currentUser) {
+        setCurrentUserFriends([]); // Clear friends if user logs out [cite: 29]
+        return;
+    }
+
+    const userDocRef = doc(db, 'users', currentUser.uid); // [cite: 29]
+    getDoc(userDocRef)
+        .then((docSnap) => { // [cite: 30]
+            if (docSnap.exists()) {
+                // Assuming 'friendUids' is the array field name [cite: 30]
+                setCurrentUserFriends(docSnap.data()?.friendUids || []); // [cite: 30]
+            } else {
+                setCurrentUserFriends([]); // [cite: 31]
+            }
+        })
+        .catch((err) => {
+            console.error('Error fetching user friends:', err); // [cite: 31]
+            setCurrentUserFriends([]); // Reset on error [cite: 32]
+        });
+}, [currentUser]); // Re-fetch if user changes [cite: 32]
 
 
     // --- Fetch Room Data (Firestore) & Manage Membership ---
@@ -485,101 +486,104 @@ const RoomPage = () => {
         }
     };
 
-    // --- Debounced User Search (for Adding Friends) ---
-    const performUserSearch = useCallback(async (query) => {
-        // Basic validation
-        if (!query.trim() || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUserFriends.length === 0) {
-            setUserSearchResults([]); setIsSearchingUsers(false); return;
+   // --- Debounced User Search (for Adding Friends) ---
+const performUserSearch = useCallback(async (query) => {
+    if (!query.trim() || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUserFriends.length === 0) { //
+        setUserSearchResults([]); //
+        setIsSearchingUsers(false); //
+        return; // Don't search if no friends or not creator
+    }
+
+    setIsSearchingUsers(true); //
+    setUserSearchResults([]); //
+
+    try {
+        const usersRef = collection(db, "users"); //
+        // Query users matching the search query *AND* whose UID is in the friends list
+        // NOTE: Firestore 'in' query has a limit of 30 items. If users have >30 friends, this needs pagination or a different strategy.
+        // NOTE: We also need to filter out existing members client-side as 'not-in' is limited.
+        const potentialFriendUids = currentUserFriends //
+            .filter(uid => uid !== currentUser.uid); // Exclude self from friend search base
+
+        if (potentialFriendUids.length === 0) { //
+             setUserSearchResults([]); //
+             setIsSearchingUsers(false); //
+             return; //
         }
-        setIsSearchingUsers(true);
-        // Do not clear results here
 
-        try {
-            const usersRef = collection(db, "users");
-            // Filter out self and already existing members from the friend list *before* querying
-            const potentialFriendUidsToAdd = currentUserFriends.filter(uid =>
-                uid !== currentUser.uid && !roomData.members?.includes(uid)
-            );
+        // Chunk the friend UIDs if necessary (more than 30) - complex, omit for now assuming <30 friends typical
+         if (potentialFriendUids.length > 30) { //
+             toast.error("Friend list too large for direct search (max 30)."); // Limitation
+             // Implement chunking/multiple queries if needed
+              setIsSearchingUsers(false); //
+              return //
+         }
 
-            if (potentialFriendUidsToAdd.length === 0) {
-                setUserSearchResults([]); setIsSearchingUsers(false); return; // No valid friends to search among
+         // Query Firestore - Case sensitive prefix search on username for users *in* the friend list
+         // *** THIS QUERY LIKELY REQUIRES A COMPOSITE INDEX: (username Asc, __name__ Asc) ***
+         const q = firestoreQuery( //
+            usersRef,
+            where("username", ">=", query), //
+            where("username", "<=", query + '\uf8ff'), //
+            where("__name__", "in", potentialFriendUids), // Filter by friends' UIDs - __name__ refers to document ID (UID)
+            limit(10) //
+        ); 
+        const querySnapshot = await getDocs(q); //
+        const users = []; //
+        querySnapshot.forEach((doc) => { //
+            // Final client-side filter: Ensure they are not *already* a member
+            if (!roomData?.members?.includes(doc.id)) { //
+                users.push({ uid: doc.id, ...doc.data() }); //
             }
-            // Handle Firestore 'in' query limit (max 30 IDs as of latest check)
-            if (potentialFriendUidsToAdd.length > 30) {
-                 toast.error("Friend list too large for direct search (max 30). Filtering locally.");
-                 // Fallback: Fetch all friends and filter locally (less efficient)
-                 // const friendsQuery = firestoreQuery(usersRef, where("__name__", "in", potentialFriendUidsToAdd.slice(0, 30))); // Fetch first 30
-                 // const querySnapshot = await getDocs(friendsQuery);
-                 // const friendsData = querySnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
-                 // const filteredLocally = friendsData.filter(friend => friend.username?.toLowerCase().includes(query.toLowerCase()));
-                 // setUserSearchResults(filteredLocally);
-                 setUserSearchResults([]); // Simplified: Show error and don't search for now
-                 setIsSearchingUsers(false);
-                 return;
-            }
+        });
 
-            // Query Firestore for friends matching the username prefix
-            const q = firestoreQuery(
-                usersRef,
-                where("__name__", "in", potentialFriendUidsToAdd), // Only search within potential friends
-                // Note: Firestore doesn't support combining 'in' with inequality filters on different fields efficiently.
-                // We filter by username *client-side* after getting results based on friend UIDs.
-                limit(30) // Limit how many friends we fetch (adjust as needed)
-            );
-
-            const querySnapshot = await getDocs(q);
-            const users = [];
-            const lowerCaseQuery = query.toLowerCase();
-            querySnapshot.forEach((doc) => {
-                 // Client-side filter for username match (case-insensitive)
-                if (doc.data().username?.toLowerCase().includes(lowerCaseQuery)) {
-                    users.push({ uid: doc.id, ...doc.data() });
-                }
-            });
-            setUserSearchResults(users.slice(0, 10)); // Limit displayed results
-
-        } catch (searchError) {
-            console.error("Error searching users:", searchError);
-            toast.error(`Failed to search for users: ${searchError.message}`);
-            setUserSearchResults([]); // Clear on error
-        } finally {
-            setIsSearchingUsers(false);
+        setUserSearchResults(users); //
+        if (users.length === 0) { //
+            // Don't toast here, lack of results is normal feedback
         }
-    }, [currentUser, roomData, currentUserFriends]); // Depend on roomData for members check
 
+    } catch (searchError) {
+        console.error("Error searching users:", searchError); //
+        toast.error("Failed to search for users."); //
+    } finally {
+        setIsSearchingUsers(false); //
+    }
+}, [currentUser, roomData?.createdBy, roomData?.members, currentUserFriends]); // Depend on friends list
     const handleUserSearchInputChange = (e) => {
-        const query = e.target.value;
-        setUserSearchQuery(query);
-
-        clearTimeout(userSearchDebounceTimeout.current);
-
-        if (!query.trim()) {
-            setUserSearchResults([]); setIsSearchingUsers(false); return;
+        const query = e.target.value; //
+        setUserSearchQuery(query); //
+        setIsSearchingUsers(true); // Show spinner
+    
+        clearTimeout(userSearchDebounceTimeout.current); // Clear existing timer
+    
+        if (query.trim()) { //
+            userSearchDebounceTimeout.current = setTimeout(() => { //
+                performUserSearch(query); //
+            }, DEBOUNCE_DELAY);
+        } else {
+            setUserSearchResults([]); // Clear results if query is empty
+            setIsSearchingUsers(false); // Hide spinner
         }
-        // Show spinner immediately while waiting for debounce
-        setIsSearchingUsers(true);
-        userSearchDebounceTimeout.current = setTimeout(() => {
-            performUserSearch(query);
-        }, DEBOUNCE_DELAY);
-    };
+    }; //
 
-    const handleAddMember = async (userToAdd) => {
-        if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy) return;
-        const roomDocRef = doc(db, 'rooms', roomId);
+    const handleAddMember = async (userToAdd) => { //
+        if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy) return; //
+        const roomDocRef = doc(db, 'rooms', roomId); //
         try {
-            await updateDoc(roomDocRef, {
+            await updateDoc(roomDocRef, { //
                 members: arrayUnion(userToAdd.uid) // Add UID to members array
-            });
-            toast.success(`${userToAdd.username || 'User'} added to the room.`);
+            }); 
+            toast.success(`${userToAdd.username || 'User'} added to the room.`); //
             // Remove the added user from search results for cleaner UX
-            setUserSearchResults(prevResults => prevResults.filter(u => u.uid !== userToAdd.uid));
+            setUserSearchResults(prevResults => prevResults.filter(u => u.uid !== userToAdd.uid)); //
             // Optionally clear search input if results are now empty
-            if (userSearchResults.length <= 1) { setUserSearchQuery(''); setIsSearchingUsers(false); }
+            if (userSearchResults.length <= 1) { setUserSearchQuery(''); //
+                setIsSearchingUsers(false); } //
         } catch (addError) {
-            console.error("Error adding member:", addError);
-            toast.error(`Failed to add ${userToAdd.username || 'User'}: ${addError.message}`);
+            console.error("Error adding member:", addError); //
+            toast.error(`Failed to add ${userToAdd.username || 'User'}: ${addError.message}`); //
         }
-    };
+    }; //
 
     // --- Leave Room ---
     const handleLeaveRoom = async () => {
@@ -642,7 +646,7 @@ const RoomPage = () => {
 
     // --- Render States ---
     if (authLoading || loadingRoom) {
-        return ( <div className="min-h-screen bg-primary flex items-center justify-center"> <NavBar /> <Mosaic color="#DAA520" size="medium" /> <Footer/></div> );
+        return ( <div className="min-h-screen bg-primary flex flex-col items-center justify-center"> <NavBar /> <Mosaic color="#DAA520" size="medium" /> <Footer/></div> );
     }
     if (error) { // Handles "not member" or "not found" errors set earlier
         return ( <div className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center mt-20"> <h2 className="text-2xl text-red-500 mb-4">Error</h2> <p className="text-textsecondary mb-6">{error}</p> <button onClick={() => router.push('/rooms')} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Back to Rooms </button> </div> <Footer /> </div> );
@@ -696,42 +700,43 @@ const RoomPage = () => {
                 </section>
 
                 {/* Creator: Add Member Search Panel */}
-                <AnimatePresence>
-                    {isCreator && showUserSearch && (
-                        <motion.section initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-secondary p-4 rounded-lg shadow mb-6 overflow-hidden">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="relative flex-1">
-                                    <input
-                                        type="text"
-                                        value={userSearchQuery}
-                                        onChange={handleUserSearchInputChange}
-                                        placeholder="Search your friends by username..."
-                                        className="w-full bg-primary border border-secondary-light rounded-md p-2 pr-8 text-textprimary focus:ring-accent focus:border-accent placeholder-textsecondary/50 disabled:opacity-50"
-                                        disabled={currentUserFriends.length === 0}
-                                    />
-                                    {isSearchingUsers && (
-                                        <FaSpinner className="animate-spin absolute right-2 top-1/2 transform -translate-y-1/2 text-textsecondary"/>
+                {/* Creator: Add Member Search Input */}
+                                <AnimatePresence>
+                                    {isCreator && showUserSearch && (
+                                        <motion.section initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-secondary p-4 rounded-lg shadow mb-6 overflow-hidden">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="relative flex-1">
+                                                    <input
+                                                        type="text"
+                                                        value={userSearchQuery}
+                                                        onChange={handleUserSearchInputChange} // Use debounced handler
+                                                        placeholder="Search your friends by username..."
+                                                        className="w-full bg-primary border border-secondary-light rounded-md p-2 pr-8 text-textprimary focus:ring-accent focus:border-accent placeholder-textsecondary/50"
+                                                        // disabled={currentUserFriends.length === 0} // Disable if no friends loaded
+                                                    />
+                                                    {isSearchingUsers && ( // Show spinner inside input
+                                                        <FaSpinner className="animate-spin absolute right-2 top-1/2 transform -translate-y-1/2 text-textsecondary"/>
+                                                    )}
+                                                </div>
+                                                {/* Optional: Add manual search trigger button if needed */}
+                                            </div>
+                                            {currentUserFriends.length === 0 && !authLoading && <p className="text-xs text-textsecondary mb-2">You haven't added any friends yet, or they couldn't be loaded.</p>}
+                                            {userSearchResults.length > 0 && (
+                                                <ul className="space-y-1 max-h-40 overflow-y-auto text-sm">
+                                                    {userSearchResults.map(user => (
+                                                        <li key={user.uid} className="flex justify-between items-center p-1.5 bg-primary rounded">
+                                                            <span>{user.username} <span className="text-xs text-textsecondary">({user.email || 'no email'})</span></span>
+                                                            <button onClick={() => handleAddMember(user)} className="text-green-500 hover:text-green-400 text-lg" title={`Add ${user.username}`}>
+                                                                <FaUserPlus />
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                             {!isSearchingUsers && userSearchQuery && userSearchResults.length === 0 && <p className="text-xs text-textsecondary">No matching friends found.</p>}
+                                        </motion.section>
                                     )}
-                                </div>
-                            </div>
-                            {currentUserFriends.length === 0 && !authLoading && <p className="text-xs text-textsecondary mb-2">You haven't added any friends yet, or they couldn't be loaded.</p>}
-                            {userSearchResults.length > 0 && (
-                                <ul className="space-y-1 max-h-40 overflow-y-auto text-sm">
-                                    {userSearchResults.map(user => (
-                                        <li key={user.uid} className="flex justify-between items-center p-1.5 bg-primary rounded">
-                                            <span>{user.username} <span className="text-xs text-textsecondary">({user.email || 'no email'})</span></span>
-                                            <button onClick={() => handleAddMember(user)} className="text-green-500 hover:text-green-400 text-lg p-1" title={`Add ${user.username}`}>
-                                                <FaUserPlus />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                             {!isSearchingUsers && userSearchQuery && userSearchResults.length === 0 && <p className="text-xs text-textsecondary text-center mt-1">No matching friends found to add.</p>}
-                             {isSearchingUsers && userSearchQuery && <p className="text-xs text-textsecondary text-center mt-1">Searching...</p>}
-                        </motion.section>
-                    )}
-                </AnimatePresence>
+                                </AnimatePresence>
 
                 {/* Main Content Area */}
                 <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
