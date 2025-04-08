@@ -113,28 +113,18 @@ const RoomPage = () => {
         return () => unsubscribe();
     }, []);
 
-   // --- Fetch Current User's Friends List --- [cite: 29]
- useEffect(() => {
-    if (!currentUser) {
-        setCurrentUserFriends([]); // Clear friends if user logs out [cite: 29]
-        return;
-    }
-
-    const userDocRef = doc(db, 'users', currentUser.uid); // [cite: 29]
-    getDoc(userDocRef)
-        .then((docSnap) => { // [cite: 30]
-            if (docSnap.exists()) {
-                // Assuming 'friendUids' is the array field name [cite: 30]
-                setCurrentUserFriends(docSnap.data()?.friendUids || []); // [cite: 30]
-            } else {
-                setCurrentUserFriends([]); // [cite: 31]
-            }
-        })
-        .catch((err) => {
-            console.error('Error fetching user friends:', err); // [cite: 31]
-            setCurrentUserFriends([]); // Reset on error [cite: 32]
-        });
-}, [currentUser]); // Re-fetch if user changes [cite: 32]
+// --- Fetch Current User's Friends List UIDs (Real-time) ---
+useEffect(() => {
+    if (!currentUser) { setCurrentUserFriends([]); return; }
+    const friendsDocRef = doc(db, 'friends', currentUser.uid); // Use 'friends' collection
+    const unsubscribe = onSnapshot( friendsDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+             // Ensure 'friends' is the field name in your 'friends' collection docs
+            setCurrentUserFriends(docSnap.data()?.friends || []);
+        } else { setCurrentUserFriends([]); }
+    }, (error) => { console.error("Error fetching friends list:", error); toast.error("Could not load friends list."); setCurrentUserFriends([]); });
+    return () => unsubscribe();
+}, [currentUser]);
 
 
     // --- Fetch Room Data (Firestore) & Manage Membership ---
@@ -465,153 +455,62 @@ const RoomPage = () => {
     };
 
 
-    // --- Member Management (Add/Remove - Creator only) ---
-    const handleRemoveMember = async (memberUidToRemove) => {
-        if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUser.uid === memberUidToRemove) return; // Cannot remove self
+    
 
-        const memberUsername = membersList.find(m => m.uid === memberUidToRemove)?.username || 'User';
-        if (!window.confirm(`Are you sure you want to remove ${memberUsername} from the room?`)) return;
-
-        const roomDocRef = doc(db, 'rooms', roomId);
-        const userStatusRef = ref(rtdb, `/roomPresence/${roomId}/${memberUidToRemove}`); // Ref to user's presence data
-
-        try {
-            await updateDoc(roomDocRef, { members: arrayRemove(memberUidToRemove) });
-            await set(userStatusRef, null); // Remove presence data for the kicked user
-            toast.success(`${memberUsername} removed from the room.`);
-            // membersList state will update via the onSnapshot listener
-        } catch (err) {
-            console.error("Error removing member:", err);
-            toast.error(`Failed to remove ${memberUsername}: ${err.message}`);
-        }
-    };
-
-   // --- Debounced User Search (for Adding Friends) ---
-const performUserSearch = useCallback(async (query) => {
-    if (!query.trim() || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUserFriends.length === 0) { //
-        setUserSearchResults([]); //
-        setIsSearchingUsers(false); //
-        return; // Don't search if no friends or not creator
+  // --- Debounced User Search (FRIENDS ONLY - CLIENT SIDE FILTER) ---
+  const performUserSearch = useCallback(async (query) => {
+    if (!query.trim() || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUserFriends.length === 0) {
+        setUserSearchResults([]); setIsSearchingUsers(false); return;
     }
-
-    setIsSearchingUsers(true); //
-    setUserSearchResults([]); //
+    setIsSearchingUsers(true); setUserSearchResults([]);
 
     try {
-        const usersRef = collection(db, "users"); //
-        // Query users matching the search query *AND* whose UID is in the friends list
-        // NOTE: Firestore 'in' query has a limit of 30 items. If users have >30 friends, this needs pagination or a different strategy.
-        // NOTE: We also need to filter out existing members client-side as 'not-in' is limited.
-        const potentialFriendUids = currentUserFriends //
-            .filter(uid => uid !== currentUser.uid); // Exclude self from friend search base
+        const lowerCaseQuery = query.toLowerCase();
+        const friendUidsToFetch = currentUserFriends.filter(uid => uid !== currentUser.uid); // Exclude self
 
-        if (potentialFriendUids.length === 0) { //
-             setUserSearchResults([]); //
-             setIsSearchingUsers(false); //
-             return; //
-        }
-
-        // Chunk the friend UIDs if necessary (more than 30) - complex, omit for now assuming <30 friends typical
-         if (potentialFriendUids.length > 30) { //
-             toast.error("Friend list too large for direct search (max 30)."); // Limitation
-             // Implement chunking/multiple queries if needed
-              setIsSearchingUsers(false); //
-              return //
+         // *** Firestore 'in' query limit is 30 ***
+         // If > 30 friends, only search the first 30 or implement pagination/chunking.
+         if (friendUidsToFetch.length > 30) {
+             toast.error("Can only search up to 30 friends at a time due to limits.", { duration: 4000 });
+             // Slice to allow searching *some* friends
+             // friendUidsToFetch = friendUidsToFetch.slice(0, 30);
+             // Or return if you want to block it completely
+              setIsSearchingUsers(false);
+              return;
+         }
+         if (friendUidsToFetch.length === 0) {
+              setIsSearchingUsers(false);
+              return; // No friends to search
          }
 
-         // Query Firestore - Case sensitive prefix search on username for users *in* the friend list
-         // *** THIS QUERY LIKELY REQUIRES A COMPOSITE INDEX: (username Asc, __name__ Asc) ***
-         const q = firestoreQuery( //
-            usersRef,
-            where("username", ">=", query), //
-            where("username", "<=", query + '\uf8ff'), //
-            where("__name__", "in", potentialFriendUids), // Filter by friends' UIDs - __name__ refers to document ID (UID)
-            limit(10) //
-        ); 
-        const querySnapshot = await getDocs(q); //
-        const users = []; //
-        querySnapshot.forEach((doc) => { //
-            // Final client-side filter: Ensure they are not *already* a member
-            if (!roomData?.members?.includes(doc.id)) { //
-                users.push({ uid: doc.id, ...doc.data() }); //
-            }
+        const usersRef = collection(db, "users");
+         // Fetch all friend documents (up to 30)
+         const q = firestoreQuery(usersRef, where("__name__", "in", friendUidsToFetch), limit(30));
+         const querySnapshot = await getDocs(q);
+
+        const friendsData = [];
+        querySnapshot.forEach((doc) => {
+            friendsData.push({ uid: doc.id, ...doc.data() });
         });
 
-        setUserSearchResults(users); //
-        if (users.length === 0) { //
-            // Don't toast here, lack of results is normal feedback
-        }
+         // Client-side filtering (case-insensitive startsWith) AND exclude existing members
+         const currentMemberIds = roomData?.memberIds || [];
+        const filteredUsers = friendsData.filter(user =>
+            user.username?.toLowerCase().startsWith(lowerCaseQuery) && !currentMemberIds.includes(user.uid)
+         );
 
-    } catch (searchError) {
-        console.error("Error searching users:", searchError); //
-        toast.error("Failed to search for users."); //
-    } finally {
-        setIsSearchingUsers(false); //
-    }
-}, [currentUser, roomData?.createdBy, roomData?.members, currentUserFriends]); // Depend on friends list
-    const handleUserSearchInputChange = (e) => {
-        const query = e.target.value; //
-        setUserSearchQuery(query); //
-        setIsSearchingUsers(true); // Show spinner
-    
-        clearTimeout(userSearchDebounceTimeout.current); // Clear existing timer
-    
-        if (query.trim()) { //
-            userSearchDebounceTimeout.current = setTimeout(() => { //
-                performUserSearch(query); //
-            }, DEBOUNCE_DELAY);
-        } else {
-            setUserSearchResults([]); // Clear results if query is empty
-            setIsSearchingUsers(false); // Hide spinner
-        }
-    }; //
+        setUserSearchResults(filteredUsers);
 
-    const handleAddMember = async (userToAdd) => { //
-        if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy) return; //
-        const roomDocRef = doc(db, 'rooms', roomId); //
-        try {
-            await updateDoc(roomDocRef, { //
-                members: arrayUnion(userToAdd.uid) // Add UID to members array
-            }); 
-            toast.success(`${userToAdd.username || 'User'} added to the room.`); //
-            // Remove the added user from search results for cleaner UX
-            setUserSearchResults(prevResults => prevResults.filter(u => u.uid !== userToAdd.uid)); //
-            // Optionally clear search input if results are now empty
-            if (userSearchResults.length <= 1) { setUserSearchQuery(''); //
-                setIsSearchingUsers(false); } //
-        } catch (addError) {
-            console.error("Error adding member:", addError); //
-            toast.error(`Failed to add ${userToAdd.username || 'User'}: ${addError.message}`); //
-        }
-    }; //
+    } catch (searchError) { console.error("Error searching users:", searchError); toast.error("Failed to search friends."); }
+    finally { setIsSearchingUsers(false); }
+}, [currentUser, roomData?.createdBy, roomData?.memberIds, currentUserFriends]); // Dependencies
 
-    // --- Leave Room ---
-    const handleLeaveRoom = async () => {
-        if (!roomId || !currentUser || !roomData) return;
-        const isCreator = currentUser.uid === roomData.createdBy;
+const handleUserSearchInputChange = (e) => { const query = e.target.value; setUserSearchQuery(query); setIsSearchingUsers(true); clearTimeout(userSearchDebounceTimeout.current); if (query.trim()) { userSearchDebounceTimeout.current = setTimeout(() => { performUserSearch(query); }, DEBOUNCE_DELAY); } else { setUserSearchResults([]); setIsSearchingUsers(false); } };
+const handleAddMember = async (userToAdd) => { if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy) return; const roomDocRef = doc(db, 'rooms', roomId); try { await updateDoc(roomDocRef, { memberIds: arrayUnion(userToAdd.uid) }); const userMemberRefRTDB = ref(rtdb, `/watchRooms/${roomId}/members/${userToAdd.uid}`); await set(userMemberRefRTDB, { username: userToAdd.username || 'Anonymous' }); toast.success(`${userToAdd.username || 'User'} added.`); setUserSearchResults(prevResults => prevResults.filter(u => u.uid !== userToAdd.uid)); if (userSearchResults.length <= 1) setUserSearchQuery(''); } catch (addError) { console.error("Error adding member:", addError); toast.error(`Failed to add ${userToAdd.username || 'User'}.`); } };
+const handleRemoveMember = async (memberUidToRemove) => { if (!roomId || !currentUser || !roomData || currentUser.uid !== roomData.createdBy || currentUser.uid === memberUidToRemove) return; const roomDocRef = doc(db, 'rooms', roomId); const userStatusRef = ref(rtdb, `/roomPresence/${roomId}/${memberUidToRemove}`); const memberUsername = membersList.find(m => m.uid === memberUidToRemove)?.username || 'User'; if (!window.confirm(`Remove ${memberUsername}?`)) return; try { await updateDoc(roomDocRef, { memberIds: arrayRemove(memberUidToRemove) }); await remove(userStatusRef); toast.success(`${memberUsername} removed.`); } catch (err) { console.error("Error removing member:", err); toast.error(`Failed to remove ${memberUsername}.`); } };
+const handleLeaveRoom = async () => { if (!roomId || !currentUser || !roomData) return; const isCreator = currentUser.uid === roomData.createdBy; const confirmMsg = isCreator ? "Leaving as creator might delete the room. Are you sure?" : "Are you sure?"; if (!window.confirm(confirmMsg)) return; const roomDocRef = doc(db, 'rooms', roomId); const userStatusRef = ref(rtdb, `/roomPresence/${roomId}/${currentUser.uid}`); const leavingToast = toast.loading("Leaving room..."); try { if (!isCreator) { await updateDoc(roomDocRef, { memberIds: arrayRemove(currentUser.uid) }); } else { toast.error("Creators cannot leave. Delete room instead."); toast.dismiss(leavingToast); return; } await remove(userStatusRef); toast.success('Left the room.', { id: leavingToast }); router.push('/rooms'); } catch (err) { console.error("Error leaving room:", err); toast.error("Failed to leave.", { id: leavingToast }); } };
 
-        // *** IMPROVEMENT: Disallow creator leaving directly ***
-        if (isCreator) {
-            toast.error("Creators cannot leave. Please delete the room or transfer ownership (not implemented).");
-            return;
-        }
-
-        if (!window.confirm("Are you sure you want to leave this room?")) return;
-
-        const roomDocRef = doc(db, 'rooms', roomId);
-        const userStatusRef = ref(rtdb, `/roomPresence/${roomId}/${currentUser.uid}`);
-        try {
-            // Only non-creators can leave this way
-            await updateDoc(roomDocRef, { members: arrayRemove(currentUser.uid) });
-            await set(userStatusRef, null); // Remove presence data on leave
-            toast.success('Left the room.');
-            router.push('/rooms'); // Navigate back
-        } catch (err) {
-            console.error("Error leaving room:", err);
-            toast.error(`Failed to leave room: ${err.message}`);
-        }
-    };
-
+// --- Calculate Player Source URL ---
     // --- Calculate Video Source URL ---
     // --- Calculate Video Source URL ---
     const calculateVideoSrc = useCallback(() => {
