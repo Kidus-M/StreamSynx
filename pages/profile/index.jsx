@@ -157,7 +157,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen mt-16 bg-primary flex items-center justify-center">
         <NavBar />
-        <div className="flex-grow flex items-center justify-center">
+        <div className="flex-grow flex flex-col items-center justify-center">
             <Mosaic color="#DAA520" size="medium" />
         </div>
         <Footer />
