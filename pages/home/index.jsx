@@ -81,9 +81,7 @@ const MovieList = () => {
     const router = useRouter();
     if (!data || data.length === 0) return null;
     
-    const handleCardClick = (item) => { 
-      router.push(`/${mediaType}/${item.id}`); 
-    }
+    
   
     return (
       <section className="mb-10 md:mb-12">
@@ -100,7 +98,7 @@ const MovieList = () => {
               variants={cardHoverVariants}
               initial="rest"
               whileHover="hover"
-              onClick={() => handleCardClick(item)}
+              
             >
               <MovieCard
                 movie={item}

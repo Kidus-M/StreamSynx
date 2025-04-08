@@ -383,7 +383,7 @@ const MovieDetailPage = () => {
             <section className="mt-6 md:mt-8">
                 <h2 className="text-xl md:text-2xl font-bold mb-4 text-textprimary">Recommended for You</h2>
                 {/* Added scrollbar-hide */}
-                <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent scrollbar-hide">
+                <div className="flex overflow-x-auto hide-scrollbar space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent scrollbar-hide">
                 {recommendedMovies.map((recMovie) => (
                     <div key={recMovie.id} className="flex-shrink-0 w-36 md:w-44">
                         <MovieCard

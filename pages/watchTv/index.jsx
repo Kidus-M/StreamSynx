@@ -860,16 +860,16 @@ const TVShowPlayerPage = () => {
               Recommended Shows
             </h2>
             {/* Added scrollbar-hide */}
-            <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent scrollbar-hide">
+            <div className="flex overflow-x-auto hide-scrollbar space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent scrollbar-hide">
               {recommendedShows.map((recShow) => (
-                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44">
+                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44 ">
                   <SearchCard
                     movie={{
                       ...recShow,
                       media_type: "tv",
                       poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}`,
                     }}
-                    onClick={() => router.push(`/tv/${recShow.id}`)}
+                    // onClick={() => router.push(`/tv/${recShow.id}`)}
                   />
                 </div>
               ))}

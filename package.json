@@ -9,6 +9,7 @@
     "@fontsource/dm-serif-display": "^5.1.1",
     "@heroicons/react": "^2.2.0",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "firebase": "^11.3.0",
     "framer-motion": "^12.4.2",
@@ -19,7 +20,8 @@
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.4.0",
     "react-loading-indicators": "^1.0.0",
-    "react-swipeable": "^7.0.2"
+    "react-swipeable": "^7.0.2",
+    "react-timeago": "^8.0.0"
   },
   "engines": {
     "node": ">=18"
@@ -27,6 +29,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.16"
+    "tailwindcss": "^3.4.16",
+    "tailwindcss-scrollbar": "^0.1.0"
   }
 }
