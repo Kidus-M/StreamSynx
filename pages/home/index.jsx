@@ -90,7 +90,7 @@ const MovieList = () => {
           <h2 className="text-xl md:text-2xl font-semibold text-textprimary">{title}</h2>
         </div>
         
-        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 scrollbar-hide pl-4 md:pl-0 hide-scrollbar" >
+        <div className="flex overflow-x-auto space-x-4 md:space-x-6 pb-4 pt-5 scrollbar-hide pl-4 md:pl-0 hide-scrollbar" >
           {data.map((item) => (
             <motion.div
               key={`${mediaType}-${item.id}`}

@@ -17,7 +17,7 @@ import {
   onSnapshot,
   limit,
 } from "firebase/firestore";
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 import { Mosaic } from "react-loading-indicators";
 import { useRouter } from "next/router";
 import {
@@ -551,7 +551,7 @@ const BuddiesPage = () => {
   return (
     // Themed background and text
     <div className="min-h-screen bg-primary text-textprimary font-poppins">
-      <Toaster
+      <toaster
         position="bottom-center"
         toastOptions={{ className: "bg-secondary text-textprimary" }}
       />
