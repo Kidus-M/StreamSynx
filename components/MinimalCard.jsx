@@ -1,7 +1,7 @@
 // components/MinimalCard.js (or MovieCard.js)
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FaPlus, FaCheck, FaStar } from "react-icons/fa"; // Using react-icons
+import { FaPlus, FaCheck, FaStar, FaFilm } from "react-icons/fa"; // Using react-icons
 import { auth, db } from "../firebase"; // Adjust path if needed
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import axios from "axios"; // Keep axios for detail fetching if needed
