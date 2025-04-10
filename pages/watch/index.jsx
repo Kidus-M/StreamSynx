@@ -388,7 +388,7 @@ const MovieDetailPage = () => {
                     <div key={recMovie.id} className="flex-shrink-0 w-36 md:w-44">
                         <MovieCard
                             movie={{...recMovie, poster_path: `${IMAGE_BASE_URL_W500}${recMovie.poster_path}`}}
-                            onClick={() => router.push(`/movie/${recMovie.id}`)}
+                            // onClick={() => router.push(`/movie/${recMovie.id}`)}
                          />
                     </div>
                 ))}
