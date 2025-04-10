@@ -25,13 +25,13 @@ const FavoritesPage = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('movies');
 
-  const handleMovieCardClick = (movie) => { router.push(`/movie/${movie.id}`); };
+  const handleMovieCardClick = (movie) => { router.push(`/watch?movie_id=${movie.id}`); };
 
   // --- Navigation Handler for Episode Cards ---
   const handleEpisodeCardClick = (episode) => {
       // Ensure necessary data exists before navigating
       if(episode?.tvShowId && typeof episode?.seasonNumber === 'number' && typeof episode?.episodeNumber === 'number') {
-            router.push(`/watchTv?tv_id=${episode.tvShowId}&season=${episode.seasonNumber}&episode=${episode.episodeNumber}`);
+            router.push(`/watchTv?tv_id=${episode.tvShowId}`);
       } else {
           console.warn("Missing data to navigate to episode:", episode);
           toast.error("Could not navigate to episode - data missing.");

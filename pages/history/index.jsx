@@ -289,7 +289,7 @@ const HistoryPage = () => {
                       <div key={`${movie.id}-${movie.watchedAt}`}>
                         <MovieCard
                           movie={movie}
-                          onClick={() => router.push(`/movie/${movie.id}`)}
+                          onClick={() => router.push(`/watch?movie_id=${movie.id}`)}
                         />
                         <p
                           className="text-xs mt-1.5 text-textsecondary text-center"
@@ -336,7 +336,7 @@ const HistoryPage = () => {
                               )}
                               <div className="flex-grow min-w-0">
                                 <Link
-                                  href={`/tv/${showId}`}
+                                  href={`/watchTv?tv_id=${showId}`}
                                   className="block group"
                                 >
                                   {" "}
