@@ -106,7 +106,7 @@ const FavoritesPage = () => {
                                 <div key={episodeKey}>
                                      <MovieCard
                                         movie={cardData}
-                                        onClick={() => handleEpisodeCardClick(episode)} // Navigate to specific episode watch page
+                                        // onClick={() => handleEpisodeCardClick(episode)} // Navigate to specific episode watch page
                                      />
                                      {/* Display S/E number below the card */}
                                      <p className="text-xs mt-1.5 text-textsecondary text-center font-medium" title={`${cardData.title} - S${cardData.seasonNumber} E${cardData.episodeNumber}`}>
