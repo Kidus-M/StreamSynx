@@ -76,22 +76,41 @@ export default function Profile() {
         const favoriteShows = favoritesData.shows?.length || 0; // Calculate favorite shows
         const buddies = friendsData.friends?.length || 0;
 
-        // Calculate Top Genre (Ensure genre_ids exist in your history data)
+        // --- Genre Calculation Start ---
         const genreCounts = {};
-        // Combine movie and episode genres (assuming episode history items store genre info)
-        [...(historyData.movies || []), ...(historyData.episodes || [])].forEach((item) => {
-            // Assuming TMDB genre IDs are stored in 'genre_ids' or 'genres' array
-            const genres = item.genre_ids || (Array.isArray(item.genres) ? item.genres.map(g => g.id) : []);
-            genres.forEach((genreId) => {
-                 genreCounts[genreId] = (genreCounts[genreId] || 0) + 1;
+        // Combine movie and episode history items
+        const allHistoryItems = [...(historyData.movies || []), ...(historyData.episodes || [])];
+
+        allHistoryItems.forEach((item) => {
+            let itemGenreIds = []; // Initialize empty array for genre IDs
+
+            // Check if item exists and has genre_ids (array of numbers)
+            if (item && Array.isArray(item.genre_ids) && item.genre_ids.length > 0) {
+                itemGenreIds = item.genre_ids;
+            }
+            // Else, check if item exists and has genres (array of objects)
+            else if (item && Array.isArray(item.genres) && item.genres.length > 0) {
+                // Map objects to get only IDs, filter out invalid ones
+                itemGenreIds = item.genres.map(g => g?.id).filter(id => typeof id === 'number');
+            }
+            // else, genre info is missing for this item in history
+
+            // Count the valid IDs found
+            itemGenreIds.forEach((genreId) => {
+                if (genreId) { // Ensure ID is valid before counting
+                    genreCounts[genreId] = (genreCounts[genreId] || 0) + 1;
+                }
             });
         });
 
-        let topGenreName = "N/A"; // Default if no history or genres
+        // Find the top genre ID (This logic is correct)
+        let topGenreName = "N/A";
         if (Object.keys(genreCounts).length > 0) {
             const topGenreId = Object.keys(genreCounts).reduce((a, b) => genreCounts[a] > genreCounts[b] ? a : b );
-            topGenreName = genreMap[topGenreId] || `ID: ${topGenreId}`; // Use map, fallback to ID
+            // Look up name in map, fallback to ID
+            topGenreName = genreMap[topGenreId] || `Unknown Genre (ID: ${topGenreId})`;
         }
+        // --- Genre Calculation End ---
 
         setStats({
             buddies, moviesWatched, episodesWatched,
@@ -107,7 +126,7 @@ export default function Profile() {
     };
 
     fetchUserDataAndStats();
-  }, [currentUser, router]); // Depend on currentUser
+  }, [currentUser, router]); // Dependencies// Depend on currentUser
 
   // Handle Save Username
   const handleSave = async () => {
