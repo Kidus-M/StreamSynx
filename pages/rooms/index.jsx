@@ -159,7 +159,7 @@ const RoomsPage = () => {
             Please log in to view or create watch party rooms.
           </p>{" "}
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/")}
             className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"
           >
             Log In

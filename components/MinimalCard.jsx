@@ -110,7 +110,7 @@ const MovieCard = ({ movie: initialMovie }) => {
   const toggleWatchlist = async (e) => {
     e.stopPropagation();
     if (!userId) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 

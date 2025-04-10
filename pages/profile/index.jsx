@@ -42,7 +42,7 @@ export default function Profile() {
         setError(null);
         if (!currentUser) {
             toast.error("Please log in to view your profile.");
-            router.push("/login"); // Redirect to login if not authenticated
+            router.push("/"); // Redirect to login if not authenticated
             setLoading(false);
             return;
         }

@@ -151,7 +151,7 @@ const RoomPage = () => {
     }
     if (!currentUser) {
       toast.error("Please log in to access rooms.");
-      router.push("/login");
+      router.push("/");
       return;
     }
 

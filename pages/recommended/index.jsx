@@ -166,7 +166,7 @@ const RecommendedPage = () => {
 
     // --- Render No User ---
     if (!currentUser) {
-        return ( <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center"> <h2 className="text-2xl text-accent mb-4">Log In Required</h2> <p className="text-textsecondary mb-6">Please log in to view recommendations.</p> <button onClick={() => router.push('/login')} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Log In </button> </div> <Footer /> </div> );
+        return ( <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center"> <h2 className="text-2xl text-accent mb-4">Log In Required</h2> <p className="text-textsecondary mb-6">Please log in to view recommendations.</p> <button onClick={() => router.push('/')} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Log In </button> </div> <Footer /> </div> );
      }
 
     // Ensure recommendations object exists before accessing its properties
