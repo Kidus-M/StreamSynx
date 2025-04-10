@@ -164,8 +164,8 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
    const handleWatch = () => {
        if (!displayData.id) return;
        const url = displayData.media_type === "tv"
-         ? `/tv/${displayData.id}` // Link to detail page
-         : `/movie/${displayData.id}`; // Link to detail page
+         ? `/watchTv?tv_id=${displayData.id}` // Link to detail page
+         : `/watch?movie_id=${displayData.id}`; // Link to detail page
        router.push(url);
    };
 
