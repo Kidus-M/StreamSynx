@@ -26,6 +26,7 @@ import {
 import { Mosaic } from "react-loading-indicators";
 import toast, { Toaster } from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
+import Head from 'next/head';
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500";
@@ -501,6 +502,26 @@ const TVShowPlayerPage = () => {
   return (
     // --- ADDED MARGIN TOP (mt-16) ---
     <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col font-poppins">
+      <Head>
+  {/* Basic SEO Meta Tags */}
+  <title>{tvShow ? `${tvShow.name} (${tvShow.first_air_date?.substring(0,4)}) - StreamSynx` : 'TV Show Details - StreamSynx'}</title>
+  <meta name="description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
+  <link rel="canonical" href={`streamsynx.vercel.app/${router.asPath}`} />
+
+  {/* Open Graph / Facebook Meta Tags */}
+  <meta property="og:type" content="video.tv_show" />
+  <meta property="og:title" content={tvShow ? `${tvShow.name} (${tvShow.first_air_date?.substring(0,4)}) - StreamSynx` : 'TV Show Details - StreamSynx'} />
+  <meta property="og:description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
+  {tvShow?.poster_path && <meta property="og:image" content={`https://image.tmdb.org/t/p/w500${tvShow.poster_path}`} />}
+  <meta property="og:url" content={`streamsynx.vercel.app/${router.asPath}`} />
+  <meta property="og:site_name" content="StreamSynx" />
+
+  {/* Twitter Card Meta Tags */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={tvShow ? `${tvShow.name} (${tvShow.first_air_date?.substring(0,4)}) - StreamSynx` : 'TV Show Details - StreamSynx'} />
+  <meta name="twitter:description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
+  {tvShow?.poster_path && <meta name="twitter:image" content={`https://image.tmdb.org/t/p/w500${tvShow.poster_path}`} />}
+</Head>
       <Toaster
         position="bottom-center"
         toastOptions={{ className: "bg-secondary text-textprimary" }}

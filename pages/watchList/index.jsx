@@ -177,7 +177,7 @@ const WatchlistPage = () => {
                  <MovieCard
                       key={`${item.id}-${item.media_type}`} // Add media_type for potential duplicate IDs
                       movie={item}
-                      onClick={() => handleCardClick(item)}
+                      // onClick={() => handleCardClick(item)}
                   />
                ))}
              </div>

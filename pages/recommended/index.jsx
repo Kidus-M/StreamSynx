@@ -113,11 +113,11 @@ const RecommendedPage = () => {
 
   const handleNavigate = (type, id, season = null, episode = null) => {
     if (type === "movie") {
-      router.push(`/movie/${id}`); // Navigate to movie detail page
-    } else if (type === "tv" && season && episode) {
-       router.push(`/watchTv?tv_id=${id}&season=${season}&episode=${episode}`); // Navigate to specific episode
+      router.push(`/watch?movie_id=${id}`); // Navigate to movie detail page
+    } else if (type === "tv" ) {
+       router.push(`/watchTv?tv_id=${id}`); // Navigate to specific episode
     } else if (type === "tv") {
-         router.push(`/tv/${id}`); // Navigate to TV show detail page
+        //  router.push(`/tv/${id}`); // Navigate to TV show detail page
      }
   };
 
