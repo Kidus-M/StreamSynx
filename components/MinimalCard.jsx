@@ -97,6 +97,7 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
   }, [initialMovie, userId, API_KEY]); // Re-run if initial data or user changes
 
   // --- WATCHLIST TOGGLE FIX ---
+  // --- WATCHLIST TOGGLE FIX ---
   const toggleWatchlist = async (e) => {
     e.stopPropagation(); // Prevent card click navigation
     if (!userId) {
@@ -104,44 +105,82 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
       router.push("/login"); // Redirect to login
       return;
     }
-    if (!displayData.id || !displayData.media_type) {
-        toast.error("Cannot add item: Data missing.");
-        return;
+    // Use initialMovie data for consistency as it's less likely to change than fetched displayData
+    if (!initialMovie?.id || !initialMovie.media_type) {
+        const type = initialMovie?.first_air_date ? 'tv' : 'movie'; // Try to infer type
+        if(!initialMovie?.id || !type) {
+            toast.error("Cannot add item: Critical data missing.");
+            console.error("Watchlist Error: Missing ID or media_type", initialMovie);
+            return;
+        }
+         // If type was inferred, use it
+         initialMovie.media_type = type;
     }
+
 
     const watchlistRef = doc(db, "watchlists", userId);
 
-    // **CRITICAL:** Use a minimal, consistent object for both add and remove
+    // **Define the object structure CONSISTENTLY based on ESSENTIAL data**
+    // Use data directly from initialMovie prop where possible, as displayData might change
     const itemDataMinimal = {
-      id: displayData.id,
-      media_type: displayData.media_type,
-      // Include essential data needed for displaying on the watchlist page later
-      title: displayData.title, // Or use initialMovie.title/name if displayData isn't ready
-      name: displayData.title, // Add name for consistency if needed
-      poster_path: displayData.poster_path || initialMovie.poster_path, // Ensure poster path is included
+      id: initialMovie.id,
+      media_type: initialMovie.media_type,
+      // Use original title/name and poster from the list item prop
+      title: initialMovie.title || null, // Store title if available
+      name: initialMovie.name || null,   // Store name if available
+      poster_path: initialMovie.poster_path || null, // Store poster if available
+      // Add any other essential fields you need on the watchlist page itself
     };
+
+    // Remove null fields to keep Firestore object clean
+    Object.keys(itemDataMinimal).forEach(key => {
+        if (itemDataMinimal[key] === null || itemDataMinimal[key] === undefined) {
+             delete itemDataMinimal[key];
+        }
+    });
+
+    // Ensure basic ID and type are present
+     if (!itemDataMinimal.id || !itemDataMinimal.media_type) {
+         toast.error("Cannot add item: ID or Type missing.");
+         console.error("Watchlist Error: Minimal data invalid", itemDataMinimal);
+         return;
+     }
+
 
     const wasAdded = isAdded; // Store current state before async operation
     setIsAdded(!wasAdded); // Optimistic UI update
 
     try {
-      const watchlistDoc = await getDoc(watchlistRef); // Check existence before update/set
+      const watchlistDoc = await getDoc(watchlistRef);
 
       if (wasAdded) {
-          // Remove the item
-          if (watchlistDoc.exists()) {
-              await updateDoc(watchlistRef, { items: arrayRemove(itemDataMinimal) });
-              toast.success("Removed from Watchlist");
-          }
+        // --- REMOVE LOGIC ---
+        if (watchlistDoc.exists()) {
+          const currentItems = watchlistDoc.data()?.items || [];
+          // Filter OUT the item matching ID and media_type
+          const updatedItems = currentItems.filter(item =>
+              !(item.id === itemDataMinimal.id && item.media_type === itemDataMinimal.media_type)
+          );
+          // Update Firestore with the NEW filtered array
+          await updateDoc(watchlistRef, { items: updatedItems });
+          toast.success("Removed from Watchlist");
+        } else {
+            // Document didn't exist, so item couldn't have been there. Revert UI.
+             console.warn("Watchlist document missing during remove attempt.");
+             setIsAdded(false); // Revert optimistic update
+         }
+        // --- END REMOVE LOGIC ---
       } else {
-          // Add the item
-          if (watchlistDoc.exists()) {
-              await updateDoc(watchlistRef, { items: arrayUnion(itemDataMinimal) });
-          } else {
-              // Create watchlist document if it doesn't exist
-              await setDoc(watchlistRef, { items: [itemDataMinimal] });
-          }
-          toast.success("Added to Watchlist");
+        // --- ADD LOGIC ---
+        // Add the MINIMAL item data using arrayUnion
+        if (watchlistDoc.exists()) {
+          await updateDoc(watchlistRef, { items: arrayUnion(itemDataMinimal) });
+        } else {
+          // Create watchlist document if it doesn't exist
+          await setDoc(watchlistRef, { items: [itemDataMinimal] });
+        }
+        toast.success("Added to Watchlist");
+        // --- END ADD LOGIC ---
       }
     } catch (err) {
       console.error("Error updating watchlist:", err);
@@ -149,6 +188,7 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
       setIsAdded(wasAdded); // Revert UI on error
     }
   };
+  // --- END WATCHLIST TOGGLE FIX ---
   // --- END WATCHLIST TOGGLE FIX ---
 
   // Use onClick from props if provided, otherwise use default handleWatch
