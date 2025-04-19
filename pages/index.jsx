@@ -63,8 +63,7 @@ export default function Home() {
           name="twitter:image"
           content={`streamsynx.vercel.app/twitter-image.png`}
         />
-        <meta name="google-site-verification" content="google-site-verification=0kkzFPcdD6mtj7GwkCoQZ33bdivJx2qYdsEYBtUpW-U"></meta>
-      </Head>
+<meta name="google-site-verification" content="LNwSQuzOjNMQo2bGOXwZXmYFtDpCtH6K29K9QzXlQ9k" />      </Head>
       <div
         className={`absolute inset-0 flex transition-all duration-500${
           isSignUp ? "translate-x-full " : ""
