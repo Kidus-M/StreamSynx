@@ -84,7 +84,7 @@ const MovieList = () => {
     
   
     return (
-      <section className="mb-10 md:mb-12 px-4 md:px-6 lg:px-8 py-8">
+      <section className="mb-10 md:mb-12 px-4 md:px-6 lg:px-8">
         <div className="flex items-center gap-3 mb-4 px-4 md:px-0">
           <Icon className="text-accent text-xl md:text-2xl" />
           <h2 className="text-xl md:text-2xl font-semibold text-textprimary">{title}</h2>
