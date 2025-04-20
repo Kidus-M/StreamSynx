@@ -139,7 +139,7 @@ const TrendingShows = () => {
 
   return (
     // --- ADDED MARGIN TOP (mt-16), Themed Background ---
-    <div className="relative w-full h-[60vh] overflow-hidden font-poppins bg-primary mt-16" {...handlers}>
+    <div className="relative w-full h-[60vh] overflow-hidden font-poppins bg-primary mt-4" {...handlers}>
 
       {/* Background Image Slider */}
       <AnimatePresence initial={false} custom={direction} mode="sync">
