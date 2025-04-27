@@ -1,110 +1,87 @@
+// pages/index.js (Auth Page)
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Slideshow from "../components/Slideshow";
-import { auth } from "../firebase";
+import Slideshow from "../components/Slideshow"; // Adjusted path
+import { auth } from "../firebase"; // Adjusted path
 import { onAuthStateChanged } from "firebase/auth";
-import SignIn from "../components/SignIn";
-import SignUp from "../components/SignUp";
+import SignIn from "../components/SignIn"; // Adjusted path
+import SignUp from "../components/SignUp"; // Adjusted path
 import Head from "next/head";
+import { motion, AnimatePresence } from "framer-motion"; // Import motion
+import { Mosaic } from "react-loading-indicators";
+
 export default function Home() {
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(true); // Default to Sign Up
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false); // Track if initial auth check is done
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthChecked(true); // Mark auth check as complete
+      // Redirect logged-in users away from auth page
       if (currentUser) {
-        router.push("/home");
+        router.replace("/home"); // Use replace to avoid auth page in history
       }
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router]); // Add router to dependencies
+
+  // Show loading or null until auth state is confirmed AND user is not logged in
+  if (!authChecked || user) {
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center bg-primary">
+             <Mosaic color="#DAA520" size="large" />
+             {/* Or a branded loading screen */}
+        </div>
+    );
+  }
+
+  // Framer Motion variants for the auth form container
+  const formContainerVariants = {
+      initial: { opacity: 0, scale: 0.95 },
+      animate: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+      exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2, ease: "easeIn" } }
+  };
+
 
   return (
-    <div className="relative h-screen bg-white overflow-hidden">
+    // Main container covering screen
+    <div className="relative h-screen w-screen bg-primary overflow-hidden font-poppins">
       <Head>
-        {/* Basic SEO Meta Tags */}
-        <title>
-          StreamSynx - Discover & Watch Movies & TV Shows Together
-        </title>{" "}
-        {/* Your main site title */}
-        <meta
-          name="description"
-          content="Explore trending and top-rated movies and TV shows. Create watch parties with friends using StreamSynx."
-        />{" "}
-        {/* Your main site description */}
-        <link rel="canonical" href="streamsynx.vercel.app/" /> {/* Base URL */}
-        {/* Open Graph / Facebook Meta Tags */}
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:title"
-          content="StreamSynx - Discover & Watch Movies & TV Shows Together"
-        />
-        <meta
-          property="og:description"
-          content="Explore trending and top-rated movies and TV shows. Create watch parties with friends using StreamSynx."
-        />
-        {/* Add a link to your main logo or a feature image */}
-        <meta property="og:image" content={`streamsynx.vercel.app//og-image.png`} />
-        <meta property="og:url" content="streamsynx.vercel.app/" />
-        <meta property="og:site_name" content="StreamSynx" />
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="StreamSynx - Discover & Watch Movies & TV Shows Together"
-        />
-        <meta
-          name="twitter:description"
-          content="Explore trending and top-rated movies and TV shows. Create watch parties with friends using StreamSynx."
-        />
-        <meta
-          name="twitter:image"
-          content={`streamsynx.vercel.app/twitter-image.png`}
-        />
-<meta name="google-site-verification" content="LNwSQuzOjNMQo2bGOXwZXmYFtDpCtH6K29K9QzXlQ9k" />      </Head>
-      <div
-        className={`absolute inset-0 flex transition-all duration-500${
-          isSignUp ? "translate-x-full " : ""
-        } max-md:flex-col max-md:translate-x-0 max-md:h-auto`}
-      >
-        <div
-          className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp
-              ? "bg-primary rounded-l-[50px] hidden"
-              : "bg-secondary rounded-r-[50px]"
-          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px]`}
-        >
-          <Slideshow />
-        </div>
+        {/* Keep your existing Head tags here */}
+        <title>Welcome to StreamSynx</title>
+        {/* ... other meta tags ... */}
+        <meta name="robots" content="noindex, nofollow" /> {/* Usually don't index login/signup */}
+      </Head>
 
-        <div
-          className={`w-1/2 h-full transition-all duration-500 ${
-            isSignUp
-              ? "bg-primary rounded-l-[50px]"
-              : "bg-white max-md:bg-secondary"
-          } flex justify-center items-center max-md:w-full max-md:h-48 max-md:rounded-none max-md:rounded-b-[50px] right-0 absolute`}
-        >
-          {isSignUp ? (
-            <Slideshow />
-          ) : (
-            <div className="w-full h-full max-md:hidden"></div>
-          )}
-        </div>
+      {/* Background Slideshow - positioned absolutely behind everything */}
+      <div className="absolute inset-0 z-0 opacity-30 md:opacity-40 blur-[2px]"> {/* Adjust opacity and blur */}
+        <Slideshow />
       </div>
-      <div className="w-screen absolute inset-0 flex justify-center items-center max-md:flex-col max-md:pt-16">
-        <div
-          className={`w-96 transition-all duration-500 transform ${
-            isSignUp ? "translate-x-[-70%]" : "translate-x-[70%]"
-          } flex justify-center items-center max-md:translate-x-0 max-lg:md:w-2/5`}
-        >
-          {!isSignUp ? (
-            <SignIn setIsSignUp={setIsSignUp} />
-          ) : (
-            <SignUp setIsSignUp={setIsSignUp} />
-          )}
-        </div>
+      {/* Overlay gradient to darken slideshow further */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-br from-primary via-primary/80 to-primary"></div>
+
+      {/* Centered Content Area */}
+      <div className="relative z-20 flex items-center justify-center h-full p-4">
+            {/* Animated container for switching forms */}
+           <AnimatePresence mode="wait">
+             <motion.div
+                 key={isSignUp ? 'signup' : 'signin'} // Key change triggers animation
+                 variants={formContainerVariants}
+                 initial="initial"
+                 animate="animate"
+                 exit="exit"
+                 className="w-full max-w-md bg-secondary/80 backdrop-blur-md p-6 md:p-8 rounded-xl shadow-2xl border border-secondary-light"
+             >
+                 {isSignUp ? (
+                    <SignUp setIsSignUp={setIsSignUp} />
+                 ) : (
+                    <SignIn setIsSignUp={setIsSignUp} />
+                 )}
+             </motion.div>
+           </AnimatePresence>
       </div>
     </div>
   );

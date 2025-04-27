@@ -1,80 +1,122 @@
-'use client';
+// components/SlideShow.js
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
+import { Mosaic } from "react-loading-indicators";
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original'; // Use full-size posters
+const IMAGE_BASE_URL_W500 = 'https://image.tmdb.org/t/p/w500';
 
 const SlideShow = () => {
-  const [movies, setMovies] = useState([]);
-  const [hovered, setHovered] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isHovering, setIsHovering] = useState(false); // State to control animation pause
+  const router = useRouter();
 
   useEffect(() => {
     const fetchMoviesAndShows = async () => {
+      setLoading(true);
+      if (!API_KEY) { console.error("TMDB API Key missing"); setLoading(false); return; }
       try {
-        // Fetch popular movies
-        const moviesRes = await fetch(
-          `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`
-        );
+        const [moviesRes, showsRes] = await Promise.all([
+          fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`),
+          fetch(`https://api.themoviedb.org/3/tv/top_rated?api_key=${API_KEY}&language=en-US&page=2`) // Fetch page 2 TV for variety
+        ]);
+        if (!moviesRes.ok || !showsRes.ok) throw new Error('Failed to fetch slideshow data');
         const moviesData = await moviesRes.json();
-
-        // Fetch top-rated TV shows
-        const showsRes = await fetch(
-          `https://api.themoviedb.org/3/tv/top_rated?api_key=${API_KEY}&language=en-US&page=1`
-        );
         const showsData = await showsRes.json();
-
-        // Combine movies and shows
-        const combinedResults = [...moviesData.results, ...showsData.results];
-        setMovies(combinedResults);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+        const combined = [
+            ...(moviesData.results || []).map(m => ({...m, media_type: 'movie'})),
+            ...(showsData.results || []).map(s => ({...s, media_type: 'tv'}))
+        ].filter(item => item.poster_path);
+        setItems(combined.sort(() => 0.5 - Math.random())); // Shuffle once
+      } catch (error) { console.error('Error fetching slideshow data:', error); toast.error("Could not load slideshow items."); }
+      finally { setLoading(false); }
     };
-
     fetchMoviesAndShows();
-  }, []);
+  }, []); // API_KEY dependency removed as it's read at build time
+
+  const handleItemClick = (item) => {
+      if (!item?.id) return;
+      router.push(`/${item.media_type}/${item.id}`);
+  };
+
+  // Variants for the main scrolling container
+  const scrollVariants = {
+    animate: {
+      y: ['0%', '-50%'], // Adjust '-50%' based on item height and duplication
+      transition: {
+        y: {
+          repeat: Infinity,
+          repeatType: "loop",
+          duration: 60, // Adjust duration for scroll speed (longer is slower)
+          ease: "linear",
+        }
+      }
+    },
+    paused: { // Define a paused state
+        y: undefined // Let Framer handle stopping at current position
+        // Or explicitly: y: currentYPosition (more complex state needed)
+    }
+  };
+
+  // Variants for individual items
+   const itemVariants = {
+       hover: { scale: 1.08, zIndex: 10, transition: { duration: 0.2 } }
+   };
+
+  // Duplicate items for seamless vertical loop
+  const duplicatedItems = items.length > 0 ? [...items, ...items] : [];
+
+  if (loading) {
+    return <div className="w-full h-full bg-secondary animate-pulse"></div>; // Simple loading placeholder
+  }
 
   return (
-    <div className="hidden md:flex overflow-hidden h-[400px] relative">
+    // Container that detects hover to pause animation
+    <div
+        className="w-full h-full overflow-hidden"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Inner container that animates vertically */}
       <motion.div
-        className="flex space-x-8"
-        animate={{ x: ['0%', '-10%'] }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: 'linear',
-        }}
+        className="w-full" // Let height be determined by content
+        variants={scrollVariants}
+        initial="animate" // Start animating immediately
+        animate={isHovering ? "paused" : "animate"} // Control animation state
       >
-        {/* Duplicate the movies to create an infinite scroll effect */}
-        {[...movies, ...movies].map((item, index) => (
-          <motion.div
-            key={index}
-            className="flex-shrink-0 w-64 h-[400px] rounded-lg overflow-hidden relative"
-            onMouseEnter={() => setHovered(index)}
-            onMouseLeave={() => setHovered(null)}
-            whileHover={{ scale: 1.1 }}
-            style={{
-              opacity: hovered === index ? 1 : 0.8,
-              transition: 'opacity 0.3s ease',
-            }}
-          >
-            <img
-              src={`${IMAGE_BASE_URL}${item.poster_path}`}
-              alt={item.title || item.name}
-              className="object-cover w-full h-full"
-            />
-            {/* <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-4">
-              <h3 className="text-white font-bold text-lg">
-                {item.title || item.name}
-              </h3>
-              <p className="text-gray-400 text-sm">
-                {item.release_date || item.first_air_date}
-              </p>
-            </div> */}
-          </motion.div>
-        ))}
+        {/* CSS Multi-column Layout */}
+        {/* Adjust column count and gap based on responsiveness */}
+        <div className="columns-2 md:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6 py-3">
+          {duplicatedItems.map((item, index) => (
+            <motion.div
+              key={`${item.id}-${item.media_type}-${index}`} // Unique key including index for duplicates
+              className="break-inside-avoid-column cursor-pointer block relative rounded-md overflow-hidden shadow-lg border border-secondary hover:border-accent/50 transition-colors" // Added block and break-inside-avoid
+              variants={itemVariants}
+              whileHover="hover"
+              onClick={() => handleItemClick(item)}
+              title={item.title || item.name}
+            >
+              <div className="aspect-[2/3] w-full relative bg-secondary"> {/* Aspect ratio */}
+                 {item.poster_path ? (
+                     <Image
+                        src={`${IMAGE_BASE_URL_W500}${item.poster_path}`}
+                        alt={`${item.title || item.name} Poster`}
+                        layout="fill"
+                        objectFit="cover"
+                        sizes="(max-width: 768px) 50vw, 33vw" // Adjust sizes based on columns
+                        priority={index < 6} // Prioritize loading initial images
+                     />
+                 ) : (
+                     <div className="w-full h-full flex items-center justify-center text-textsecondary/50">?</div>
+                 )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </div>
   );
