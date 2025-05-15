@@ -525,7 +525,7 @@ const MovieDetailPage = () => {
           {/* WARNING: Embedding from sources like vidlink.pro can be unreliable, potentially insecure, and may infringe copyright. Use official sources or self-hosted options where possible. */}
           <iframe
             // Updated color params to use new theme hex codes (remove #)
-            src={`https://vidlink.pro/movie/${movie.id}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`}
+            src={`https://vidlink.pro/movie/${movie.id}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
             frameBorder="0"
             allowFullScreen
             // It's crucial to use sandbox for third-party embeds if possible
