@@ -555,7 +555,7 @@ const TVShowPlayerPage = () => {
           {/* WARNING: Using vidlink.pro can be unreliable/insecure/infringing. */}
           <iframe
             // Use TV show link with updated theme colors
-            src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA`}
+            src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&autoplay=true&nextbutton=true`}
             frameBorder="0"
             allowFullScreen
             // sandbox="allow-scripts allow-same-origin"
