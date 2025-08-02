@@ -19,7 +19,7 @@ import {
 } from "react-icons/fa"; // Added Icons
 import toast, { Toaster } from "react-hot-toast";
 import TimeAgo from "react-timeago"; // Import TimeAgo
-
+import Head from "next/head";
 const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500";
 
 // Helper function to format date
@@ -205,6 +205,11 @@ const HistoryPage = () => {
     return (
       <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4">
         {" "}
+        <Head>
+          <title>My History | StreamSynx</title>
+          <meta name="description" content="View your collection of Privious  movies and TV show episodes. Your curated list of top picks on StreamSynx." />
+          <meta name="keywords" content="History, Past movies, Privious tv shows, liked, StreamSynx" />
+        </Head>
         <NavBar />{" "}
         <div className="text-center">
           <h2 className="text-2xl text-accent mb-4">Log In Required</h2>
