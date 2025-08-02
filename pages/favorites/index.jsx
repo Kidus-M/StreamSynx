@@ -11,7 +11,7 @@ import { useRouter } from "next/router";
 import Link from 'next/link';
 import { FaFilm, FaTv } from "react-icons/fa";
 import toast, { Toaster } from 'react-hot-toast';
-
+import Head from 'next/head';
 const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500";
 
 // Custom hook (keep as is)
@@ -49,7 +49,12 @@ const FavoritesPage = () => {
   // --- Main Render ---
   return (
     <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col font-poppins">
-      <Toaster position="bottom-center" toastOptions={{ className: 'bg-secondary text-textprimary',}} />
+        <Head>
+            <title>My Favorites | StreamSynx</title>
+            <meta name="description" content="View your collection of favorite movies and TV show episodes. Your curated list of top picks on StreamSynx." />
+            <meta name="keywords" content="favorites, favorite movies, favorite tv shows, liked, StreamSynx" />
+        </Head>
+            <Toaster position="bottom-center" toastOptions={{ className: 'bg-secondary text-textprimary',}} />
       <NavBar />
       <div className="flex-grow">
          <main className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
