@@ -10,7 +10,7 @@ import { Mosaic } from "react-loading-indicators";
 import { useRouter } from "next/router";
 import { FaListAlt, FaFilm, FaTv } from "react-icons/fa"; // Icons for filters
 import toast, { Toaster } from 'react-hot-toast'; // Optional: If using toasts
-
+import Head from "next/head";
 // Custom hook to fetch watchlist
 const useWatchlist = (userId) => {
   const [watchlistItems, setWatchlistItems] = useState(null); // Start as null for loading state
@@ -127,7 +127,12 @@ const WatchlistPage = () => {
    if (error) {
        return (
          <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4">
-             <NavBar />
+             <Head>
+                 <title>My Watchlist | StreamSynx</title>
+                 <meta name="description" content="Keep track of all the movies and TV shows you want to watch. Your personal watchlist on StreamSynx." />
+                 <meta name="keywords" content="watchlist, my list, movies to watch, tv shows to watch, StreamSynx" />
+             </Head>
+                 <NavBar />
               <div className="text-center">
                   <h2 className="text-2xl text-red-500 mb-4">Error Loading Watchlist</h2>
                   <p className="text-textsecondary mb-6">{error}</p>
