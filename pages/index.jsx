@@ -9,7 +9,7 @@ import SignUp from "../components/SignUp"; // Adjusted path
 import Head from "next/head";
 import { motion, AnimatePresence } from "framer-motion"; // Import motion
 import { Mosaic } from "react-loading-indicators";
-
+import Head from "next/head";
 export default function Home() {
   const [isSignUp, setIsSignUp] = useState(true); // Default to Sign Up
   const [user, setUser] = useState(null);
