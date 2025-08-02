@@ -10,7 +10,7 @@ import { Mosaic } from "react-loading-indicators";
 import axios from "axios"; // Using axios for consistency
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
-
+import Head from "next/head";
 const MovieList = () => {
   const [trendingMovies, setTrendingMovies] = useState([]);
   // const [mostWatchedMovies, setMostWatchedMovies] = useState([]); // Optional
@@ -129,6 +129,16 @@ const MovieList = () => {
   return (
     // Themed background and text
     <div className="bg-primary text-textprimary min-h-screen flex flex-col font-poppins">
+        <Head>
+            <title>StreamSynx | Discover Movies & TV Shows</title>
+            <meta name="description" content="Discover trending, popular, and top-rated movies and TV shows. Track your watch history, create a watchlist, and share recommendations with friends on StreamSynx." />
+            <meta name="keywords" content="movies, tv shows, trending, popular, watchlist, recommendations, stream, watch party" />
+
+            {/* Open Graph / Facebook */}
+            <meta property="og:type" content="website" />
+
+
+        </Head>
       <NavBar />
 
       {/* Wrapper with pt-16 to offset fixed NavBar */}
