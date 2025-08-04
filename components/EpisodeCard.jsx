@@ -1,77 +1,110 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { CheckCircleIcon } from "@heroicons/react/20/solid"; // Correct for v2
-const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber }) => {
+import { FaPlay } from "react-icons/fa";
+import { IoCheckmarkCircle } from "react-icons/io5";
+
+const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected }) => {
   const [isWatched, setIsWatched] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const userId = auth.currentUser?.uid;
+
+  // Memoize checkIfWatched to prevent unnecessary re-renders
+  const checkIfWatched = useCallback(async () => {
+    if (!userId || !episode?.episode_number) {
+      console.debug("No userId or episode_number, skipping check:", { userId, episodeNumber: episode?.episode_number });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const historyRef = doc(db, "history", userId);
+      const historyDoc = await getDoc(historyRef);
+      if (historyDoc.exists()) {
+        const watchedEpisodes = historyDoc.data().episodes || [];
+        const numericTvShowId = Number(tvShowId); // Coerce tvShowId to number
+        const watched = watchedEpisodes.some((watchedEp) => {
+          const match =
+              watchedEp.tvShowId === numericTvShowId &&
+              watchedEp.seasonNumber === seasonNumber &&
+              watchedEp.episodeNumber === episode.episode_number;
+          console.debug("Checking episode:", {
+            tvShowId: watchedEp.tvShowId,
+            seasonNumber: watchedEp.seasonNumber,
+            episodeNumber: watchedEp.episodeNumber,
+            inputTvShowId: numericTvShowId,
+            matches: match,
+          });
+          return match;
+        });
+        setIsWatched(watched);
+      } else {
+        console.debug("No history document found for user:", userId);
+      }
+    } catch (error) {
+      console.error("Error checking watch history:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, episode?.episode_number, tvShowId, seasonNumber]);
 
   useEffect(() => {
-    const checkIfWatched = async () => {
-      if (auth.currentUser) {
-        const historyRef = doc(db, "history", auth.currentUser.uid);
-        const historyDoc = await getDoc(historyRef);
-        if (historyDoc.exists()) {
-          const watchedEpisodes = historyDoc.data().episodes || [];
-          setIsWatched(
-            watchedEpisodes.some(
-              (watchedEpisode) =>
-                watchedEpisode.tvShowId === tvShowId &&
-                watchedEpisode.seasonNumber === seasonNumber &&
-                watchedEpisode.episodeNumber === episode.episode_number
-            )
-          );
-        }
-      }
-    };
+    setLoading(true);
+    setIsWatched(false);
     checkIfWatched();
-  }, [episode, tvShowId, seasonNumber]); // Add tvShowId and seasonNumber to dependency array
+  }, [checkIfWatched]);
 
   if (!episode) {
     return null;
   }
 
+  const imageUrl = episode.still_path
+      ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
+      : "/placeholder-wide.jpg";
+
   return (
-    <div
-      className={`relative bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-lg ${
-        isWatched ? "ring-2 ring-green-500" : ""
-      }`}
-      onClick={() => onWatchClick(episode.episode_number)}
-    >
-      <div className="relative aspect-w-16 aspect-h-9">
-        <img
-          src={
-            episode.still_path
-              ? `https://image.tmdb.org/t/p/w500${episode.still_path}`
-              : "/placeholder.jpg"
-          }
-          alt={`Episode ${episode.episode_number}`}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/placeholder.jpg";
-          }}
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
-        <h3 className="text-sm font-semibold text-white">
-          Episode {episode.episode_number}
-        </h3>
-        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-          {episode.name}
-        </p>
-      </div>
-
-      {isWatched && (
-        <div className="absolute top-2 right-2">
-          <CheckCircleIcon
-            className="w-6 h-6 text-green-500"
-            aria-hidden="true"
-          />{" "}
+      <div
+          onClick={onWatchClick}
+          className={`
+        group relative bg-secondary rounded-lg shadow overflow-hidden cursor-pointer
+        border-2 transition-all duration-200 ease-in-out
+        ${isSelected ? "border-accent shadow-lg shadow-accent/20" : "border-transparent"}
+        ${isWatched && !isSelected ? "opacity-60 hover:opacity-100" : "opacity-100"}
+        ${!isSelected ? "hover:border-accent/50" : ""}
+      `}
+          title={isWatched ? "Watched" : `Watch Episode ${episode.episode_number}`}
+      >
+        <div className="relative aspect-video">
+          <img
+              src={imageUrl}
+              alt={`Still from ${episode.name}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/placeholder-wide.jpg";
+              }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
+          <div className="absolute inset-0 flex items-center justify-center
+                        bg-black/50 opacity-0 group-hover:opacity-100
+                        transition-opacity duration-200">
+            <FaPlay className="w-6 h-6 text-white" />
+          </div>
+          {isWatched && !isSelected && !loading && (
+              <div className="absolute top-1.5 right-1.5" title="Watched">
+                <IoCheckmarkCircle className="w-5 h-5 text-accent bg-secondary rounded-full" />
+              </div>
+          )}
         </div>
-      )}
-    </div>
+        <div className="p-3">
+          <h4 className="text-sm font-semibold text-textprimary truncate" title={episode.name}>
+            E{episode.episode_number}: {episode.name}
+          </h4>
+          <p className="text-xs text-textsecondary mt-1 line-clamp-2">
+            {episode.overview || "No description available."}
+          </p>
+        </div>
+      </div>
   );
 };
 
