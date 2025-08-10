@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/router";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { FaPlay } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
 
-const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected }) => {
+const EpisodeCard = ({ episode, showId, seasonNumber, isSelected }) => {
+  const router = useRouter();
   const [isWatched, setIsWatched] = useState(false);
   const [loading, setLoading] = useState(true);
   const userId = auth.currentUser?.uid;
@@ -22,17 +24,17 @@ const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected
       const historyDoc = await getDoc(historyRef);
       if (historyDoc.exists()) {
         const watchedEpisodes = historyDoc.data().episodes || [];
-        const numericTvShowId = Number(tvShowId); // Coerce tvShowId to number
+        const numericShowId = Number(showId); // Coerce showId to number
         const watched = watchedEpisodes.some((watchedEp) => {
           const match =
-              watchedEp.tvShowId === numericTvShowId &&
+              watchedEp.tvShowId === numericShowId &&
               watchedEp.seasonNumber === seasonNumber &&
               watchedEp.episodeNumber === episode.episode_number;
           console.debug("Checking episode:", {
             tvShowId: watchedEp.tvShowId,
             seasonNumber: watchedEp.seasonNumber,
             episodeNumber: watchedEp.episodeNumber,
-            inputTvShowId: numericTvShowId,
+            inputShowId: numericShowId,
             matches: match,
           });
           return match;
@@ -46,13 +48,18 @@ const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected
     } finally {
       setLoading(false);
     }
-  }, [userId, episode?.episode_number, tvShowId, seasonNumber]);
+  }, [userId, episode?.episode_number, showId, seasonNumber]);
 
   useEffect(() => {
     setLoading(true);
     setIsWatched(false);
     checkIfWatched();
   }, [checkIfWatched]);
+
+  // Handle click to navigate to the episode route
+  const handleClick = () => {
+    router.push(`/watchTv/${showId}/${seasonNumber}/${episode.episode_number}`, undefined, { scroll: true });
+  };
 
   if (!episode) {
     return null;
@@ -64,7 +71,7 @@ const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected
 
   return (
       <div
-          onClick={onWatchClick}
+          onClick={handleClick}
           className={`
         group relative bg-secondary rounded-lg shadow overflow-hidden cursor-pointer
         border-2 transition-all duration-200 ease-in-out
@@ -86,8 +93,8 @@ const EpisodeCard = ({ episode, onWatchClick, tvShowId, seasonNumber, isSelected
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
           <div className="absolute inset-0 flex items-center justify-center
-                        bg-black/50 opacity-0 group-hover:opacity-100
-                        transition-opacity duration-200">
+                      bg-black/50 opacity-0 group-hover:opacity-100
+                      transition-opacity duration-200">
             <FaPlay className="w-6 h-6 text-white" />
           </div>
           {isWatched && !isSelected && !loading && (

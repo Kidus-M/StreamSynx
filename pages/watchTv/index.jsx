@@ -1,4 +1,4 @@
-// pages/tv/[tv_id].jsx (or your watchTv page route)
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
@@ -845,27 +845,17 @@ const TVShowPlayerPage = () => {
                 <Mosaic color="#DAA520" size="small" />
               </div>
             ) : episodes.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {episodes.map((episode) => (
-                  <EpisodeCard
-                    key={episode.id}
-                    episode={episode}
-                    showId={tvShow.id}
-                    seasonNumber={selectedSeason}
-                    isSelected={selectedEpisode === episode.episode_number}
-                    onWatchClick={() =>
-                      handleEpisodeClick(episode.episode_number)
-                    }
-                    // Pass theme colors if needed by EpisodeCard
-                    theme={{
-                      accent: "accent",
-                      secondary: "secondary-light",
-                      textPrimary: "text-textprimary",
-                      textSecondary: "text-textsecondary",
-                    }}
-                  />
-                ))}
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {episodes.map((episode) => (
+                      <EpisodeCard
+                          key={episode.id}
+                          episode={episode}
+                          showId={tvShow.id}
+                          seasonNumber={selectedSeason}
+                          isSelected={selectedEpisode === episode.episode_number}
+                      />
+                  ))}
+                </div>
             ) : (
               <p className="text-textsecondary italic">
                 No episodes found for this season.
