@@ -72,7 +72,7 @@ const RecommendationsModal = ({ onClose, recommendedMovies, router }) => {
                                     <MovieCard
                                         key={recMovie.id}
                                         movie={recMovie}
-                                        onClick={() => handleRecClick(recMovie.id)}
+                                        // onClick={() => handleRecClick(recMovie.id)}
                                     />
                                 ))}
                             </div>
