@@ -27,7 +27,11 @@ const RecommendationsModal = ({ onClose, recommendedMovies, router }) => {
 
     const handleRecClick = (recMovieId) => {
         onClose(); // Close the modal first
-        router.push(`/movie/${recMovieId}`); // Then navigate
+        if (!displayData.id) return;
+        const url = displayData.media_type === "tv"
+            ? `/watchTv?tv_id=${displayData.id}` // Link to detail page
+            : `/watch?movie_id=${displayData.id}`; // Link to detail page
+        router.push(url); // Then navigate
     };
 
     return (
@@ -72,7 +76,7 @@ const RecommendationsModal = ({ onClose, recommendedMovies, router }) => {
                                     <MovieCard
                                         key={recMovie.id}
                                         movie={recMovie}
-                                        // onClick={() => handleRecClick(recMovie.id)}
+                                        onClick={() => handleRecClick(recMovie.id)}
                                     />
                                 ))}
                             </div>
