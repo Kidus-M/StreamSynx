@@ -244,7 +244,7 @@ const RecommendationsModal = ({ onClose, recommendedMovies, router }) => {
 // --- Main Component ---
 const MovieDetailPage = () => {
     const router = useRouter();
-    const { movie_id: id } = router.query;
+    const { id: id } = router.query;
     const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
     const isRouterReady = router.isReady;
