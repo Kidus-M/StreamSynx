@@ -101,7 +101,7 @@ const TrendingMovies = () => {
 
 
       {/* Content Overlay - ADJUSTED PADDING */}
-      <div className="relative z-10 h-full flex flex-col justify-end items-start text-textprimary px-6 pt-6 pb-20 md:px-10 md:pt-10 md:pb-24 lg:px-12 lg:pt-12 lg:pb-28">
+      <div className="relative z-10 h-full flex flex-col justify-end items-start text-textprimary px-6 pt-6 pb-20 md:px-10 md:pt-10 md:pb-24 lg:px-20 lg:pt-12 lg:pb-28">
          <AnimatePresence mode="wait">
             {showDetails ? (
               <motion.div
