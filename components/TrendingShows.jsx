@@ -127,7 +127,7 @@ const TrendingShows = () => {
   if (trendingShows.length === 0) {
     return (
       // Themed Empty State, Added mt-16
-      <div className="h-[60vh] mt-16 flex items-center justify-center bg-primary text-textsecondary">
+      <div className="h-[75vh] mt-16 flex items-center justify-center bg-primary text-textsecondary">
         <p>No trending shows found.</p> {/* Updated text */}
       </div>
     );
@@ -139,7 +139,7 @@ const TrendingShows = () => {
 
   return (
     // --- ADDED MARGIN TOP (mt-16), Themed Background ---
-    <div className="relative w-full h-[60vh] overflow-hidden font-poppins bg-primary mt-4" {...handlers}>
+    <div className="relative w-full h-[75vh] overflow-hidden font-poppins bg-primary mt-4" {...handlers}>
 
       {/* Background Image Slider */}
       <AnimatePresence initial={false} custom={direction} mode="sync">
@@ -168,7 +168,7 @@ const TrendingShows = () => {
 
 
       {/* Content Overlay - ADJUSTED PADDING */}
-      <div className="relative z-10 h-full flex flex-col justify-end items-start text-textprimary px-6 pt-6 pb-20 md:px-10 md:pt-10 md:pb-24 lg:px-12 lg:pt-12 lg:pb-28">
+      <div className="relative z-10 h-full flex flex-col justify-end items-start text-textprimary px-6 pt-6 pb-20 md:px-10 md:pt-10 md:pb-24 lg:px-20 lg:pt-12 lg:pb-28">
          <AnimatePresence mode="wait">
             {detailsReady ? ( // Use detailsReady
               <motion.div
