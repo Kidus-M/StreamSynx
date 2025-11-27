@@ -114,9 +114,9 @@ const FavoritesPage = () => {
                                         // onClick={() => handleEpisodeCardClick(episode)} // Navigate to specific episode watch page
                                      />
                                      {/* Display S/E number below the card */}
-                                     <p className="text-xs mt-1.5 text-textsecondary text-center font-medium" title={`${cardData.title} - S${cardData.seasonNumber} E${cardData.episodeNumber}`}>
-                                         S {String(cardData.seasonNumber).padStart(2, '0')} E {String(cardData.episodeNumber).padStart(2, '0')}
-                                     </p>
+                                     {/*<p className="text-xs mt-1.5 text-textsecondary text-center font-medium" title={`${cardData.title} - S${cardData.seasonNumber} E${cardData.episodeNumber}`}>*/}
+                                     {/*    S {String(cardData.seasonNumber).padStart(2, '0')} E {String(cardData.episodeNumber).padStart(2, '0')}*/}
+                                     {/*</p>*/}
                                  </div>
                                );
                            })}
