@@ -14,7 +14,7 @@
     "firebase": "^11.3.0",
     "framer-motion": "^12.4.2",
     "lucide-react": "^0.475.0",
-    "next": "latest",
+    "next": "15.5.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.5.2",
