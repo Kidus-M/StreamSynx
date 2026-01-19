@@ -318,7 +318,7 @@ const MovieDetailPage = () => {
                     className="w-full rounded-lg overflow-hidden shadow-lg bg-black aspect-video border border-secondary-light"
                 >
                     <iframe
-                        src={`https://vidlink.pro/movie/${movie.id}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&icons=default&player=default&title=true&poster=true&autoplay=true&nextbutton=true`}
+                        src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
                         frameBorder="0"
                         allowFullScreen
                         className="w-full h-full"

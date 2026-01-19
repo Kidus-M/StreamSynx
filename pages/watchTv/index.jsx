@@ -478,7 +478,7 @@ const TVShowPlayerPage = () => {
           >
             <iframe
                 key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`} // Force re-render on S/E change
-                src={`https://vidlink.pro/tv/${tvShow.id}/${selectedSeason}/${selectedEpisode}?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&autoplay=true&nextbutton=true`}
+                src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
                 frameBorder="0"
                 allowFullScreen
                 className="w-full h-full"

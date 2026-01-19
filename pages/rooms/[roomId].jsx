@@ -792,26 +792,23 @@ const handleRemoveMember = async (memberUidToRemove) => {
   const calculateVideoSrc = useCallback(() => {
     if (!roomData?.currentMediaId) return "";
     const type = roomData.currentMediaType === "tv" ? "tv" : "movie";
-    // *** Verify this base URL and path structure is correct for vidlink.pro ***
-    let urlBase = `https://vidlink.pro/${type}/${roomData.currentMediaId}`;
+    
     let url = "";
-
-    // Construct URL based on type and selected episode/season
-    if (type === "tv" && selectedSeason !== null && selectedEpisode !== null) {
-      // *** THIS IS THE CRITICAL PART TO VERIFY ***
-      // The assumption here is that vidlink.pro uses "-SEASON-EPISODE" format.
-      // It might use query parameters (e.g., ?s=X&e=Y) or a different path structure.
-      // You MUST confirm the correct format for vidlink.pro.
-      url = `${urlBase}/${selectedSeason}/${selectedEpisode}`; // <-- LIKELY PROBLEM AREA
+    
+    if (type === "movie") {
+      // Movie embed URL format
+      url = `https://vidsrc-embed.ru/embed/movie?tmdb=${roomData.currentMediaId}&autoplay=0`;
+    } else if (type === "tv" && selectedSeason !== null && selectedEpisode !== null) {
+      // TV episode embed URL format
+      url = `https://vidsrc-embed.ru/embed/tv?tmdb=${roomData.currentMediaId}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=0`;
     } else if (type === "tv" && selectedSeason !== null) {
-      // If only season is selected, attempt episode 1 (check if vidlink supports this)
-      url = `${urlBase}-${selectedSeason}-1`; // <-- Also needs verification
-    } else {
-      url = urlBase; // For movies or TV shows without episode selected
+      // If only season is selected, default to episode 1
+      url = `https://vidsrc-embed.ru/embed/tv?tmdb=${roomData.currentMediaId}&season=${selectedSeason}&episode=1&autoplay=0`;
+    } else if (type === "tv") {
+      // TV show without season/episode selected - show TV overview
+      url = `https://vidsrc-embed.ru/embed/tv?tmdb=${roomData.currentMediaId}`;
     }
-
-    // Add query parameters (ensure these are still valid for vidlink.pro)
-    url += `?primaryColor=DAA520&secondaryColor=A0A0A0&iconColor=EAEAEA&icons=default&player=default&title=true&poster=true&autoplay=false&nextbutton=false`;
+    
     console.log("Generated iframe src:", url); // Add log to see generated URL
     return url;
   }, [
