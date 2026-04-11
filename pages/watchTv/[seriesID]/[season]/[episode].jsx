@@ -14,6 +14,8 @@ import {
     FaShareAlt,
     FaFilm, // Icon for Details
     FaListOl, // Icon for Episodes
+    FaChevronLeft,
+    FaChevronRight,
 } from "react-icons/fa";
 import { auth, db } from "../../../../firebase"; // Adjust path
 import {
@@ -216,16 +218,20 @@ const TVEpisodesModal = ({ onClose, tvShow, seasons, selectedSeason, handleSeaso
                             </div>
                         ) : episodes.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {episodes.map((episode) => (
+                                {episodes.map((episode) => {
+                                    const isReleased = !episode.air_date || new Date(episode.air_date).getTime() <= Date.now();
+                                    return (
                                     <EpisodeCard
                                         key={episode.id}
                                         episode={episode}
                                         showId={tvShow.id}
                                         seasonNumber={selectedSeason}
                                         isSelected={selectedEpisode === episode.episode_number}
-                                        // Pass the wrapper click handler to the card
+                                        isAvailable={isReleased}
+                                        unavailableReason={`Available on ${episode.air_date || "a later date"}`}
                                         onWatchClick={() => {
-                                            handleEpisodeClick(episode.episode_number);
+                                            if (!isReleased) return;
+                                            handleEpisodeClick(episode.episode_number, selectedSeason);
                                             onClose(); // Close modal on episode click
                                         }}
                                         // Pass theme colors
@@ -237,7 +243,8 @@ const TVEpisodesModal = ({ onClose, tvShow, seasons, selectedSeason, handleSeaso
                                             primary: "primary"
                                         }}
                                     />
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             <p className="text-textsecondary italic text-center py-10">
@@ -302,6 +309,11 @@ const TVShowPlayerPage = () => {
     const { episodes, loadingEpisodes } = useTVSeasonsEpisodes(
         validId,
         modalViewSeason, // Fetch episodes based on what modal is viewing
+        apiKey
+    );
+    const { episodes: selectedSeasonEpisodes } = useTVSeasonsEpisodes(
+        validId,
+        selectedSeason,
         apiKey
     );
 
@@ -424,12 +436,90 @@ const TVShowPlayerPage = () => {
         if (selectedEpisode && selectedEpisode > 0) saveToHistory();
     }, [tvShow, selectedSeason, selectedEpisode, currentUser]);
 
-    // --- Episode Click Handler (UPDATED) ---
-    const handleEpisodeClick = (episodeNumber) => {
-        setSelectedEpisode(episodeNumber); // Update player state
-        // Update URL without reloading page
-        router.push(`/watchTv/${id}/${selectedSeason}/${episodeNumber}`, undefined, { shallow: true });
+    const isEpisodeReleased = useCallback((ep) => {
+        if (!ep?.air_date) return true;
+        return new Date(ep.air_date).getTime() <= Date.now();
+    }, []);
+
+    const goToEpisode = useCallback((seasonNumber, episodeNumber) => {
+        setSelectedSeason(seasonNumber);
+        setSelectedEpisode(episodeNumber);
+        setModalViewSeason(seasonNumber);
+        router.push(`/watchTv/${id}/${seasonNumber}/${episodeNumber}`, undefined, { shallow: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [router, id]);
+
+    const playableEpisodesInSeason = useMemo(() => {
+        return (selectedSeasonEpisodes || [])
+            .filter(isEpisodeReleased)
+            .sort((a, b) => a.episode_number - b.episode_number);
+    }, [selectedSeasonEpisodes, isEpisodeReleased]);
+
+    const currentEpisodeDetails = useMemo(() => {
+        return (selectedSeasonEpisodes || []).find((ep) => ep.episode_number === selectedEpisode) || null;
+    }, [selectedSeasonEpisodes, selectedEpisode]);
+
+    const isCurrentEpisodeReleased = currentEpisodeDetails ? isEpisodeReleased(currentEpisodeDetails) : true;
+
+    // --- Episode Click Handler (UPDATED) ---
+    const handleEpisodeClick = (episodeNumber, seasonNumber = selectedSeason) => {
+        const targetEpisode = (seasonNumber === selectedSeason ? selectedSeasonEpisodes : episodes)
+            ?.find((ep) => ep.episode_number === episodeNumber);
+        if (targetEpisode && !isEpisodeReleased(targetEpisode)) {
+            toast.error("This episode has not aired yet.");
+            return;
+        }
+        goToEpisode(seasonNumber, episodeNumber);
+    };
+
+    const navigateToAdjacentEpisode = async (direction) => {
+        if (!tvShow || !validId || !apiKey) return;
+
+        const currentIndex = playableEpisodesInSeason.findIndex((ep) => ep.episode_number === selectedEpisode);
+
+        if (direction === "next" && currentIndex >= 0 && currentIndex < playableEpisodesInSeason.length - 1) {
+            goToEpisode(selectedSeason, playableEpisodesInSeason[currentIndex + 1].episode_number);
+            return;
+        }
+
+        if (direction === "prev" && currentIndex > 0) {
+            goToEpisode(selectedSeason, playableEpisodesInSeason[currentIndex - 1].episode_number);
+            return;
+        }
+
+        const candidateSeasons = (tvShow.seasons || [])
+            .filter((s) => s.season_number > 0 && s.episode_count > 0)
+            .sort((a, b) => a.season_number - b.season_number);
+
+        const orderedCandidates = direction === "next"
+            ? candidateSeasons.filter((s) => s.season_number > selectedSeason)
+            : candidateSeasons.filter((s) => s.season_number < selectedSeason).reverse();
+
+        for (const seasonMeta of orderedCandidates) {
+            try {
+                const response = await axios.get(`${BASE_URL}/tv/${validId}/season/${seasonMeta.season_number}`, {
+                    params: { api_key: apiKey, language: "en-US" },
+                });
+
+                const releasedEpisodes = (response.data.episodes || [])
+                    .filter(isEpisodeReleased)
+                    .sort((a, b) => a.episode_number - b.episode_number);
+
+                if (!releasedEpisodes.length) {
+                    continue;
+                }
+
+                const target = direction === "next"
+                    ? releasedEpisodes[0]
+                    : releasedEpisodes[releasedEpisodes.length - 1];
+                goToEpisode(seasonMeta.season_number, target.episode_number);
+                return;
+            } catch (navError) {
+                console.error("Could not fetch adjacent season episodes:", navError);
+            }
+        }
+
+        toast(direction === "next" ? "You are at the latest released episode." : "You are at the earliest released episode.");
     };
 
     // --- Season Change Handler (UPDATED) ---
@@ -444,7 +534,7 @@ const TVShowPlayerPage = () => {
 
     // --- Click handler for recommendation card ---
     const handleRecClick = (recShowId) => {
-        router.push(`/tv/${recShowId}`); // Navigate to TV detail page
+        router.push(`/watchTv/${recShowId}/1/1`); // Navigate to TV player page
     };
 
 
@@ -478,214 +568,203 @@ const TVShowPlayerPage = () => {
                 </div>
             )}
 
-            <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-6xl mx-auto w-full">
-
-                {/* --- IFRAME PLAYER SECTION --- */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-                    className="w-full rounded-lg overflow-hidden shadow-lg bg-black aspect-video border border-secondary-light"
-                >
-                    <iframe
-                        key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`} // Force re-render on S/E change
-                        src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
-                        frameBorder="0"
-                        allowFullScreen
-                        className="w-full h-full"
-                        title={`${tvShow.name} Player - S${selectedSeason} E${selectedEpisode}`}
-                    ></iframe>
-                </motion.div>
-
-                {/* --- NEW: BUTTON BAR SECTION --- */}
+            <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-7 max-w-7xl mx-auto w-full">
                 <motion.section
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.1 }}
-                    className="bg-secondary rounded-lg shadow-lg p-3 md:p-4"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45 }}
+                    className="rounded-2xl border border-secondary-light/60 bg-secondary/80 backdrop-blur-sm p-4 md:p-5"
                 >
-                    {/* Main row of buttons */}
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
-                        {/* Favorite Button (Show-level) */}
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-5">
+                        <img
+                            src={tvShow.poster_path ? `${IMAGE_BASE_URL_W500}${tvShow.poster_path}` : "/placeholder.jpg"}
+                            alt={`${tvShow.name} poster`}
+                            className="w-24 h-36 md:w-28 md:h-40 rounded-xl object-cover border border-secondary-light/60 shadow-md"
+                            onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+                        />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-textsecondary">Streaming Now</p>
+                            <h1 className="text-2xl md:text-3xl font-semibold text-textprimary mt-1 truncate">{tvShow.name}</h1>
+                            <p className="text-sm text-textsecondary mt-1">
+                                S{selectedSeason} • E{selectedEpisode}
+                                {currentEpisodeDetails?.name ? ` • ${currentEpisodeDetails.name}` : ""}
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                {(tvShow.genres || []).slice(0, 4).map((genre) => (
+                                    <span key={genre.id} className="px-2.5 py-1 rounded-full text-xs bg-primary/70 text-textsecondary border border-secondary-light/40">
+                                        {genre.name}
+                                    </span>
+                                ))}
+                            </div>
+                            {!isCurrentEpisodeReleased && (
+                                <p className="text-xs text-red-300 mt-3">This episode has not aired yet. Use Previous to continue watching released episodes.</p>
+                            )}
+                        </div>
+                    </div>
+                </motion.section>
+
+                <motion.section
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.05 }}
+                    className="rounded-2xl overflow-hidden border border-secondary-light/70 shadow-[0_20px_50px_rgba(0,0,0,0.35)] bg-black"
+                >
+                    <div className="flex items-center justify-between px-4 py-2 bg-black/60 border-b border-white/10 text-xs text-textsecondary">
+                        <span>{tvShow.name}</span>
+                        <span>Season {selectedSeason} Episode {selectedEpisode}</span>
+                    </div>
+                    <div className="aspect-video">
+                        <iframe
+                            key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`}
+                            src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
+                            frameBorder="0"
+                            allowFullScreen
+                            className="w-full h-full"
+                            title={`${tvShow.name} Player - S${selectedSeason} E${selectedEpisode}`}
+                        ></iframe>
+                    </div>
+                </motion.section>
+
+                <motion.section
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.45, delay: 0.1 }}
+                    className="rounded-2xl border border-secondary-light/60 bg-secondary/85 backdrop-blur-md p-4 md:p-5"
+                >
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                        <button
+                            onClick={() => navigateToAdjacentEpisode("prev")}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary-light text-textprimary hover:bg-secondary-light/70 transition-colors"
+                        >
+                            <FaChevronLeft className="w-3.5 h-3.5" />
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => navigateToAdjacentEpisode("next")}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-accent text-primary hover:bg-accent-hover transition-colors"
+                        >
+                            Next
+                            <FaChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="h-6 w-px bg-secondary-light/70 hidden md:block"></div>
                         <motion.button
-                            whileTap={{ scale: 0.9 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={toggleFavoriteShow}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-200 ${
+                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                                 isFavorite
-                                    ? "bg-accent/20 text-accent border border-accent"
-                                    : "bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light"
+                                    ? "bg-accent/20 text-accent border border-accent/70"
+                                    : "bg-secondary-light/50 text-textsecondary hover:text-textprimary"
                             }`}
-                            title={isFavorite ? "Remove Show from Favorites" : "Add Show to Favorites"}
                         >
                             {isFavorite ? <FaHeart /> : <FaRegHeart />}
-                            <span>Favorite Show</span>
+                            Favorite
                         </motion.button>
-
-                        {/* Rating Section (Show-level) */}
-                        <div className="flex items-center gap-1 bg-secondary-light/50 px-3 py-1.5 rounded-md border border-transparent group">
-                            <span className="text-sm text-textsecondary mr-1">Rate Show:</span>
-                            {[...Array(5)].map((_, index) => {
-                                const ratingValue = index + 1;
-                                return (
-                                    <motion.button
-                                        key={ratingValue}
-                                        whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.2, y: -2 }}
-                                        onClick={() => handleShowRating(ratingValue * 2)}
-                                        className="text-lg transition-colors duration-150"
-                                        title={`Rate ${ratingValue * 2}/10`}
-                                    >
-                                        {ratingValue * 2 <= rating ? (<FaStar className="text-accent" />) : (<FaRegStar className="text-textsecondary group-hover:text-accent/70" />)}
-                                    </motion.button>
-                                );
-                            })}
-                            {savedRating && (<span className="ml-2 text-xs text-accent">({savedRating}/10)</span>)}
-                        </div>
-
-                        {/* Recommend/Share Button (Show-level) */}
                         <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setShowRecommend(!showRecommend)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light transition-all duration-200"
-                            title="Recommend Show"
-                        >
-                            <FaShareAlt />
-                            <span>Recommend</span>
-                        </motion.button>
-
-                        {/* Details Modal Button */}
-                        <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setIsDetailsModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light transition-all duration-200"
-                            title="Show Details"
-                        >
-                            <FaFilm />
-                            <span>Details</span>
-                        </motion.button>
-
-                        {/* Episodes Modal Button */}
-                        <motion.button
-                            whileTap={{ scale: 0.9 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => setIsEpisodesModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary hover:bg-secondary-light border border-transparent hover:border-secondary-light transition-all duration-200"
-                            title="Show Episodes"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
                         >
                             <FaListOl />
-                            <span>Episodes</span>
+                            Episodes
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => setIsDetailsModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
+                        >
+                            <FaFilm />
+                            Details
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => setShowRecommend(!showRecommend)}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
+                        >
+                            <FaShareAlt />
+                            Share
                         </motion.button>
                     </div>
 
-                    {/* Recommend Friend Section (Conditional) */}
+                    <div className="flex flex-wrap items-center gap-2 mt-4">
+                        <span className="text-sm text-textsecondary mr-1">Your rating</span>
+                        {[...Array(5)].map((_, index) => {
+                            const ratingValue = index + 1;
+                            return (
+                                <motion.button
+                                    key={ratingValue}
+                                    whileTap={{ scale: 0.9 }}
+                                    whileHover={{ scale: 1.15, y: -1 }}
+                                    onClick={() => handleShowRating(ratingValue * 2)}
+                                    className="text-xl"
+                                    title={`Rate ${ratingValue * 2}/10`}
+                                >
+                                    {ratingValue * 2 <= rating ? <FaStar className="text-accent" /> : <FaRegStar className="text-textsecondary" />}
+                                </motion.button>
+                            );
+                        })}
+                        {savedRating && <span className="text-xs text-accent ml-1">Saved: {savedRating}/10</span>}
+                    </div>
+
                     <AnimatePresence>
                         {showRecommend && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0, marginTop: 0 }}
                                 animate={{ opacity: 1, height: "auto", marginTop: "1rem" }}
                                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-secondary-light p-3 rounded-md overflow-hidden"
+                                transition={{ duration: 0.25 }}
+                                className="bg-primary/60 border border-secondary-light/50 p-3 rounded-xl"
                             >
-                                <label htmlFor="friendSelect" className="block text-xs text-textsecondary mb-1">Select friend:</label>
+                                <label htmlFor="friendSelect" className="block text-xs text-textsecondary mb-1">Recommend to friend</label>
                                 <div className="flex items-center gap-2">
                                     <select
                                         id="friendSelect"
                                         value={selectedFriend}
                                         onChange={(e) => setSelectedFriend(e.target.value)}
-                                        className="flex-grow p-2 border-none rounded bg-secondary text-textprimary text-sm focus:outline-none focus:ring-1 focus:ring-accent appearance-none"
-                                        style={{ WebkitAppearance: "none", MozAppearance: "none", appearance: "none" }}
+                                        className="flex-grow p-2 border-none rounded-lg bg-secondary text-textprimary text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                                     >
-                                        <option value="">-- Select --</option>
+                                        <option value="">Select friend</option>
                                         {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
                                     </select>
                                     <button
                                         onClick={recommendShow}
                                         disabled={!selectedFriend}
-                                        className="flex-shrink-0 bg-accent hover:bg-accent-hover text-primary font-semibold px-4 py-2 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >Send</button>
+                                        className="bg-accent hover:bg-accent-hover text-primary font-semibold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Send
+                                    </button>
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </motion.section>
 
-                {/* --- TV SHOW INFO SECTION (Simplified) --- */}
-                {/*<motion.section*/}
-                {/*    initial={{ opacity: 0 }}*/}
-                {/*    animate={{ opacity: 1 }}*/}
-                {/*    transition={{ duration: 0.5, delay: 0.2 }}*/}
-                {/*    className="bg-secondary rounded-lg shadow-lg p-4 md:p-6"*/}
-                {/*>*/}
-                {/*    <div className="flex flex-col md:flex-row gap-4 md:gap-6">*/}
-                {/*        <div className="flex-shrink-0 w-full md:w-48 lg:w-64 mx-auto md:mx-0">*/}
-                {/*            <img*/}
-                {/*                src={`${IMAGE_BASE_URL_W500}${tvShow.poster_path}`}*/}
-                {/*                alt={`${tvShow.name} Poster`}*/}
-                {/*                className="w-full h-auto object-cover rounded-md shadow-md"*/}
-                {/*            />*/}
-                {/*        </div>*/}
-                {/*        <div className="flex-1">*/}
-                {/*            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-textprimary mb-1">*/}
-                {/*                {tvShow.name}*/}
-                {/*            </h1>*/}
-                {/*            {tvShow.tagline && (*/}
-                {/*                <p className="text-sm md:text-md italic text-textsecondary mb-3">*/}
-                {/*                    {tvShow.tagline}*/}
-                {/*                </p>*/}
-                {/*            )}*/}
-                {/*            /!* Metadata *!/*/}
-                {/*            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">*/}
-                {/*                {tvShow.genres?.map((genre) => (*/}
-                {/*                    <span key={genre.id} className="text-xs uppercase font-medium text-textsecondary border border-secondary-light px-2 py-0.5 rounded">*/}
-                {/*    {genre.name}*/}
-                {/*  </span>*/}
-                {/*                ))}*/}
-                {/*                <span className="text-textsecondary">•</span>*/}
-                {/*                <div className="flex items-center gap-1 text-accent">*/}
-                {/*                    <FaStar />*/}
-                {/*                    <span className="font-semibold text-textprimary">{tvShow.vote_average?.toFixed(1)}</span>*/}
-                {/*                    <span className="text-xs text-textsecondary">({tvShow.vote_count?.toLocaleString()} votes)</span>*/}
-                {/*                </div>*/}
-                {/*                <span className="text-textsecondary">•</span>*/}
-                {/*                <span className="text-textsecondary">{tvShow.first_air_date?.substring(0, 4)}</span>*/}
-                {/*                <span className="text-textsecondary">•</span>*/}
-                {/*                <span className="text-textsecondary">{tvShow.number_of_seasons} Season{tvShow.number_of_seasons !== 1 ? "s" : ""}</span>*/}
-                {/*            </div>*/}
-
-                {/*            /!* Short Overview *!/*/}
-                {/*            <div className="mt-4 border-t border-secondary-light pt-4">*/}
-                {/*                <h3 className="text-base font-semibold text-textprimary mb-1">Overview</h3>*/}
-                {/*                <p className="text-sm text-textsecondary leading-relaxed line-clamp-3">*/}
-                {/*                    {tvShow.overview || "No overview available."}*/}
-                {/*                </p>*/}
-                {/*                <button*/}
-                {/*                    onClick={() => setIsDetailsModalOpen(true)}*/}
-                {/*                    className="text-sm text-accent hover:text-accent-hover font-medium mt-1"*/}
-                {/*                >*/}
-                {/*                    Read More...*/}
-                {/*                </button>*/}
-                {/*            </div>*/}
-                {/*        </div>*/}
-                {/*    </div>*/}
-                {/*</motion.section>*/}
-
-                {/*/!* --- Recommended Shows Section (Kept) --- *!/*/}
-                {/*{recommendedShows.length > 0 && (*/}
-                {/*    <section className="mt-6 md:mt-8">*/}
-                {/*        <h2 className="text-xl md:text-2xl font-bold mb-4 text-textprimary">*/}
-                {/*            Recommended Shows*/}
-                {/*        </h2>*/}
-                {/*        <div className="flex overflow-x-auto scrollbar-hide space-x-4 pb-4 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent">*/}
-                {/*            {recommendedShows.map((recShow) => (*/}
-                {/*                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44">*/}
-                {/*                    <SearchCard*/}
-                {/*                        movie={{*/}
-                {/*                            ...recShow,*/}
-                {/*                            media_type: "tv",*/}
-                {/*                            poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}`,*/}
-                {/*                        }}*/}
-                {/*                        onClick={() => handleRecClick(recShow.id)} // <-- FIXED onClick*/}
-                {/*                    />*/}
-                {/*                </div>*/}
-                {/*            ))}*/}
-                {/*        </div>*/}
-                {/*    </section>*/}
-                {/*)}*/}
+                {recommendedShows.length > 0 && (
+                    <motion.section
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.45, delay: 0.12 }}
+                        className="rounded-2xl border border-secondary-light/60 bg-secondary/80 p-4 md:p-5"
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-lg md:text-xl font-semibold text-textprimary">Up Next</h2>
+                            <span className="text-xs text-textsecondary">Curated for this show</span>
+                        </div>
+                        <div className="flex overflow-x-auto gap-3 pb-1 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent">
+                            {recommendedShows.map((recShow) => (
+                                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44">
+                                    <SearchCard
+                                        movie={{
+                                            ...recShow,
+                                            media_type: "tv",
+                                            poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}`,
+                                        }}
+                                        onClick={() => handleRecClick(recShow.id)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </motion.section>
+                )}
             </main>
 
             {/* --- RENDER MODALS --- */}

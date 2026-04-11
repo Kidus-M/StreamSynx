@@ -4,8 +4,17 @@ import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { FaPlay } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
+import { FaLock } from "react-icons/fa";
 
-const EpisodeCard = ({ episode, showId, seasonNumber, isSelected }) => {
+const EpisodeCard = ({
+  episode,
+  showId,
+  seasonNumber,
+  isSelected,
+  onWatchClick,
+  isAvailable = true,
+  unavailableReason = "This episode is not available yet.",
+}) => {
   const router = useRouter();
   const [isWatched, setIsWatched] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,6 +67,15 @@ const EpisodeCard = ({ episode, showId, seasonNumber, isSelected }) => {
 
   // Handle click to navigate to the episode route
   const handleClick = () => {
+    if (!isAvailable) {
+      return;
+    }
+
+    if (onWatchClick) {
+      onWatchClick();
+      return;
+    }
+
     router.push(`/watchTv/${showId}/${seasonNumber}/${episode.episode_number}`, undefined, { scroll: true });
   };
 
@@ -72,14 +90,29 @@ const EpisodeCard = ({ episode, showId, seasonNumber, isSelected }) => {
   return (
       <div
           onClick={handleClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleClick();
+            }
+          }}
           className={`
-        group relative bg-secondary rounded-lg shadow overflow-hidden cursor-pointer
+        group relative bg-secondary rounded-lg shadow overflow-hidden
         border-2 transition-all duration-200 ease-in-out
         ${isSelected ? "border-accent shadow-lg shadow-accent/20" : "border-transparent"}
         ${isWatched && !isSelected ? "opacity-60 hover:opacity-100" : "opacity-100"}
-        ${!isSelected ? "hover:border-accent/50" : ""}
+        ${!isSelected && isAvailable ? "hover:border-accent/50" : ""}
+        ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-55 grayscale-[0.25]"}
       `}
-          title={isWatched ? "Watched" : `Watch Episode ${episode.episode_number}`}
+          title={
+            isAvailable
+              ? isWatched
+                ? "Watched"
+                : `Watch Episode ${episode.episode_number}`
+              : unavailableReason
+          }
       >
         <div className="relative aspect-video">
           <img
@@ -97,6 +130,14 @@ const EpisodeCard = ({ episode, showId, seasonNumber, isSelected }) => {
                       transition-opacity duration-200">
             <FaPlay className="w-6 h-6 text-white" />
           </div>
+          {!isAvailable && (
+              <div className="absolute inset-0 bg-black/65 flex items-center justify-center px-3 text-center">
+                <div className="flex items-center gap-2 text-xs text-white font-semibold">
+                  <FaLock className="w-3.5 h-3.5 text-accent" />
+                  <span>Not released yet</span>
+                </div>
+              </div>
+          )}
           {isWatched && !isSelected && !loading && (
               <div className="absolute top-1.5 right-1.5" title="Watched">
                 <IoCheckmarkCircle className="w-5 h-5 text-accent bg-secondary rounded-full" />
