@@ -545,259 +545,194 @@ const TVShowPlayerPage = () => {
 
     // --- Main Render (UPDATED) ---
     return (
-        <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col font-poppins">
+        <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins selection:bg-accent/30">
             <Head>
                 <title>{tvShow ? `${tvShow.name} (S${selectedSeason} E${selectedEpisode}) - StreamSynx` : 'TV Show Details - StreamSynx'}</title>
                 <meta name="description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
-                <link rel="canonical" href={`https://streamsynx.vercel.app/${router.asPath}`} />
-                <meta property="og:type" content="video.tv_show" />
-                <meta property="og:title" content={tvShow ? `${tvShow.name} (S${selectedSeason} E${selectedEpisode}) - StreamSynx` : 'TV Show Details - StreamSynx'} />
-                <meta property="og:description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
-                {tvShow?.poster_path && <meta property="og:image" content={`https://image.tmdb.org/t/p/w500${tvShow.poster_path}`} />}
-                <meta property="og:url" content={`https://streamsynx.vercel.app/${router.asPath}`} />
-                <meta property="og:site_name" content="StreamSynx" />
             </Head>
-            <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary text-textprimary" }} />
+            <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary/90 text-textprimary backdrop-blur-md border border-white/10" }} />
             <NavBar />
 
-            {/* Blurred Backdrop */}
+            {/* Cinematic Backdrop */}
             {tvShow.backdrop_path && (
-                <div className="absolute top-0 left-0 w-full h-[50vh] md:h-[60vh] -z-10 overflow-hidden" aria-hidden="true">
-                    <img src={`${IMAGE_BASE_URL_ORIGINAL}${tvShow.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-20 blur-md scale-110"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/50"></div>
+                <div className="absolute top-0 left-0 w-full h-[80vh] -z-10 overflow-hidden" aria-hidden="true">
+                    <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10" />
+                    <img src={`${IMAGE_BASE_URL_ORIGINAL}${tvShow.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-30 blur-2xl scale-110"/>
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent z-20"></div>
                 </div>
             )}
 
-            <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-7 max-w-7xl mx-auto w-full">
-                <motion.section
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.45 }}
-                    className="rounded-2xl border border-secondary-light/60 bg-secondary/80 backdrop-blur-sm p-4 md:p-5"
-                >
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-5">
-                        <img
-                            src={tvShow.poster_path ? `${IMAGE_BASE_URL_W500}${tvShow.poster_path}` : "/placeholder.jpg"}
-                            alt={`${tvShow.name} poster`}
-                            className="w-24 h-36 md:w-28 md:h-40 rounded-xl object-cover border border-secondary-light/60 shadow-md"
-                            onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
-                        />
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-textsecondary">Streaming Now</p>
-                            <h1 className="text-2xl md:text-3xl font-semibold text-textprimary mt-1 truncate">{tvShow.name}</h1>
-                            <p className="text-sm text-textsecondary mt-1">
-                                S{selectedSeason} • E{selectedEpisode}
-                                {currentEpisodeDetails?.name ? ` • ${currentEpisodeDetails.name}` : ""}
-                            </p>
-                            <div className="flex flex-wrap gap-2 mt-3">
-                                {(tvShow.genres || []).slice(0, 4).map((genre) => (
-                                    <span key={genre.id} className="px-2.5 py-1 rounded-full text-xs bg-primary/70 text-textsecondary border border-secondary-light/40">
-                                        {genre.name}
-                                    </span>
-                                ))}
-                            </div>
-                            {!isCurrentEpisodeReleased && (
-                                <p className="text-xs text-red-300 mt-3">This episode has not aired yet. Use Previous to continue watching released episodes.</p>
-                            )}
-                        </div>
-                    </div>
-                </motion.section>
-
-                <motion.section
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.05 }}
-                    className="rounded-2xl overflow-hidden border border-secondary-light/70 shadow-[0_20px_50px_rgba(0,0,0,0.35)] bg-black"
-                >
-                    <div className="flex items-center justify-between px-4 py-2 bg-black/60 border-b border-white/10 text-xs text-textsecondary">
-                        <span>{tvShow.name}</span>
-                        <span>Season {selectedSeason} Episode {selectedEpisode}</span>
-                    </div>
-                    <div className="aspect-video">
+            <main className="flex-1 w-full pt-20 md:pt-24 pb-12 flex flex-col">
+                {/* Contained Player Section */}
+                <section className="w-full max-w-[1800px] mx-auto px-4 md:px-32 relative z-30">
+                    <div className="w-full aspect-video relative group rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10">
                         <iframe
                             key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`}
                             src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
                             frameBorder="0"
                             allowFullScreen
-                            className="w-full h-full"
+                            className="w-full h-full absolute inset-0"
                             title={`${tvShow.name} Player - S${selectedSeason} E${selectedEpisode}`}
                         ></iframe>
                     </div>
-                </motion.section>
+                </section>
 
-                <motion.section
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.45, delay: 0.1 }}
-                    className="rounded-2xl border border-secondary-light/60 bg-secondary/85 backdrop-blur-md p-4 md:p-5"
-                >
-                    <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                        <button
-                            onClick={() => navigateToAdjacentEpisode("prev")}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary-light text-textprimary hover:bg-secondary-light/70 transition-colors"
-                        >
-                            <FaChevronLeft className="w-3.5 h-3.5" />
-                            Previous
-                        </button>
-                        <button
-                            onClick={() => navigateToAdjacentEpisode("next")}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-accent text-primary hover:bg-accent-hover transition-colors"
-                        >
-                            Next
-                            <FaChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                        <div className="h-6 w-px bg-secondary-light/70 hidden md:block"></div>
-                        <motion.button
-                            whileTap={{ scale: 0.96 }}
-                            onClick={toggleFavoriteShow}
-                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                                isFavorite
-                                    ? "bg-accent/20 text-accent border border-accent/70"
-                                    : "bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-                            }`}
-                        >
-                            {isFavorite ? <FaHeart /> : <FaRegHeart />}
-                            Favorite
-                        </motion.button>
-                        <motion.button
-                            whileTap={{ scale: 0.96 }}
-                            onClick={() => setIsEpisodesModalOpen(true)}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-                        >
-                            <FaListOl />
-                            Episodes
-                        </motion.button>
-                        <motion.button
-                            whileTap={{ scale: 0.96 }}
-                            onClick={() => setIsDetailsModalOpen(true)}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-                        >
-                            <FaFilm />
-                            Details
-                        </motion.button>
-                        <motion.button
-                            whileTap={{ scale: 0.96 }}
-                            onClick={() => setShowRecommend(!showRecommend)}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-                        >
-                            <FaShareAlt />
-                            Share
-                        </motion.button>
-                    </div>
+                {/* Content Container below player */}
+                <div className="max-w-7xl mx-auto w-full px-4 md:px-8 mt-6 md:mt-8 space-y-8 md:space-y-12">
+                    
+                    {/* Now Playing & Action Bar */}
+                    <section className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
+                        <div className="flex-1">
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
+                                <span className="section-label text-accent">Now Playing</span>
+                                <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">{tvShow.name}</h1>
+                                <p className="text-sm md:text-base text-textsecondary font-medium">
+                                    <span className="text-textprimary">Season {selectedSeason} • Episode {selectedEpisode}</span>
+                                    {currentEpisodeDetails?.name && <span className="hidden sm:inline"> • {currentEpisodeDetails.name}</span>}
+                                </p>
+                            </motion.div>
+                        </div>
 
-                    <div className="flex flex-wrap items-center gap-2 mt-4">
-                        <span className="text-sm text-textsecondary mr-1">Your rating</span>
-                        {[...Array(5)].map((_, index) => {
-                            const ratingValue = index + 1;
-                            return (
-                                <motion.button
-                                    key={ratingValue}
-                                    whileTap={{ scale: 0.9 }}
-                                    whileHover={{ scale: 1.15, y: -1 }}
-                                    onClick={() => handleShowRating(ratingValue * 2)}
-                                    className="text-xl"
-                                    title={`Rate ${ratingValue * 2}/10`}
-                                >
-                                    {ratingValue * 2 <= rating ? <FaStar className="text-accent" /> : <FaRegStar className="text-textsecondary" />}
-                                </motion.button>
-                            );
-                        })}
-                        {savedRating && <span className="text-xs text-accent ml-1">Saved: {savedRating}/10</span>}
-                    </div>
+                        {/* Action Buttons */}
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-2 bg-secondary/40 backdrop-blur-md p-1 rounded-2xl border border-white/[0.06]">
+                                <button onClick={() => navigateToAdjacentEpisode("prev")} className="action-btn" title="Previous Episode">
+                                    <FaChevronLeft className="w-3.5 h-3.5" /> <span className="hidden sm:block">Prev</span>
+                                </button>
+                                <div className="w-px h-5 bg-white/10"></div>
+                                <button onClick={() => navigateToAdjacentEpisode("next")} className="action-btn-primary" title="Next Episode">
+                                    <span className="hidden sm:block">Next</span> <FaChevronRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <button onClick={toggleFavoriteShow} className={`action-btn ${isFavorite ? "text-accent bg-accent/10 border border-accent/20" : ""}`} title="Favorite">
+                                    {isFavorite ? <FaHeart className="w-4 h-4" /> : <FaRegHeart className="w-4 h-4" />}
+                                </button>
+                                <button onClick={() => setShowRecommend(!showRecommend)} className="action-btn" title="Share">
+                                    <FaShareAlt className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    </section>
 
+                    {/* Quick Recommend Dropdown */}
                     <AnimatePresence>
                         {showRecommend && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                animate={{ opacity: 1, height: "auto", marginTop: "1rem" }}
-                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                transition={{ duration: 0.25 }}
-                                className="bg-primary/60 border border-secondary-light/50 p-3 rounded-xl"
-                            >
-                                <label htmlFor="friendSelect" className="block text-xs text-textsecondary mb-1">Recommend to friend</label>
-                                <div className="flex items-center gap-2">
-                                    <select
-                                        id="friendSelect"
-                                        value={selectedFriend}
-                                        onChange={(e) => setSelectedFriend(e.target.value)}
-                                        className="flex-grow p-2 border-none rounded-lg bg-secondary text-textprimary text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                                    >
-                                        <option value="">Select friend</option>
-                                        {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
-                                    </select>
-                                    <button
-                                        onClick={recommendShow}
-                                        disabled={!selectedFriend}
-                                        className="bg-accent hover:bg-accent-hover text-primary font-semibold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Send
-                                    </button>
-                                </div>
+                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-4 flex gap-3 max-w-md ml-auto relative z-40">
+                                <select value={selectedFriend} onChange={(e) => setSelectedFriend(e.target.value)} className="flex-1 bg-primary/50 text-sm rounded-lg border-none focus:ring-1 focus:ring-accent p-2.5">
+                                    <option value="">Select buddy to recommend...</option>
+                                    {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
+                                </select>
+                                <button onClick={recommendShow} disabled={!selectedFriend} className="action-btn-primary px-5 disabled:opacity-50">Send</button>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </motion.section>
 
-                {recommendedShows.length > 0 && (
-                    <motion.section
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.45, delay: 0.12 }}
-                        className="rounded-2xl border border-secondary-light/60 bg-secondary/80 p-4 md:p-5"
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-lg md:text-xl font-semibold text-textprimary">Up Next</h2>
-                            <span className="text-xs text-textsecondary">Curated for this show</span>
-                        </div>
-                        <div className="flex overflow-x-auto gap-3 pb-1 scrollbar-thin scrollbar-thumb-secondary-light scrollbar-track-transparent">
-                            {recommendedShows.map((recShow) => (
-                                <div key={recShow.id} className="flex-shrink-0 w-36 md:w-44">
-                                    <SearchCard
-                                        movie={{
-                                            ...recShow,
-                                            media_type: "tv",
-                                            poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}`,
-                                        }}
-                                        onClick={() => handleRecClick(recShow.id)}
-                                    />
+                    {/* Inline Episodes Strip */}
+                    <section className="space-y-4">
+                        <div className="flex items-end justify-between">
+                            <h2 className="text-xl font-semibold text-white">Episodes</h2>
+                            
+                            {/* Inline Season Selector */}
+                            <div className="relative group">
+                                <select 
+                                    value={modalViewSeason} 
+                                    onChange={(e) => handleSeasonChange(Number(e.target.value))}
+                                    className="appearance-none bg-secondary/50 border border-white/10 hover:border-white/20 text-sm text-textprimary py-1.5 pl-4 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent transition-all"
+                                >
+                                    {(tvShow.seasons || []).filter(s => s.season_number !== 0).map(s => (
+                                        <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-textsecondary group-hover:text-textprimary transition-colors">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </motion.section>
-                )}
+
+                        {loadingEpisodes ? (
+                            <div className="h-40 flex items-center justify-center bg-secondary/20 rounded-xl"><Mosaic color="#DAA520" size="small" /></div>
+                        ) : episodes && episodes.length > 0 ? (
+                            <div className="flex overflow-x-auto gap-4 pb-4 episode-strip snap-x">
+                                {episodes.map((ep) => (
+                                    <div key={ep.id} className="snap-start">
+                                        <EpisodeCard
+                                            compact={true}
+                                            episode={ep}
+                                            showId={tvShow.id}
+                                            seasonNumber={modalViewSeason}
+                                            isSelected={selectedEpisode === ep.episode_number && selectedSeason === modalViewSeason}
+                                            isAvailable={isEpisodeReleased(ep)}
+                                            onWatchClick={() => handleEpisodeClick(ep.episode_number, modalViewSeason)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-8 text-center text-textsecondary bg-secondary/20 rounded-xl border border-white/5">No episodes available for this season.</div>
+                        )}
+                    </section>
+
+                    {/* Inline Details Section */}
+                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
+                        {/* Poster & Rating */}
+                        <div className="col-span-1 flex gap-6 lg:flex-col lg:gap-4">
+                            <img src={tvShow.poster_path ? `${IMAGE_BASE_URL_W500}${tvShow.poster_path}` : "/placeholder.jpg"} alt={tvShow.name} className="w-32 lg:w-full rounded-xl shadow-xl aspect-[2/3] object-cover border border-white/10" />
+                            <div className="flex-1 glass-card p-4 flex flex-col justify-center items-center gap-2">
+                                <span className="text-xs text-textsecondary font-medium">Your Rating</span>
+                                <div className="flex items-center gap-1.5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <button key={i} onClick={() => handleShowRating((i + 1) * 2)} className="text-xl transition-transform hover:scale-110 active:scale-95">
+                                            {(i + 1) * 2 <= rating ? <FaStar className="text-accent drop-shadow-[0_0_8px_rgba(218,165,32,0.5)]" /> : <FaRegStar className="text-textsecondary/50 hover:text-textsecondary" />}
+                                        </button>
+                                    ))}
+                                </div>
+                                {savedRating && <span className="text-[10px] uppercase font-bold text-accent tracking-wider mt-1">{savedRating} / 10</span>}
+                            </div>
+                        </div>
+
+                        {/* Info & Cast */}
+                        <div className="col-span-1 lg:col-span-2 space-y-6">
+                            <div>
+                                <h3 className="text-xl font-semibold mb-3 text-white">Overview</h3>
+                                <p className="text-textsecondary leading-relaxed text-sm md:text-base">{tvShow.overview}</p>
+                            </div>
+                            
+                            {cast.length > 0 && (
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-white">Top Cast</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {cast.slice(0, 4).map(actor => (
+                                            <div key={actor.cast_id} className="flex items-center gap-3 bg-secondary/30 p-2 rounded-xl border border-white/[0.03]">
+                                                <img src={actor.profile_path ? `${IMAGE_BASE_URL_W185}${actor.profile_path}` : "/placeholder.jpg"} alt={actor.name} className="w-12 h-12 rounded-full object-cover shadow-inner" />
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium text-white truncate">{actor.name}</p>
+                                                    <p className="text-[11px] text-textsecondary truncate">{actor.character}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Recommendations */}
+                    {recommendedShows.length > 0 && (
+                        <section className="pt-8 border-t border-white/[0.06]">
+                            <h2 className="text-xl font-semibold mb-4 text-white">More Like This</h2>
+                            <div className="flex overflow-x-auto gap-4 pb-4 custom-scrollbar">
+                                {recommendedShows.map((recShow) => (
+                                    <div key={recShow.id} className="flex-shrink-0 w-40 md:w-48">
+                                        <SearchCard movie={{ ...recShow, media_type: "tv", poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}` }} onClick={() => router.push(`/watchTv/${recShow.id}/1/1`)} />
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+                </div>
             </main>
-
-            {/* --- RENDER MODALS --- */}
-            <AnimatePresence>
-                {isDetailsModalOpen && (
-                    <TVDetailsModal
-                        onClose={() => setIsDetailsModalOpen(false)}
-                        tvShow={tvShow}
-                        cast={cast}
-                        creator={creator}
-                        trailerKey={trailerKey}
-                    />
-                )}
-
-                {isEpisodesModalOpen && (
-                    <TVEpisodesModal
-                        onClose={() => setIsEpisodesModalOpen(false)}
-                        tvShow={tvShow}
-                        seasons={tvShow.seasons} // Pass seasons list from tvShow
-                        selectedSeason={modalViewSeason} // Pass the modal's view state
-                        handleSeasonChange={setModalViewSeason} // Let modal update its view state
-                        episodes={episodes} // Pass episodes fetched based on modalViewSeason
-                        loadingEpisodes={loadingEpisodes}
-                        selectedEpisode={selectedEpisode} // Pass the *player's* current episode for highlighting
-                        handleEpisodeClick={(episodeNumber) => {
-                            // This is the action when an episode is clicked
-                            handleEpisodeClick(episodeNumber); // Update player state & URL
-                            setIsEpisodesModalOpen(false); // Close modal
-                        }}
-                    />
-                )}
-            </AnimatePresence>
-
             <Footer />
         </div>
     );

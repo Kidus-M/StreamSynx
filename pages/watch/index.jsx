@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
 import NavBar from "../../components/NavBar";
 import Footer from "../../components/Footer";
 import MovieCard from "../../components/MinimalCard";
+import SearchCard from "../../components/MinimalCard";
 import {
   FaStar,
   FaRegStar,
@@ -286,226 +287,188 @@ const MovieDetailPage = () => {
 
   // --- Main Render (UPDATED) ---
   return (
-      <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins">
+      <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins selection:bg-accent/30">
         <Head>
           <title>{movie ? `${movie.title} (${movie.release_date?.substring(0,4)}) - StreamSynx` : "Movie Details - StreamSynx"}</title>
           <meta name="description" content={movie?.overview ? movie.overview.substring(0, 160) + "..." : "Discover details about movies on StreamSynx."} />
-          <link rel="canonical" href={`https://streamsynx.vercel.app/${router.asPath}`} /> {/* Use your site URL */}
-          <meta property="og:type" content="video.movie" />
-          <meta property="og:title" content={movie ? `${movie.title} (${movie.release_date?.substring(0,4)}) - StreamSynx` : "Movie Details - StreamSynx"} />
-          <meta property="og:description" content={movie?.overview ? movie.overview.substring(0, 160) + "..." : "Discover details about movies on StreamSynx."} />
-          {movie?.poster_path && ( <meta property="og:image" content={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} /> )}
-          <meta property="og:url" content={`https://streamsynx.vercel.app/${router.asPath}`} /> {/* Use your site URL */}
-          <meta property="og:site_name" content="StreamSynx" />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={movie ? `${movie.title} (${movie.release_date?.substring(0,4)}) - StreamSynx` : "Movie Details - StreamSynx"} />
-          <meta name="twitter:description" content={movie?.overview ? movie.overview.substring(0, 160) + "..." : "Discover details about movies on StreamSynx."} />
-          {movie?.poster_path && ( <meta name="twitter:image" content={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} /> )}
         </Head>
-        <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary text-textprimary" }} />
+        <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary/90 text-textprimary backdrop-blur-md border border-white/10" }} />
         <NavBar />
 
-        {/* Blurred Backdrop */}
+        {/* Cinematic Backdrop */}
         {movie.backdrop_path && (
-            <div className="absolute top-0 left-0 w-full h-[50vh] md:h-[60vh] -z-10 overflow-hidden" aria-hidden="true">
-              <img src={`${IMAGE_BASE_URL_ORIGINAL}${movie.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-20 blur-md scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/50"></div>
+            <div className="absolute top-0 left-0 w-full h-[80vh] -z-10 overflow-hidden" aria-hidden="true">
+              <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10" />
+              <img src={`${IMAGE_BASE_URL_ORIGINAL}${movie.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-30 blur-2xl scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent z-20"></div>
             </div>
         )}
 
-        {/* Main content starts below NavBar */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-7 max-w-7xl mx-auto pt-20 mt-16 md:pt-24 w-full">
-          <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="rounded-2xl border border-secondary-light/60 bg-secondary/80 backdrop-blur-sm p-4 md:p-5"
-          >
-            <div className="flex flex-col md:flex-row gap-4 md:gap-5">
-              <img
-                  src={movie.poster_path ? `${IMAGE_BASE_URL_W500}${movie.poster_path}` : "/placeholder.jpg"}
-                  alt={`${movie.title} poster`}
-                  className="w-24 h-36 md:w-28 md:h-40 rounded-xl object-cover border border-secondary-light/60 shadow-md"
-                  onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-textsecondary">Feature Presentation</p>
-                <h1 className="text-2xl md:text-3xl font-semibold text-textprimary mt-1 truncate">{movie.title}</h1>
-                <p className="text-sm text-textsecondary mt-1">
-                  {movie.release_date?.substring(0, 4) || "Unknown"} • {movie.runtime ? `${movie.runtime} min` : "Runtime N/A"}
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {(movie.genres || []).slice(0, 4).map((genre) => (
-                      <span key={genre.id} className="px-2.5 py-1 rounded-full text-xs bg-primary/70 text-textsecondary border border-secondary-light/40">
-                        {genre.name}
-                      </span>
-                  ))}
-                </div>
-                <p className="text-sm text-textsecondary mt-3 line-clamp-2 leading-relaxed">{movie.overview || "No overview available."}</p>
-              </div>
-            </div>
-          </motion.section>
-
-          <motion.section
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
-              className="rounded-2xl overflow-hidden border border-secondary-light/70 shadow-[0_20px_50px_rgba(0,0,0,0.35)] bg-black"
-          >
-            <div className="flex items-center justify-between px-4 py-2 bg-black/60 border-b border-white/10 text-xs text-textsecondary">
-              <span>{movie.title}</span>
-              <span>{isMovieReleased ? "Available" : "Coming Soon"}</span>
-            </div>
-            <div className="aspect-video">
+        <main className="flex-1 w-full pt-20 md:pt-24 pb-12 flex flex-col">
+          {/* Contained Player Section */}
+          <section className="w-full max-w-[1800px] mx-auto px-4 md:px-32 relative z-30">
+            <div className="w-full aspect-video relative group rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10">
               {isMovieReleased ? (
                   <iframe
                       src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
                       frameBorder="0"
                       allowFullScreen
-                      className="w-full h-full"
+                      className="w-full h-full absolute inset-0"
                       title={`${movie.title} Movie Player`}
                   ></iframe>
               ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary to-primary px-6 text-center">
+                  <div className="w-full h-full absolute inset-0 flex items-center justify-center bg-gradient-to-br from-secondary/80 to-primary/80 backdrop-blur-md px-6 text-center">
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-red-300">Unavailable</p>
-                      <h2 className="text-xl md:text-2xl font-bold mt-2 text-textprimary">This title has not been released yet</h2>
-                      <p className="text-sm text-textsecondary mt-2">Release date: {new Date(movie.release_date).toLocaleDateString()}</p>
+                      <p className="text-sm uppercase tracking-[0.2em] font-bold text-accent mb-2">Coming Soon</p>
+                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3">Not Released Yet</h2>
+                      <p className="text-sm md:text-base text-textsecondary">
+                        Releases on {new Date(movie.release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
                     </div>
                   </div>
               )}
             </div>
-          </motion.section>
+          </section>
 
-          <motion.section
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.45, delay: 0.1 }}
-              className="rounded-2xl border border-secondary-light/60 bg-secondary/85 backdrop-blur-md p-4 md:p-5"
-          >
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={toggleFavorite}
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                      isFavorite
-                          ? "bg-accent/20 text-accent border border-accent/70"
-                          : "bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-                  }`}
-              >
-                {isFavorite ? <FaHeart /> : <FaRegHeart />}
-                Favorite
-              </motion.button>
+          {/* Content Container below player */}
+          <div className="max-w-7xl mx-auto w-full px-4 md:px-8 mt-6 md:mt-8 space-y-8 md:space-y-12">
+            
+            {/* Now Playing & Action Bar */}
+            <section className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
+              <div className="flex-1">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
+                  <span className="section-label text-accent">Feature Presentation</span>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">{movie.title}</h1>
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${isMovieReleased ? "bg-accent/20 text-accent border border-accent/20" : "bg-white/10 text-textsecondary border border-white/20"}`}>
+                      {isMovieReleased ? "Available" : "Upcoming"}
+                    </span>
+                  </div>
+                  <p className="text-sm md:text-base text-textsecondary font-medium">
+                    {movie.release_date?.substring(0, 4) || "Unknown"} 
+                    {movie.runtime ? <span className="text-textprimary"> • {movie.runtime} min</span> : ""}
+                  </p>
+                </motion.div>
+              </div>
 
-              <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setShowRecommend(!showRecommend)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-              >
-                <FaShareAlt />
-                Share
-              </motion.button>
+              {/* Action Buttons */}
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 bg-secondary/40 backdrop-blur-md p-1 rounded-2xl border border-white/[0.06]">
+                  <button onClick={toggleFavorite} className={`action-btn ${isFavorite ? "text-accent bg-accent/10 border border-accent/20" : ""}`} title="Favorite">
+                    {isFavorite ? <FaHeart className="w-4 h-4" /> : <FaRegHeart className="w-4 h-4" />}
+                    <span className="hidden sm:inline ml-1 font-semibold">{isFavorite ? "Favorited" : "Favorite"}</span>
+                  </button>
+                  <div className="w-px h-5 bg-white/10"></div>
+                  <button onClick={() => setShowRecommend(!showRecommend)} className="action-btn" title="Share">
+                    <FaShareAlt className="w-4 h-4" />
+                    <span className="hidden sm:inline ml-1 font-semibold">Share</span>
+                  </button>
+                </div>
+              </motion.div>
+            </section>
 
-              <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setIsDetailsModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-              >
-                <FaFilm />
-                Details
-              </motion.button>
-
-              <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setIsRecsModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-secondary-light/50 text-textsecondary hover:text-textprimary"
-              >
-                <FaThumbsUp />
-                Recommendations
-              </motion.button>
-
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ml-auto ${
-                  isMovieReleased ? "bg-accent/20 text-accent" : "bg-red-500/20 text-red-300"
-              }`}>
-                {isMovieReleased ? "Now available" : "Releases soon"}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 mt-4">
-              <span className="text-sm text-textsecondary mr-1">Your rating</span>
-              {[...Array(5)].map((_, index) => {
-                const ratingValue = index + 1;
-                return (
-                    <motion.button
-                        key={ratingValue}
-                        whileTap={{ scale: 0.9 }}
-                        whileHover={{ scale: 1.15, y: -1 }}
-                        onClick={() => handleRating(ratingValue * 2)}
-                        className="text-xl"
-                        title={`Rate ${ratingValue * 2}/10`}
-                    >
-                      {ratingValue * 2 <= rating ? <FaStar className="text-accent" /> : <FaRegStar className="text-textsecondary" />}
-                    </motion.button>
-                );
-              })}
-              {savedRating && <span className="text-xs text-accent ml-1">Saved: {savedRating}/10</span>}
-            </div>
-
+            {/* Quick Recommend Dropdown */}
             <AnimatePresence>
               {showRecommend && (
-                  <motion.div
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: "auto", marginTop: "1rem" }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="bg-primary/60 border border-secondary-light/50 p-3 rounded-xl"
-                  >
-                    <label htmlFor="friendSelect" className="block text-xs text-textsecondary mb-1">Recommend to friend</label>
-                    <div className="flex items-center gap-2">
-                      <select
-                          id="friendSelect"
-                          value={selectedFriend}
-                          onChange={(e) => setSelectedFriend(e.target.value)}
-                          className="flex-grow p-2 border-none rounded-lg bg-secondary text-textprimary text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-                      >
-                        <option value="">Select friend</option>
-                        {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
-                      </select>
-                      <button
-                          onClick={recommendMovie}
-                          disabled={!selectedFriend}
-                          className="bg-accent hover:bg-accent-hover text-primary font-semibold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Send
-                      </button>
-                    </div>
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-4 flex gap-3 max-w-md ml-auto relative z-40">
+                    <select value={selectedFriend} onChange={(e) => setSelectedFriend(e.target.value)} className="flex-1 bg-primary/50 text-sm rounded-lg border-none focus:ring-1 focus:ring-accent p-2.5">
+                      <option value="">Select buddy to recommend...</option>
+                      {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
+                    </select>
+                    <button onClick={recommendMovie} disabled={!selectedFriend} className="action-btn-primary px-5 disabled:opacity-50">Send</button>
                   </motion.div>
               )}
             </AnimatePresence>
-          </motion.section>
+
+            {/* Inline Details Section */}
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
+              {/* Poster & Rating */}
+              <div className="col-span-1 flex gap-6 lg:flex-col lg:gap-4">
+                <img src={movie.poster_path ? `${IMAGE_BASE_URL_W500}${movie.poster_path}` : "/placeholder.jpg"} alt={movie.title} className="w-32 lg:w-full rounded-xl shadow-xl aspect-[2/3] object-cover border border-white/10" />
+                <div className="flex-1 glass-card p-4 flex flex-col justify-center items-center gap-2">
+                  <span className="text-xs text-textsecondary font-medium">Your Rating</span>
+                  <div className="flex items-center gap-1.5">
+                    {[...Array(5)].map((_, i) => (
+                        <button key={i} onClick={() => handleRating((i + 1) * 2)} className="text-xl transition-transform hover:scale-110 active:scale-95">
+                          {(i + 1) * 2 <= rating ? <FaStar className="text-accent drop-shadow-[0_0_8px_rgba(218,165,32,0.5)]" /> : <FaRegStar className="text-textsecondary/50 hover:text-textsecondary" />}
+                        </button>
+                    ))}
+                  </div>
+                  {savedRating && <span className="text-[10px] uppercase font-bold text-accent tracking-wider mt-1">{savedRating} / 10</span>}
+                </div>
+              </div>
+
+              {/* Info & Cast */}
+              <div className="col-span-1 lg:col-span-2 space-y-6">
+                <div>
+                  <h3 className="text-xl font-semibold mb-3 text-white">Overview</h3>
+                  <p className="text-textsecondary leading-relaxed text-sm md:text-base">{movie.overview}</p>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {(movie.genres || []).map((genre) => (
+                      <span key={genre.id} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-textsecondary border border-white/10">
+                        {genre.name}
+                      </span>
+                  ))}
+                </div>
+
+                {director && (
+                    <div>
+                        <h3 className="text-sm font-semibold text-white mb-2 uppercase tracking-wider">Director</h3>
+                        <div className="inline-flex items-center gap-3 bg-secondary/30 pr-4 rounded-full border border-white/[0.03]">
+                            <img src={director.profile_path ? `${IMAGE_BASE_URL_W185}${director.profile_path}` : "/placeholder.jpg"} alt={director.name} className="w-10 h-10 rounded-full object-cover shadow-inner" />
+                            <p className="text-sm font-medium text-white">{director.name}</p>
+                        </div>
+                    </div>
+                )}
+                
+                {cast.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 text-white">Top Cast</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {cast.slice(0, 6).map(actor => (
+                            <div key={actor.cast_id} className="flex items-center gap-3 bg-secondary/30 p-2 rounded-xl border border-white/[0.03]">
+                              <img src={actor.profile_path ? `${IMAGE_BASE_URL_W185}${actor.profile_path}` : "/placeholder.jpg"} alt={actor.name} className="w-12 h-12 rounded-full object-cover shadow-inner" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{actor.name}</p>
+                                <p className="text-[11px] text-textsecondary truncate">{actor.character}</p>
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+                    </div>
+                )}
+
+                {trailerKey && (
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4 text-white">Trailer</h3>
+                        <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
+                            <iframe src={`https://www.youtube.com/embed/${trailerKey}`} frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
+                        </div>
+                    </div>
+                )}
+              </div>
+            </section>
+
+            {/* Recommendations */}
+            {recommendedMovies.length > 0 && (
+                <section className="pt-8 border-t border-white/[0.06]">
+                  <h2 className="text-xl font-semibold mb-4 text-white">More Like This</h2>
+                  <div className="flex overflow-x-auto gap-4 pb-4 custom-scrollbar">
+                    {recommendedMovies.map((recMovie) => (
+                        <div key={recMovie.id} className="flex-shrink-0 w-40 md:w-48">
+                          <SearchCard movie={{ ...recMovie, media_type: "movie", poster_path: `${IMAGE_BASE_URL_W500}${recMovie.poster_path}` }} onClick={() => router.push(`/watch?movie_id=${recMovie.id}`)} />
+                        </div>
+                    ))}
+                  </div>
+                </section>
+            )}
+          </div>
         </main>
-
-        {/* --- RENDER MODALS --- */}
-        <AnimatePresence>
-          {isDetailsModalOpen && (
-              <DetailsModal
-                  onClose={() => setIsDetailsModalOpen(false)}
-                  movie={movie}
-                  cast={cast}
-                  director={director}
-                  trailerKey={trailerKey}
-              />
-          )}
-
-          {isRecsModalOpen && (
-              <RecommendationsModal
-                  onClose={() => setIsRecsModalOpen(false)}
-                  recommendedMovies={recommendedMovies}
-                  router={router} // Pass router for navigation
-              />
-          )}
-        </AnimatePresence>
-
+        
+        {/* Note: Modals intentionally removed as content is now inline */}
+        
         <Footer />
       </div>
   );
