@@ -66,7 +66,44 @@ const TVDetailsModal = ({ onClose, tvShow, cast, creator, trailerKey }) => {
     const useTVSeasonsEpisodes = (id, seasonNumber, apiKey) => {
         const [episodes, setEpisodes] = useState([]);
         const [loading, setLoading] = useState(false);
-        useEffect(() => { const fetchEpisodes = async () => { if (!id || !apiKey || !seasonNumber || seasonNumber === 0) { setEpisodes([]); return; } setLoading(true); try { const response = await axios.get( `${BASE_URL}/tv/${id}/season/${seasonNumber}`, { params: { api_key: apiKey, language: "en-US" } } ); setEpisodes(response.data.episodes || []); } catch (error) { console.error("Error fetching episodes:", error); setEpisodes([]); } finally { setLoading(false); } }; fetchEpisodes(); }, [id, apiKey, seasonNumber]);
+        useEffect(() => {
+            const controller = new AbortController();
+            let isLatestRequest = true;
+
+            const fetchEpisodes = async () => {
+                if (!id || !apiKey || !seasonNumber || seasonNumber === 0) {
+                    setEpisodes([]);
+                    setLoading(false);
+                    return;
+                }
+
+                setLoading(true);
+                setEpisodes([]);
+
+                try {
+                    const response = await axios.get(`${BASE_URL}/tv/${id}/season/${seasonNumber}`, {
+                        params: { api_key: apiKey, language: "en-US" },
+                        signal: controller.signal,
+                    });
+
+                    if (!isLatestRequest) return;
+                    setEpisodes(response.data.episodes || []);
+                } catch (error) {
+                    if (error?.code === "ERR_CANCELED") return;
+                    console.error("Error fetching episodes:", error);
+                    if (isLatestRequest) setEpisodes([]);
+                } finally {
+                    if (isLatestRequest) setLoading(false);
+                }
+            };
+
+            fetchEpisodes();
+
+            return () => {
+                isLatestRequest = false;
+                controller.abort();
+            };
+        }, [id, apiKey, seasonNumber]);
         return { episodes, loadingEpisodes: loading };
     };
     const useRecommendedShows = (id, apiKey) => {
@@ -271,7 +308,44 @@ const useTVShow = (id, apiKey) => {
 const useTVSeasonsEpisodes = (id, seasonNumber, apiKey) => {
     const [episodes, setEpisodes] = useState([]);
     const [loading, setLoading] = useState(false);
-    useEffect(() => { const fetchEpisodes = async () => { if (!id || !apiKey || !seasonNumber || seasonNumber === 0) { setEpisodes([]); return; } setLoading(true); try { const response = await axios.get( `${BASE_URL}/tv/${id}/season/${seasonNumber}`, { params: { api_key: apiKey, language: "en-US" } } ); setEpisodes(response.data.episodes || []); } catch (error) { console.error("Error fetching episodes:", error); setEpisodes([]); } finally { setLoading(false); } }; fetchEpisodes(); }, [id, apiKey, seasonNumber]);
+    useEffect(() => {
+        const controller = new AbortController();
+        let isLatestRequest = true;
+
+        const fetchEpisodes = async () => {
+            if (!id || !apiKey || !seasonNumber || seasonNumber === 0) {
+                setEpisodes([]);
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            setEpisodes([]);
+
+            try {
+                const response = await axios.get(`${BASE_URL}/tv/${id}/season/${seasonNumber}`, {
+                    params: { api_key: apiKey, language: "en-US" },
+                    signal: controller.signal,
+                });
+
+                if (!isLatestRequest) return;
+                setEpisodes(response.data.episodes || []);
+            } catch (error) {
+                if (error?.code === "ERR_CANCELED") return;
+                console.error("Error fetching episodes:", error);
+                if (isLatestRequest) setEpisodes([]);
+            } finally {
+                if (isLatestRequest) setLoading(false);
+            }
+        };
+
+        fetchEpisodes();
+
+        return () => {
+            isLatestRequest = false;
+            controller.abort();
+        };
+    }, [id, apiKey, seasonNumber]);
     return { episodes, loadingEpisodes: loading };
 };
 const useRecommendedShows = (id, apiKey) => {
