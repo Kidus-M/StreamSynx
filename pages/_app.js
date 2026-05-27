@@ -1,6 +1,9 @@
 // These styles apply to every route in the application
 import '../styles/global.css'
 import Head from 'next/head';
+import { installTmdbRateLimiter } from '../lib/tmdbRateLimiter';
+
+installTmdbRateLimiter();
 
 export default function App({ Component, pageProps }) {
   
