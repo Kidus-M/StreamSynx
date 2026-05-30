@@ -1,6 +1,7 @@
 // These styles apply to every route in the application
 import '../styles/global.css'
 import Head from 'next/head';
+import { Analytics } from '@vercel/analytics/next';
 import { installTmdbRateLimiter } from '../lib/tmdbRateLimiter';
 
 installTmdbRateLimiter();
@@ -26,5 +27,7 @@ export default function App({ Component, pageProps }) {
           <meta property="og:type" content="website" />
 
       </Head>
-  <Component {...pageProps} /></>
+  <Component {...pageProps} />
+  <Analytics />
+  </>
 }
