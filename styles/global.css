@@ -45,6 +45,18 @@
   .tv-focusable:focus-visible img {
     opacity: 0.86;
   }
+
+  .tv-player-frame:focus,
+  .tv-player-frame:focus-visible {
+    transform: none;
+    outline-offset: 6px;
+  }
+
+  .tv-player-iframe:focus,
+  .tv-player-iframe:focus-visible {
+    outline: 4px solid #DAA520;
+    outline-offset: -4px;
+  }
 }
 
 /* Hide number input spinners */

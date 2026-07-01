@@ -639,14 +639,18 @@ const TVShowPlayerPage = () => {
             <main className="flex-1 w-full pt-20 md:pt-24 pb-12 flex flex-col">
                 {/* Contained Player Section */}
                 <section className="w-full max-w-[1800px] mx-auto px-4 md:px-32 relative z-30">
-                    <div className="w-full aspect-video relative group rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10">
+                    <div className="tv-focusable tv-player-frame w-full aspect-video relative group rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10 focus:border-accent"
+              role="region"
+              tabIndex={0}
+              aria-label="Video player">
                         <iframe
                             key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`}
                             src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
                             frameBorder="0"
                             allowFullScreen
-                            className="w-full h-full absolute inset-0"
+                            className="tv-player-iframe w-full h-full absolute inset-0"
                             title={`${tvShow.name} Player - S${selectedSeason} E${selectedEpisode}`}
+                  tabIndex={0}
                         ></iframe>
                     </div>
                 </section>

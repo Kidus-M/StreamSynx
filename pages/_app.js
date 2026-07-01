@@ -3,11 +3,11 @@ import '../styles/global.css'
 import Head from 'next/head';
 import { Analytics } from '@vercel/analytics/next';
 import { installTmdbRateLimiter } from '../lib/tmdbRateLimiter';
+import TvRemoteNavigation from '../components/TvRemoteNavigation';
 
 installTmdbRateLimiter();
 
 export default function App({ Component, pageProps }) {
-  
   return <>
   <Head>
         {/* Favicon Links */}
@@ -27,6 +27,7 @@ export default function App({ Component, pageProps }) {
           <meta property="og:type" content="website" />
 
       </Head>
+  <TvRemoteNavigation />
   <Component {...pageProps} />
   <Analytics />
   </>
