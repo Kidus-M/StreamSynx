@@ -31,7 +31,7 @@ export default function DownloadPage() {
             {/* Animated Download Buttons */}
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 <motion.a
-                    href="/downloads/StreamSynx.apk"
+                    href="/android.apk"
                     download
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -43,7 +43,7 @@ export default function DownloadPage() {
                 </motion.a>
 
                 <motion.a
-                    href="/downloads/StreamSynx-TV.apk"
+                    href="/tv.apk"
                     download
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -68,7 +68,7 @@ export default function DownloadPage() {
                     className="w-75 h-auto rounded-2xl shadow-lg mx-auto"
                 />
                 <p className="text-[#A0A0A0] text-sm">
-                    Choose the mobile APK for phones or the TV APK for Android TV devices.
+                    For Downloader on Android TV, enter streamsynx.vercel.app/tv.apk directly.
                 </p>
             </motion.div>
 
