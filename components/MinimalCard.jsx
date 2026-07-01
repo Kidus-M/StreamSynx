@@ -200,6 +200,13 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
        handleWatch(); // Fallback to default navigation
    };
 
+  const handleCardKeyDown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick(e);
+      }
+  };
+
     // Default navigation if no onClick prop
    const handleWatch = () => {
        if (!displayData.id) return;
@@ -212,10 +219,14 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
 
   return (
     <motion.div
-      className="relative w-full rounded-lg overflow-hidden group transition-transform duration-300 ease-in-out border border-secondary/50 hover:border-accent/50 shadow-md hover:shadow-accent/10" // Themed border/shadow
+      className="tv-focusable relative w-full rounded-lg overflow-hidden group transition-transform duration-300 ease-in-out border border-secondary/50 hover:border-accent/50 focus:border-accent shadow-md hover:shadow-accent/10 focus:shadow-accent/20 cursor-pointer" // Themed border/shadow
       onClick={handleClick} // Use determined click handler
+      onKeyDown={handleCardKeyDown}
+      role="button"
+      tabIndex={0}
       whileHover={{ y: -5 }} // Subtle lift on hover
       title={`${displayData.title} (${displayData.media_type === 'tv' ? 'TV' : 'Movie'})`} // Tooltip
+      aria-label={`Open ${displayData.title} ${displayData.media_type === 'tv' ? 'TV show' : 'movie'}`}
     >
       {/* Image with Aspect Ratio */}
       <div className="aspect-[2/3] bg-secondary"> {/* Background color for loading/missing */}
@@ -239,7 +250,7 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
         className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-all duration-200 backdrop-blur-sm ${
           isAdded
             ? "bg-accent/80 text-primary hover:bg-accent" // Themed: Added state
-            : "bg-black/50 text-textprimary hover:bg-accent hover:text-primary opacity-0 group-hover:opacity-100" // Themed: Add state
+            : "bg-black/50 text-textprimary hover:bg-accent focus:bg-accent hover:text-primary focus:text-primary opacity-0 group-hover:opacity-100 group-focus:opacity-100 focus:opacity-100" // Themed: Add state
         }`}
         onClick={toggleWatchlist}
         title={isAdded ? "Remove from Watchlist" : "Add to Watchlist"}

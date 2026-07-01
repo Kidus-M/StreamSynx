@@ -85,7 +85,7 @@ const EpisodeCard = ({
       <motion.div
         onClick={handleClick}
         role="button"
-        tabIndex={0}
+        tabIndex={isAvailable ? 0 : -1}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -95,11 +95,11 @@ const EpisodeCard = ({
         whileHover={isAvailable ? { scale: 1.03 } : {}}
         whileTap={isAvailable ? { scale: 0.98 } : {}}
         className={`
-          group relative flex-shrink-0 w-48 md:w-56 rounded-xl overflow-hidden
+          tv-focusable group relative flex-shrink-0 w-48 md:w-56 rounded-xl overflow-hidden
           transition-all duration-200 ease-out
           ${isSelected
             ? "ring-2 ring-accent ring-offset-2 ring-offset-primary shadow-lg shadow-accent/20"
-            : "hover:ring-1 hover:ring-white/20"
+            : "hover:ring-1 hover:ring-white/20 focus:ring-2 focus:ring-accent"
           }
           ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-50 grayscale-[0.3]"}
         `}
@@ -165,7 +165,7 @@ const EpisodeCard = ({
       <motion.div
           onClick={handleClick}
           role="button"
-          tabIndex={0}
+          tabIndex={isAvailable ? 0 : -1}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -175,9 +175,9 @@ const EpisodeCard = ({
           whileHover={isAvailable ? { y: -2 } : {}}
           whileTap={isAvailable ? { scale: 0.98 } : {}}
           className={`
-        group relative bg-secondary/80 rounded-xl shadow-md overflow-hidden
+        tv-focusable group relative bg-secondary/80 rounded-xl shadow-md overflow-hidden
         border transition-all duration-200 ease-out
-        ${isSelected ? "border-accent shadow-lg shadow-accent/15" : "border-white/[0.06]"}
+        ${isSelected ? "border-accent shadow-lg shadow-accent/15" : "border-white/[0.06] focus:border-accent"}
         ${isWatched && !isSelected ? "opacity-65 hover:opacity-100" : "opacity-100"}
         ${!isSelected && isAvailable ? "hover:border-white/[0.12]" : ""}
         ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-50 grayscale-[0.25]"}

@@ -23,9 +23,27 @@
 
   /* Focus visible for accessibility */
   *:focus-visible {
-    outline: 2px solid #DAA520;
-    outline-offset: 2px;
-    border-radius: 4px;
+    outline: 3px solid #DAA520;
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  .tv-focusable:focus,
+  .tv-focusable:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 4px solid #DAA520;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 7px rgba(218, 165, 32, 0.28), 0 18px 40px rgba(0, 0, 0, 0.35);
+    transform: translateY(-4px) scale(1.03);
+    z-index: 20;
+  }
+
+  .tv-focusable:focus img,
+  .tv-focusable:focus-visible img {
+    opacity: 0.86;
   }
 }
 

@@ -236,7 +236,7 @@ const TVEpisodesModal = ({ onClose, tvShow, seasons, selectedSeason, handleSeaso
                         <button
                             key={season.id}
                             onClick={() => handleSeasonChange(season.season_number)}
-                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
+                            className={`tv-focusable px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
                                 selectedSeason === season.season_number
                                     ? "bg-accent text-primary shadow-md"
                                     : "bg-secondary-light text-textsecondary hover:bg-secondary-light/70 hover:text-textprimary"
@@ -685,7 +685,7 @@ const TVShowPlayerPage = () => {
             <AnimatePresence>
               {showRecommend && (
                   <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-4 flex gap-3 max-w-md ml-auto relative z-40">
-                    <select value={selectedFriend} onChange={(e) => setSelectedFriend(e.target.value)} className="flex-1 bg-primary/50 text-sm rounded-lg border-none focus:ring-1 focus:ring-accent p-2.5">
+                    <select value={selectedFriend} onChange={(e) => setSelectedFriend(e.target.value)} className="tv-focusable flex-1 bg-primary/50 text-sm rounded-lg border-none focus:ring-1 focus:ring-accent p-2.5">
                       <option value="">Select buddy to recommend...</option>
                       {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
                     </select>
@@ -704,7 +704,7 @@ const TVShowPlayerPage = () => {
                   <select 
                       value={modalViewSeason} 
                       onChange={(e) => handleSeasonChange(Number(e.target.value))}
-                      className="appearance-none bg-secondary/50 border border-white/10 hover:border-white/20 text-sm text-textprimary py-1.5 pl-4 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent transition-all"
+                      className="tv-focusable appearance-none bg-secondary/50 border border-white/10 hover:border-white/20 text-sm text-textprimary py-1.5 pl-4 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent transition-all"
                   >
                     {(tvShow.seasons || []).filter(s => s.season_number !== 0).map(s => (
                         <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
