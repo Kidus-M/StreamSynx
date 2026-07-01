@@ -31,7 +31,7 @@ export default function DownloadPage() {
             {/* Animated Download Buttons */}
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
                 <motion.a
-                    href="/android.apk"
+                    href="/downloads/StreamSynx.apk"
                     download
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -43,7 +43,7 @@ export default function DownloadPage() {
                 </motion.a>
 
                 <motion.a
-                    href="/tv.apk"
+                    href="https://streamsynx.vercel.app/tv.apk"
                     download
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
