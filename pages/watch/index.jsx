@@ -316,8 +316,9 @@ const MovieDetailPage = () => {
                       src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
                       frameBorder="0"
                       allowFullScreen
-                      className="w-full h-full absolute inset-0"
+                      className="tv-player-iframe w-full h-full absolute inset-0"
                       title={`${movie.title} Movie Player`}
+                      tabIndex={0}
                   ></iframe>
               ) : (
                   <div className="w-full h-full absolute inset-0 flex items-center justify-center bg-gradient-to-br from-secondary/80 to-primary/80 backdrop-blur-md px-6 text-center">
