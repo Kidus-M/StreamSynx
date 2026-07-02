@@ -87,7 +87,7 @@ function getFocusableElements() {
 
 function focusElement(element) {
   element.focus({ preventScroll: true });
-  element.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+  element.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
 }
 
 function findFirstFocusable(elements) {
