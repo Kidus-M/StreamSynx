@@ -254,8 +254,24 @@ const MovieDetailPage = () => {
   const validId = isRouterReady ? id || null : null;
 
   const { movie, loading: loadingMovie, error } = useMovie(validId, apiKey);
-  const { recommendedMovies } = useRecommendedMovies(validId, apiKey);
-  const { cast, trailerKey, director } = useAdditionalDetails(movie, apiKey);
+  const recommendedMovies = useMemo(() => {
+    return (movie?.recommendations?.results || [])
+      .filter((m) => m.poster_path)
+      .slice(0, 10);
+  }, [movie]);
+  const cast = useMemo(() => (movie?.credits?.cast || []).slice(0, 6), [movie]);
+  const director = useMemo(
+    () => movie?.credits?.crew?.find((member) => member.job === "Director") || null,
+    [movie]
+  );
+  const trailerKey = useMemo(() => {
+    const videos = movie?.videos?.results || [];
+    const trailer =
+      videos.find((vid) => vid.type === "Trailer" && vid.site === "YouTube") ||
+      videos.find((vid) => vid.site === "YouTube");
+
+    return trailer?.key || "";
+  }, [movie]);
 
   const [rating, setRating] = useState(0);
   const [savedRating, setSavedRating] = useState(null);
@@ -275,43 +291,54 @@ const MovieDetailPage = () => {
     [embedSources, selectedEmbedSourceId]
   );
   const moviePlayerUrl = useMemo(
-    () => resolveEmbedSourceUrl(selectedEmbedSource, { mediaType: "movie", tmdbId: movie?.id }),
-    [selectedEmbedSource, movie?.id]
+    () => resolveEmbedSourceUrl(selectedEmbedSource, { mediaType: "movie", tmdbId: movie?.id || validId }),
+    [selectedEmbedSource, movie?.id, validId]
   );
   const currentUser = auth.currentUser;
   const isMovieReleased = useMemo(() => {
     if (!movie?.release_date) return true;
     return new Date(movie.release_date).getTime() <= Date.now();
   }, [movie]);
+  const displayMovie = movie || {
+    id: validId,
+    title: loadingMovie ? "Loading movie details..." : "Movie",
+    overview: loadingMovie
+      ? "Movie details are still loading. The player is ready above."
+      : "Movie details could not be loaded right now.",
+    genres: [],
+    release_date: "",
+    runtime: null,
+    poster_path: "",
+    backdrop_path: "",
+  };
 
   // --- Data Fetching & Actions (No Changes) ---
   useEffect(() => { if (!currentUser || !validId) { setIsFavorite(false); setSavedRating(null); setFriends([]); return; } const fetchData = async () => { const favoritesRef = doc(db, "favorites", currentUser.uid); const favoritesDoc = await getDoc(favoritesRef); if (favoritesDoc.exists()) setIsFavorite((favoritesDoc.data().movies || []).some((m) => m.id === parseInt(validId))); else setIsFavorite(false); const ratingsRef = doc(db, "ratings", currentUser.uid); const ratingsDoc = await getDoc(ratingsRef); let foundRating = null; if (ratingsDoc.exists()) { const movieRating = (ratingsDoc.data().ratings || []).find((r) => r.movieId === parseInt(validId)); if (movieRating) foundRating = movieRating.rating; } setSavedRating(foundRating); setRating(foundRating || 0); const friendsRef = doc(db, "friends", currentUser.uid); const friendsDoc = await getDoc(friendsRef); if (friendsDoc.exists()) { const friendIds = friendsDoc.data().friends || []; const friendsData = await Promise.all( friendIds.map(async (friendId) => { const userRef = doc(db, "users", friendId); const userDoc = await getDoc(userRef); return userDoc.exists() ? { uid: friendId, username: userDoc.data().username } : null; }) ); setFriends(friendsData.filter(Boolean)); } else { setFriends([]); } }; fetchData(); }, [currentUser, validId]);
   const toggleFavorite = async () => { if (!currentUser || !movie) return toast.error("Please log in."); const favoritesRef = doc(db, "favorites", currentUser.uid); const movieData = { id: movie.id, title: movie.title, poster_path: movie.poster_path, }; try { if (isFavorite) { await updateDoc(favoritesRef, { movies: arrayRemove(movieData) }); toast.success(`Removed "${movie.title}" from favorites`); } else { await setDoc( favoritesRef, { movies: arrayUnion(movieData) }, { merge: true } ); toast.success(`Added "${movie.title}" to favorites`); } setIsFavorite((prev) => !prev); } catch (err) { console.error("Error toggling favorite:", err); toast.error("Failed to update favorites."); } };
-  const handleRating = (newRating) => { setRating(newRating); saveRating(movie.id, newRating); };
+  const handleRating = (newRating) => { if (!movie) return toast.error("Movie details are still loading."); setRating(newRating); saveRating(movie.id, newRating); };
   const saveRating = async (movieId, newRating) => { if (!currentUser || newRating === 0) return; const ratingsRef = doc(db, "ratings", currentUser.uid); const ratingData = { movieId: parseInt(movieId), rating: newRating }; try { const ratingsDoc = await getDoc(ratingsRef); if (ratingsDoc.exists()) { const currentRatings = ratingsDoc.data().ratings || []; const filteredRatings = currentRatings.filter( (r) => r.movieId !== parseInt(movieId) ); await updateDoc(ratingsRef, { ratings: [...filteredRatings, ratingData], }); } else { await setDoc(ratingsRef, { ratings: [ratingData] }); } setSavedRating(newRating); toast.success(`Rated "${movie.title}" ${newRating}/10`); } catch (err) { console.error("Error saving rating:", err); toast.error("Failed to save rating."); setRating(savedRating || 0); } };
   const recommendMovie = async () => { if (!currentUser) { toast.error("Please log in to recommend movies."); return; } if (!selectedFriend) { toast.error("Please select a friend."); return; } if (!movie) { toast.error("Movie data not loaded."); return; } const recommendationRef = doc(db, "recommendations", selectedFriend); const movieData = { id: movie.id, title: movie.title, poster_path: movie.poster_path, recommendedBy: currentUser.uid, recommendedByUsername: currentUser.displayName || "Anonymous", recommendedAt: new Date().toISOString(), type: "movie", }; try { const recommendationDoc = await getDoc(recommendationRef); if (recommendationDoc.exists()) { await updateDoc(recommendationRef, { movies: arrayUnion(movieData), }); } else { await setDoc(recommendationRef, { movies: [movieData], }); } const friend = friends.find((f) => f.uid === selectedFriend); toast.success( `Recommended "${movie.title}" to ${friend?.username || "friend"}` ); setSelectedFriend(""); setShowRecommend(false); } catch (error) { console.error("Error recommending movie:", error); toast.error("Failed to send recommendation."); } };
   useEffect(() => { const saveToHistory = async () => { if (!currentUser || !movie || !movie.id || !movie.title || !isMovieReleased) return; const historyRef = doc(db, "history", currentUser.uid); const movieData = { id: movie.id, title: movie.title, poster_path: movie.poster_path, watchedAt: new Date().toISOString(), type: "movie", }; try { const historyDoc = await getDoc(historyRef); if (historyDoc.exists()) { const recentMovies = (historyDoc.data().movies || []).slice(-5); if (!recentMovies.some((m) => m.id === movie.id)) await updateDoc(historyRef, { movies: arrayUnion(movieData) }); } else { await setDoc(historyRef, { movies: [movieData], episodes: [] }); } } catch (err) { console.error("Error saving to history:", err); } }; if (movie?.id) saveToHistory(); }, [movie, currentUser, isMovieReleased]);
 
-  // --- Render States (No Changes) ---
-  if (!isRouterReady || loadingMovie) { return ( <div className="min-h-screen bg-primary flex items-center justify-center"> <NavBar /> <Mosaic color="#DAA520" size="medium" /> </div> ); }
-  if (error) { return ( <div className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center mt-20"> <h2 className="text-2xl text-red-500 mb-4">Error Loading Movie</h2> <p className="text-textsecondary mb-6">{error}</p> <button onClick={() => router.push("/home")} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Go to Home </button> </div> <Footer /> </div> ); }
-  if (!movie) { return ( <div className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center mt-20"> <h2 className="text-2xl text-yellow-500 mb-4">Movie Not Found</h2> <p className="text-textsecondary mb-6">The requested movie could not be found.</p> <button onClick={() => router.push("/home")} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Go to Home </button> </div> <Footer /> </div> ); }
+  // --- Render States ---
+  if (!isRouterReady) { return ( <div className="min-h-screen bg-primary flex items-center justify-center"> <NavBar /> <Mosaic color="#DAA520" size="medium" /> </div> ); }
+  if (!validId) { return ( <div className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center mt-20"> <h2 className="text-2xl text-yellow-500 mb-4">Movie Not Found</h2> <p className="text-textsecondary mb-6">No movie was selected.</p> <button onClick={() => router.push("/home")} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Go to Home </button> </div> <Footer /> </div> ); }
 
   // --- Main Render (UPDATED) ---
   return (
       <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins selection:bg-accent/30">
         <Head>
-          <title>{movie ? `${movie.title} (${movie.release_date?.substring(0,4)}) - StreamSynx` : "Movie Details - StreamSynx"}</title>
+          <title>{movie ? `${movie.title} (${movie.release_date?.substring(0,4)}) - StreamSynx` : "Loading Movie - StreamSynx"}</title>
           <meta name="description" content={movie?.overview ? movie.overview.substring(0, 160) + "..." : "Discover details about movies on StreamSynx."} />
         </Head>
         <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary/90 text-textprimary backdrop-blur-md border border-white/10" }} />
         <NavBar />
 
         {/* Cinematic Backdrop */}
-        {movie.backdrop_path && (
+        {displayMovie.backdrop_path && (
             <div className="absolute top-0 left-0 w-full h-[80vh] -z-10 overflow-hidden" aria-hidden="true">
               <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10" />
-              <img src={`${IMAGE_BASE_URL_ORIGINAL}${movie.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-30 blur-2xl scale-110" />
+              <img src={`${IMAGE_BASE_URL_ORIGINAL}${displayMovie.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-30 blur-2xl scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent z-20"></div>
             </div>
         )}
@@ -329,7 +356,7 @@ const MovieDetailPage = () => {
                       frameBorder="0"
                       allowFullScreen
                       className="tv-player-iframe w-full h-full absolute inset-0"
-                      title={`${movie.title} Movie Player`}
+                      title={`${displayMovie.title} Movie Player`}
                       tabIndex={0}
                   ></iframe>
               ) : (
@@ -338,7 +365,7 @@ const MovieDetailPage = () => {
                       <p className="text-sm uppercase tracking-[0.2em] font-bold text-accent mb-2">Coming Soon</p>
                       <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3">Not Released Yet</h2>
                       <p className="text-sm md:text-base text-textsecondary">
-                        Releases on {new Date(movie.release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                        Releases on {new Date(displayMovie.release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                       </p>
                     </div>
                   </div>
@@ -355,14 +382,14 @@ const MovieDetailPage = () => {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
                   <span className="section-label text-accent">Feature Presentation</span>
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">{movie.title}</h1>
+                    <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">{displayMovie.title}</h1>
                     <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${isMovieReleased ? "bg-accent/20 text-accent border border-accent/20" : "bg-white/10 text-textsecondary border border-white/20"}`}>
                       {isMovieReleased ? "Available" : "Upcoming"}
                     </span>
                   </div>
                   <p className="text-sm md:text-base text-textsecondary font-medium">
-                    {movie.release_date?.substring(0, 4) || "Unknown"} 
-                    {movie.runtime ? <span className="text-textprimary"> • {movie.runtime} min</span> : ""}
+                    {displayMovie.release_date?.substring(0, 4) || "Unknown"} 
+                    {displayMovie.runtime ? <span className="text-textprimary"> • {displayMovie.runtime} min</span> : ""}
                   </p>
                 </motion.div>
               </div>
@@ -370,18 +397,24 @@ const MovieDetailPage = () => {
               {/* Action Buttons */}
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 bg-secondary/40 backdrop-blur-md p-1 rounded-2xl border border-white/[0.06]">
-                  <button onClick={toggleFavorite} className={`action-btn ${isFavorite ? "text-accent bg-accent/10 border border-accent/20" : ""}`} title="Favorite">
+                  <button onClick={toggleFavorite} disabled={!movie} className={`action-btn ${isFavorite ? "text-accent bg-accent/10 border border-accent/20" : ""} ${!movie ? "opacity-60" : ""}`} title="Favorite">
                     {isFavorite ? <FaHeart className="w-4 h-4" /> : <FaRegHeart className="w-4 h-4" />}
                     <span className="hidden sm:inline ml-1 font-semibold">{isFavorite ? "Favorited" : "Favorite"}</span>
                   </button>
                   <div className="w-px h-5 bg-white/10"></div>
-                  <button onClick={() => setShowRecommend(!showRecommend)} className="action-btn" title="Share">
+                  <button onClick={() => movie ? setShowRecommend(!showRecommend) : toast.error("Movie details are still loading.")} disabled={!movie} className="action-btn disabled:opacity-60" title="Share">
                     <FaShareAlt className="w-4 h-4" />
                     <span className="hidden sm:inline ml-1 font-semibold">Share</span>
                   </button>
                 </div>
               </motion.div>
             </section>
+
+            {(loadingMovie || error) && (
+              <p className={`text-sm ${error ? "text-red-300" : "text-textsecondary"}`}>
+                {loadingMovie ? "Loading movie details..." : `Movie details could not be loaded: ${error}`}
+              </p>
+            )}
 
             {/* Quick Recommend Dropdown */}
             <AnimatePresence>
@@ -406,7 +439,7 @@ const MovieDetailPage = () => {
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
               {/* Poster & Rating */}
               <div className="col-span-1 flex gap-6 lg:flex-col lg:gap-4">
-                <img src={movie.poster_path ? `${IMAGE_BASE_URL_W500}${movie.poster_path}` : "/placeholder.jpg"} alt={movie.title} className="w-32 lg:w-full rounded-xl shadow-xl aspect-[2/3] object-cover border border-white/10" />
+                <img src={displayMovie.poster_path ? `${IMAGE_BASE_URL_W500}${displayMovie.poster_path}` : "/placeholder.jpg"} alt={displayMovie.title} className="w-32 lg:w-full rounded-xl shadow-xl aspect-[2/3] object-cover border border-white/10" />
                 <div className="flex-1 glass-card p-4 flex flex-col justify-center items-center gap-2">
                   <span className="text-xs text-textsecondary font-medium">Your Rating</span>
                   <div className="flex items-center gap-1.5">
@@ -424,11 +457,11 @@ const MovieDetailPage = () => {
               <div className="col-span-1 lg:col-span-2 space-y-6">
                 <div>
                   <h3 className="text-xl font-semibold mb-3 text-white">Overview</h3>
-                  <p className="text-textsecondary leading-relaxed text-sm md:text-base">{movie.overview}</p>
+                  <p className="text-textsecondary leading-relaxed text-sm md:text-base">{displayMovie.overview}</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
-                  {(movie.genres || []).map((genre) => (
+                  {(displayMovie.genres || []).map((genre) => (
                       <span key={genre.id} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-textsecondary border border-white/10">
                         {genre.name}
                       </span>
@@ -506,7 +539,7 @@ const useMovie = (id, apiKey) => {
       setLoading(true); setMovie(null); setError(null);
       if (!id || !apiKey || id === '0') { setLoading(false); return; }
       try {
-        const response = await axios.get(`${BASE_URL}/movie/${id}`, { params: { api_key: apiKey, language: 'en-US' } });
+        const response = await axios.get(`${BASE_URL}/movie/${id}`, { params: { api_key: apiKey, language: 'en-US', append_to_response: 'credits,videos,recommendations' } });
         if (response.data) setMovie(response.data);
         else throw new Error(`Movie with ID ${id} not found.`);
       } catch (err) { console.error("Error in useMovie:", err); setError(err.message || "Failed to fetch movie data.");
@@ -518,46 +551,6 @@ const useMovie = (id, apiKey) => {
   return { movie, loading, error };
 };
 
-const useRecommendedMovies = (id, apiKey) => {
-  const [recommendedMovies, setRecommendedMovies] = useState([]);
-  useEffect(() => {
-    const fetchRecommendedMovies = async () => {
-      if (!id || !apiKey || id === '0') { setRecommendedMovies([]); return; }
-      try {
-        const response = await axios.get(`${BASE_URL}/movie/${id}/recommendations`, { params: { api_key: apiKey, language: 'en-US', page: 1 } });
-        const filtered = response.data.results.filter(m => m.poster_path).slice(0, 10); // Sliced to 10
-        setRecommendedMovies(filtered);
-      } catch (error) { console.error("Error fetching recommended movies:", error); setRecommendedMovies([]); }
-    };
-    if (id && id !== '0') fetchRecommendedMovies();
-    else setRecommendedMovies([]);
-  }, [id, apiKey]);
-  return { recommendedMovies };
-};
-
-const useAdditionalDetails = (movie, apiKey) => {
-  const [cast, setCast] = useState([]);
-  const [trailerKey, setTrailerKey] = useState("");
-  const [director, setDirector] = useState(null);
-  useEffect(() => {
-    if (!movie || !movie.id || !apiKey) { setCast([]); setTrailerKey(""); setDirector(null); return; };
-    const fetchAdditionalDetails = async () => {
-      try {
-        const [creditsResponse, videosResponse] = await Promise.all([
-          axios.get(`${BASE_URL}/movie/${movie.id}/credits`, { params: { api_key: apiKey, language: 'en-US' }, }),
-          axios.get(`${BASE_URL}/movie/${movie.id}/videos`, { params: { api_key: apiKey, language: 'en-US' }, }),
-        ]);
-        setCast(creditsResponse.data.cast.slice(0, 6)); // Sliced to 6
-        const directorData = creditsResponse.data.crew.find((member) => member.job === "Director");
-        setDirector(directorData || null);
-        const trailer = videosResponse.data.results.find((vid) => vid.type === "Trailer" && vid.site === "YouTube");
-        setTrailerKey(trailer ? trailer.key : "");
-      } catch (error) { console.error("Error fetching additional movie data:", error); setCast([]); setTrailerKey(""); setDirector(null); }
-    };
-    fetchAdditionalDetails();
-  }, [movie, apiKey]);
-  return { cast, trailerKey, director };
-};
 // --- End Custom Hooks ---
 
 export default MovieDetailPage;

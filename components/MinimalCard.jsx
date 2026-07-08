@@ -15,56 +15,77 @@ const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500"; // Defined W500 b
 // Genre map (keep as is)
 const genreMap = { 28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", 10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western", 10759: "Action & Adventure", 10762: "Kids", 10763: "News", 10764: "Reality", 10765: "Sci-Fi & Fantasy", 10766: "Soap", 10767: "Talk", 10768: "War & Politics" };
 
+const getMediaType = (movie) => movie.media_type || (movie.first_air_date ? "tv" : "movie");
+
+const getGenreText = (movie) => {
+  if (Array.isArray(movie.genres)) {
+    const genres = movie.genres
+      .map((genre) => (typeof genre === "string" ? genre : genre?.name))
+      .filter(Boolean)
+      .slice(0, 2)
+      .join(", ");
+
+    if (genres) return genres;
+  }
+
+  const genresFromIds = movie.genre_ids
+    ?.map((id) => genreMap[id])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(", ");
+
+  return genresFromIds || "N/A";
+};
+
+const getCardDisplayData = (movie) => ({
+  id: movie.id,
+  title: movie.title || movie.name || "Untitled",
+  poster_path: movie.poster_path,
+  vote_average: movie.vote_average,
+  genres: getGenreText(movie),
+  media_type: getMediaType(movie),
+});
+
 const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop from parent
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
   const userId = auth.currentUser?.uid;
   // Store essential details, fetch full details only if needed for display, not for watchlist actions
-  const [displayData, setDisplayData] = useState({
-      // Use initial data immediately, overwrite with fetched if necessary
-      id: initialMovie.id,
-      title: initialMovie.title || initialMovie.name || "Loading...",
-      poster_path: initialMovie.poster_path,
-      vote_average: initialMovie.vote_average,
-      genres: "Loading Genre...",
-      media_type: initialMovie.media_type || (initialMovie.first_air_date ? "tv" : "movie") // Determine media type
-  });
+  const [displayData, setDisplayData] = useState(() => getCardDisplayData(initialMovie));
 
   // Fetch full details and check watchlist status
   useEffect(() => {
-      if (!initialMovie?.id || !API_KEY) return;
+      if (!initialMovie?.id) return;
 
-      const mediaType = initialMovie.media_type || (initialMovie.first_air_date ? "tv" : "movie");
-      setDisplayData(prev => ({ ...prev, media_type: mediaType })); // Ensure mediaType is set early
+      const mediaType = getMediaType(initialMovie);
+      setDisplayData(getCardDisplayData(initialMovie));
 
       let isMounted = true; // Prevent state updates on unmount
+      const shouldHydrateDetails = API_KEY && (
+          (!initialMovie.title && !initialMovie.name) ||
+          !initialMovie.poster_path
+      );
 
-      // Fetch details (mainly for genre names)
+      // Fetch details only for legacy/minimal items missing the basics.
       const fetchDetails = async () => {
+          if (!shouldHydrateDetails) return;
+
           try {
               const { data } = await axios.get( `${BASE_URL}/${mediaType}/${initialMovie.id}`, {
                       params: { api_key: API_KEY, language: "en-US" },
                   }
               );
               if (isMounted && data) {
-                   const fetchedGenres = data.genres?.map(g => g.name).slice(0, 2).join(', ') || // Get first 2 genres
-                                        (initialMovie.genre_ids?.map(id => genreMap[id] || '').filter(Boolean).slice(0,2).join(', ')) || // Fallback to IDs from initial data
-                                        "N/A";
                    setDisplayData(prev => ({
                         ...prev,
-                        // Use fetched data if available, otherwise keep initial
                         title: data.title || data.name || prev.title,
+                        poster_path: data.poster_path || prev.poster_path,
                         vote_average: data.vote_average ?? prev.vote_average,
-                        genres: fetchedGenres
+                        genres: getGenreText(data)
                     }));
               }
           } catch (error) {
               console.error("Error fetching details in card:", error);
-              // Fallback using initial data if fetch fails
-               if (isMounted) {
-                    const initialGenres = initialMovie.genre_ids?.map(id => genreMap[id] || '').filter(Boolean).slice(0,2).join(', ') || "N/A";
-                    setDisplayData(prev => ({...prev, genres: initialGenres }));
-               }
           }
       };
 
@@ -89,7 +110,7 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
             }
       };
 
-      fetchDetails();
+      if (shouldHydrateDetails) fetchDetails();
       checkWatchlist();
 
       return () => { isMounted = false; }; // Cleanup
@@ -102,7 +123,7 @@ const MovieCard = ({ movie: initialMovie, onClick }) => { // Accept onClick prop
     e.stopPropagation(); // Prevent card click navigation
     if (!userId) {
       toast.error("Please log in to manage watchlist.");
-      router.push("/login"); // Redirect to login
+      router.push("/"); // Redirect to auth page
       return;
     }
     // Use initialMovie data for consistency as it's less likely to change than fetched displayData

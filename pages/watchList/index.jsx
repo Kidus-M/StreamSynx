@@ -85,9 +85,9 @@ const WatchlistPage = () => {
   const handleCardClick = (item) => {
     if (!item?.id) return;
     if (item.media_type === "tv") {
-      router.push(`/tv/${item.id}`); // Link to detail page
+      router.push(`/watchTv?tv_id=${item.id}`); // Link to TV player page
     } else if (item.media_type === "movie") {
-      router.push(`/movie/${item.id}`); // Link to detail page
+      router.push(`/watch?movie_id=${item.id}`); // Link to movie player page
     } else {
         console.warn("Unknown media type in watchlist:", item.media_type);
         // Maybe navigate to a generic search or home?
@@ -116,7 +116,7 @@ const WatchlistPage = () => {
               <div className="text-center">
                   <h2 className="text-2xl text-accent mb-4">Log In Required</h2>
                   <p className="text-textsecondary mb-6">Please log in to view your watchlist.</p>
-                  <button onClick={() => router.push('/login')} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors">Log In</button>
+                  <button onClick={() => router.push('/')} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors">Log In</button>
               </div>
               <Footer />
           </div>
