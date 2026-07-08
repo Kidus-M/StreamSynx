@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "start": "next start"
   },
   "dependencies": {
@@ -34,3 +34,4 @@
     "tailwindcss-scrollbar": "^0.1.0"
   }
 }
+

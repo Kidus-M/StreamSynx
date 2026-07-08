@@ -6,6 +6,8 @@ import NavBar from "../../components/NavBar"; // Adjust path if needed
 import Footer from "../../components/Footer"; // Adjust path if needed
 import EpisodeCard from "../../components/EpisodeCard"; // Adjust path if needed
 import SearchCard from "../../components/MinimalCard"; // Adjust path if needed (using this for recommendations)
+import EmbeddedSourceSelector from "../../components/EmbeddedSourceSelector";
+import { getConfiguredEmbedSources, resolveEmbedSourceUrl } from "../../lib/embeddedSources";
 import {
   FaStar,
   FaRegStar,
@@ -397,6 +399,21 @@ const TVShowPlayerPage = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isEpisodesModalOpen, setIsEpisodesModalOpen] = useState(false);
 
+  const embedSources = useMemo(() => getConfiguredEmbedSources(), []);
+  const [selectedEmbedSourceId, setSelectedEmbedSourceId] = useState(embedSources[0]?.id || "");
+  const selectedEmbedSource = useMemo(
+    () => embedSources.find((source) => source.id === selectedEmbedSourceId) || embedSources[0],
+    [embedSources, selectedEmbedSourceId]
+  );
+  const tvPlayerUrl = useMemo(
+    () => resolveEmbedSourceUrl(selectedEmbedSource, {
+      mediaType: "tv",
+      tmdbId: tvShow?.id,
+      season: selectedSeason,
+      episode: selectedEpisode,
+    }),
+    [selectedEmbedSource, tvShow?.id, selectedSeason, selectedEpisode]
+  );
   const currentUser = auth.currentUser;
 
   // Set initial S/E from URL query params
@@ -636,7 +653,7 @@ const TVShowPlayerPage = () => {
               aria-label="Video player">
               <iframe
                   key={`${tvShow.id}-${selectedSeason}-${selectedEpisode}`}
-                  src={`https://vidsrc-embed.ru/embed/tv?tmdb=${tvShow.id}&season=${selectedSeason}&episode=${selectedEpisode}&autoplay=1`}
+                  src={tvPlayerUrl}
                   frameBorder="0"
                   allowFullScreen
                   className="tv-player-iframe w-full h-full absolute inset-0"
@@ -743,6 +760,12 @@ const TVShowPlayerPage = () => {
               )}
             </section>
 
+            <EmbeddedSourceSelector
+              sources={embedSources}
+              selectedSourceId={selectedEmbedSource?.id}
+              mediaType="tv"
+              onSelect={setSelectedEmbedSourceId}
+            />
             {/* Inline Details Section */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
               {/* Poster & Rating */}
@@ -809,3 +832,5 @@ const TVShowPlayerPage = () => {
 };
 
 export default TVShowPlayerPage;
+
+

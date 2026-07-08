@@ -6,6 +6,8 @@ import NavBar from "../../components/NavBar";
 import Footer from "../../components/Footer";
 import MovieCard from "../../components/MinimalCard";
 import SearchCard from "../../components/MinimalCard";
+import EmbeddedSourceSelector from "../../components/EmbeddedSourceSelector";
+import { getConfiguredEmbedSources, resolveEmbedSourceUrl } from "../../lib/embeddedSources";
 import {
   FaStar,
   FaRegStar,
@@ -266,6 +268,16 @@ const MovieDetailPage = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isRecsModalOpen, setIsRecsModalOpen] = useState(false);
 
+  const embedSources = useMemo(() => getConfiguredEmbedSources(), []);
+  const [selectedEmbedSourceId, setSelectedEmbedSourceId] = useState(embedSources[0]?.id || "");
+  const selectedEmbedSource = useMemo(
+    () => embedSources.find((source) => source.id === selectedEmbedSourceId) || embedSources[0],
+    [embedSources, selectedEmbedSourceId]
+  );
+  const moviePlayerUrl = useMemo(
+    () => resolveEmbedSourceUrl(selectedEmbedSource, { mediaType: "movie", tmdbId: movie?.id }),
+    [selectedEmbedSource, movie?.id]
+  );
   const currentUser = auth.currentUser;
   const isMovieReleased = useMemo(() => {
     if (!movie?.release_date) return true;
@@ -313,7 +325,7 @@ const MovieDetailPage = () => {
               aria-label="Movie player">
               {isMovieReleased ? (
                   <iframe
-                      src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
+                      src={moviePlayerUrl}
                       frameBorder="0"
                       allowFullScreen
                       className="tv-player-iframe w-full h-full absolute inset-0"
@@ -384,6 +396,12 @@ const MovieDetailPage = () => {
               )}
             </AnimatePresence>
 
+            <EmbeddedSourceSelector
+              sources={embedSources}
+              selectedSourceId={selectedEmbedSource?.id}
+              mediaType="movie"
+              onSelect={setSelectedEmbedSourceId}
+            />
             {/* Inline Details Section */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
               {/* Poster & Rating */}
@@ -543,3 +561,5 @@ const useAdditionalDetails = (movie, apiKey) => {
 // --- End Custom Hooks ---
 
 export default MovieDetailPage;
+
+
