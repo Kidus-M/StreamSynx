@@ -40,7 +40,7 @@ const SlideShow = () => {
 
   const handleItemClick = (item) => {
       if (!item?.id) return;
-      router.push(`/${item.media_type}/${item.id}`);
+      router.push(item.media_type === "tv" ? `/watchTv?tv_id=${item.id}` : `/watch?movie_id=${item.id}`);
   };
 
   // Variants for the main scrolling container

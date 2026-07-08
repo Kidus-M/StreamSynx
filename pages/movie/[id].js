@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
@@ -251,8 +251,24 @@ const MovieDetailPage = () => {
     const validId = isRouterReady ? id || null : null;
 
     const { movie, loading: loadingMovie, error } = useMovie(validId, apiKey);
-    const { recommendedMovies } = useRecommendedMovies(validId, apiKey);
-    const { cast, trailerKey, director } = useAdditionalDetails(movie, apiKey);
+    const recommendedMovies = useMemo(() => {
+        return (movie?.recommendations?.results || [])
+            .filter((m) => m.poster_path)
+            .slice(0, 10);
+    }, [movie]);
+    const cast = useMemo(() => (movie?.credits?.cast || []).slice(0, 6), [movie]);
+    const director = useMemo(
+        () => movie?.credits?.crew?.find((member) => member.job === "Director") || null,
+        [movie]
+    );
+    const trailerKey = useMemo(() => {
+        const videos = movie?.videos?.results || [];
+        const trailer =
+            videos.find((vid) => vid.type === "Trailer" && vid.site === "YouTube") ||
+            videos.find((vid) => vid.site === "YouTube");
+
+        return trailer?.key || "";
+    }, [movie]);
 
     const [rating, setRating] = useState(0);
     const [savedRating, setSavedRating] = useState(null);
@@ -542,7 +558,7 @@ const useMovie = (id, apiKey) => {
             setLoading(true); setMovie(null); setError(null);
             if (!id || !apiKey || id === '0') { setLoading(false); return; }
             try {
-                const response = await axios.get(`${BASE_URL}/movie/${id}`, { params: { api_key: apiKey, language: 'en-US' } });
+                const response = await axios.get(`${BASE_URL}/movie/${id}`, { params: { api_key: apiKey, language: 'en-US', append_to_response: 'credits,videos,recommendations' } });
                 if (response.data) setMovie(response.data);
                 else throw new Error(`Movie with ID ${id} not found.`);
             } catch (err) { console.error("Error in useMovie:", err); setError(err.message || "Failed to fetch movie data.");
@@ -554,46 +570,6 @@ const useMovie = (id, apiKey) => {
     return { movie, loading, error };
 };
 
-const useRecommendedMovies = (id, apiKey) => {
-    const [recommendedMovies, setRecommendedMovies] = useState([]);
-    useEffect(() => {
-        const fetchRecommendedMovies = async () => {
-            if (!id || !apiKey || id === '0') { setRecommendedMovies([]); return; }
-            try {
-                const response = await axios.get(`${BASE_URL}/movie/${id}/recommendations`, { params: { api_key: apiKey, language: 'en-US', page: 1 } });
-                const filtered = response.data.results.filter(m => m.poster_path).slice(0, 10); // Sliced to 10
-                setRecommendedMovies(filtered);
-            } catch (error) { console.error("Error fetching recommended movies:", error); setRecommendedMovies([]); }
-        };
-        if (id && id !== '0') fetchRecommendedMovies();
-        else setRecommendedMovies([]);
-    }, [id, apiKey]);
-    return { recommendedMovies };
-};
-
-const useAdditionalDetails = (movie, apiKey) => {
-    const [cast, setCast] = useState([]);
-    const [trailerKey, setTrailerKey] = useState("");
-    const [director, setDirector] = useState(null);
-    useEffect(() => {
-        if (!movie || !movie.id || !apiKey) { setCast([]); setTrailerKey(""); setDirector(null); return; };
-        const fetchAdditionalDetails = async () => {
-            try {
-                const [creditsResponse, videosResponse] = await Promise.all([
-                    axios.get(`${BASE_URL}/movie/${movie.id}/credits`, { params: { api_key: apiKey, language: 'en-US' }, }),
-                    axios.get(`${BASE_URL}/movie/${movie.id}/videos`, { params: { api_key: apiKey, language: 'en-US' }, }),
-                ]);
-                setCast(creditsResponse.data.cast.slice(0, 6)); // Sliced to 6
-                const directorData = creditsResponse.data.crew.find((member) => member.job === "Director");
-                setDirector(directorData || null);
-                const trailer = videosResponse.data.results.find((vid) => vid.type === "Trailer" && vid.site === "YouTube");
-                setTrailerKey(trailer ? trailer.key : "");
-            } catch (error) { console.error("Error fetching additional movie data:", error); setCast([]); setTrailerKey(""); setDirector(null); }
-        };
-        fetchAdditionalDetails();
-    }, [movie, apiKey]);
-    return { cast, trailerKey, director };
-};
 // --- End Custom Hooks ---
 
 export default MovieDetailPage;

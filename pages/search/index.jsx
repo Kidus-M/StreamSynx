@@ -237,7 +237,7 @@ const SearchPage = () => {
                     key={item.id}
                     movie={item}
                     onClick={() =>
-                      router.push(`/${item.media_type}/${item.id}`)
+                      router.push(item.media_type === "tv" ? `/watchTv?tv_id=${item.id}` : `/watch?movie_id=${item.id}`)
                     }
                   />
                 ))}
@@ -254,7 +254,7 @@ const SearchPage = () => {
                     key={item.id}
                     movie={item}
                     onClick={() =>
-                      router.push(`/${item.media_type}/${item.id}`)
+                      router.push(item.media_type === "tv" ? `/watchTv?tv_id=${item.id}` : `/watch?movie_id=${item.id}`)
                     }
                   />
                 ))}

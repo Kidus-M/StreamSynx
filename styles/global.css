@@ -22,7 +22,7 @@
   }
 
   /* Focus visible for accessibility */
-  *:focus-visible {
+  /* *:focus-visible {
     outline: 3px solid #DAA520;
     outline-offset: 3px;
     border-radius: 8px;
@@ -56,7 +56,7 @@
   .tv-player-iframe:focus-visible {
     outline: 4px solid #DAA520;
     outline-offset: -4px;
-  }
+  } */
 }
 
 /* Hide number input spinners */
