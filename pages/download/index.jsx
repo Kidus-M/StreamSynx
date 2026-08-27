@@ -4,7 +4,7 @@ import NavBar  from "../../components/NavBar";
 import Footer  from "../../components/Footer";
 export default function DownloadPage() {
     return (
-        <main className="min-h-screen bg-[#121212] text-[#EAEAEA] flex flex-col items-center justify-center font-[Poppins]">
+        <main className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center">
             {/* Animated Hero Section */}
             <NavBar />
             <motion.div
@@ -19,10 +19,10 @@ export default function DownloadPage() {
                     transition={{ delay: 0.2, duration: 0.6 }}
                     className="flex items-center justify-center gap-3"
                 >
-                    <Smartphone className="text-[#DAA520] w-8 h-8" />
+                    <Smartphone className="text-accent w-8 h-8" />
                     <h1 className="text-4xl font-semibold">StreamSynx App</h1>
                 </motion.div>
-                <p className="text-[#A0A0A0] max-w-md mx-auto">
+                <p className="text-textsecondary max-w-md mx-auto">
                     Take your watchlists, favorites, and buddies anywhere.
                     Stream your world, now on Android and Android TV.
                 </p>
@@ -36,7 +36,7 @@ export default function DownloadPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 200 }}
-                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl bg-[#DAA520] text-black font-medium shadow-lg hover:bg-[#C8941A] transition-colors"
+                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl bg-accent text-primary font-medium shadow-lg hover:bg-accent-hover transition-colors"
                 >
                     <Download className="w-5 h-5" />
                     Download for Android
@@ -48,7 +48,7 @@ export default function DownloadPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 200 }}
-                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-[#DAA520] text-[#DAA520] font-medium shadow-lg hover:bg-[#DAA520] hover:text-black transition-colors"
+                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-accent/60 text-accent font-medium shadow-lg hover:bg-accent hover:text-primary transition-colors"
                 >
                     <Tv className="w-5 h-5" />
                     Download for Android TV
@@ -67,7 +67,7 @@ export default function DownloadPage() {
                     alt="App Preview"
                     className="w-75 h-auto rounded-2xl shadow-lg mx-auto"
                 />
-                <p className="text-[#A0A0A0] text-sm">
+                <p className="text-textsecondary text-sm">
                     For Downloader on Android TV, enter streamsynx.vercel.app/tv.apk directly.
                 </p>
             </motion.div>

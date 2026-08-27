@@ -17,6 +17,13 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // The landing page is now the homepage; keep old links working.
+      { source: '/home', destination: '/', permanent: true },
+      { source: '/movie/:id', destination: '/watch?movie_id=:id', permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       {

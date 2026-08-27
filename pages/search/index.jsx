@@ -1,271 +1,315 @@
-import React, { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { FiSearch, FiX, FiClock } from "react-icons/fi";
 import NavBar from "../../components/NavBar";
 import Footer from "../../components/Footer";
-import axios from "axios";
 import MovieCard from "../../components/MinimalCard";
-import { useRouter } from "next/router";
-import { Mosaic } from "react-loading-indicators";
-const BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+import {
+  addRecentSearch,
+  clearRecentSearches,
+  getRecentSearches,
+  removeRecentSearch,
+} from "../../lib/localStore";
+import { mediaTypeOf, tmdbGet, yearOf } from "../../lib/tmdb";
 
-const SearchPage = () => {
+const TYPES = [
+  { id: "all", label: "All" },
+  { id: "movie", label: "Movies" },
+  { id: "tv", label: "Series" },
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const DECADES = [
+  { id: "", label: "Any year" },
+  { id: `${CURRENT_YEAR}`, label: "This year" },
+  { id: "2020s", label: "2020s" },
+  { id: "2010s", label: "2010s" },
+  { id: "2000s", label: "2000s" },
+  { id: "1990s", label: "1990s" },
+];
+
+const matchesPeriod = (item, period) => {
+  if (!period) return true;
+  const year = Number(yearOf(item));
+  if (!year) return false;
+  if (/^\d{4}$/.test(period)) return year === Number(period);
+  const decade = Number(period.slice(0, 4));
+  return year >= decade && year < decade + 10;
+};
+
+export default function SearchPage() {
   const router = useRouter();
-  const [query, setQuery] = useState(""); // Search query
-  const [results, setResults] = useState([]); // Search results
-  const [isMovie, setIsMovie] = useState(null); // Filter: Movie or TV Show (null for both)
-  const [year, setYear] = useState(""); // Filter: Release year
-  const [genre, setGenre] = useState(""); // Filter: Genre
-  const [genres, setGenres] = useState([]); // List of genres
-  const [loading, setLoading] = useState(false); // Loading state
-  const [mostSearched, setMostSearched] = useState([]); // Most searched shows
-  const [initialLoad, setInitialLoad] = useState(true);
-  // Fetch genres on component mount
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/genre/movie/list`, {
-          params: { api_key: API_KEY, language: "en-US" },
-        });
-        setGenres(response.data.genres);
-      } catch (error) {
-        console.error("Error fetching genres:", error);
-      } finally {
-        setInitialLoad(false); // Set initial load to false after fetching genres
-      }
-    };
+  const inputRef = useRef(null);
 
-    fetchGenres();
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState("all");
+  const [period, setPeriod] = useState("");
+  const [genre, setGenre] = useState("");
+  const [genres, setGenres] = useState([]);
+  const [results, setResults] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [recents, setRecents] = useState([]);
+
+  const trimmed = query.trim();
+
+  // Hydrate from the URL so shared links and the palette land in the same place.
+  useEffect(() => {
+    if (!router.isReady) return;
+    setQuery(typeof router.query.q === "string" ? router.query.q : "");
+    if (typeof router.query.type === "string" && TYPES.some((item) => item.id === router.query.type)) {
+      setType(router.query.type);
+    }
+  }, [router.isReady, router.query.q, router.query.type]);
+
+  useEffect(() => {
+    setRecents(getRecentSearches());
+    inputRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (!query && !initialLoad) {
-      const fetchMostSearched = async () => {
-        try {
-          const response = await axios.get(`${BASE_URL}/trending/all/week`, {
-            params: { api_key: API_KEY },
-          });
-          const filteredResults = response.data.results.filter(
-            (item) => item.poster_path
-          );
-          setMostSearched(filteredResults.slice(0, 10));
-        } catch (error) {
-          console.error("Error fetching most searched shows:", error);
-        }
-      };
+    Promise.all([tmdbGet("/genre/movie/list"), tmdbGet("/genre/tv/list")])
+      .then(([movies, shows]) => {
+        const combined = [...(movies.data.genres || []), ...(shows.data.genres || [])];
+        const unique = Array.from(new Map(combined.map((item) => [item.id, item])).values());
+        setGenres(unique.sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => {});
 
-      fetchMostSearched();
-    }
-  }, [query, initialLoad]);
+    tmdbGet("/trending/all/week")
+      .then(({ data }) =>
+        setTrending(
+          (data.results || [])
+            .filter((item) => item.poster_path && ["movie", "tv"].includes(item.media_type))
+            .slice(0, 18)
+        )
+      )
+      .catch(() => {});
+  }, []);
 
+  // Debounced search, then remember the term on this device.
   useEffect(() => {
-    if (query) {
-      const fetchResults = async () => {
-        setLoading(true);
-        try {
-          const response = await axios.get(`${BASE_URL}/search/multi`, {
-            params: {
-              api_key: API_KEY,
-              query: query,
-              year: year ? parseInt(year) : undefined, // Convert to number or undefined
-              with_genres: genre || undefined, // Pass genre or undefined
-            },
-          });
-          let filteredResults = response.data.results;
-          if (query) {
-            filteredResults = response.data.results.filter(
-              (item) =>
-                item.poster_path &&
-                (isMovie === null ||
-                  (isMovie
-                    ? item.media_type === "movie"
-                    : item.media_type === "tv"))
-            );
-          }
-          setResults(filteredResults);
-        } catch (error) {
-          console.error("Error fetching search results:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const debounceTimer = setTimeout(() => {
-        fetchResults();
-      }, 500);
-
-      return () => clearTimeout(debounceTimer);
-    } else {
+    if (!trimmed) {
       setResults([]);
+      setLoading(false);
+      return undefined;
     }
-  }, [query, isMovie, year, genre]);
 
-  if (initialLoad) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
-        <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
-      </div>
-    );
-  }
+    setLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await tmdbGet("/search/multi", { query: trimmed, include_adult: false });
+        setResults(
+          (data.results || []).filter(
+            (item) => item.poster_path && ["movie", "tv"].includes(item.media_type)
+          )
+        );
+        setRecents(addRecentSearch(trimmed));
+      } catch (error) {
+        console.error("Search failed:", error);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 420);
+
+    return () => clearTimeout(timer);
+  }, [trimmed]);
+
+  const filtered = useMemo(
+    () =>
+      results.filter((item) => {
+        if (type !== "all" && mediaTypeOf(item) !== type) return false;
+        if (!matchesPeriod(item, period)) return false;
+        if (genre && !(item.genre_ids || []).includes(Number(genre))) return false;
+        return true;
+      }),
+    [results, type, period, genre]
+  );
+
+  const runSearch = useCallback(
+    (term) => {
+      setQuery(term);
+      inputRef.current?.focus();
+    },
+    []
+  );
+
+  const grid = trimmed ? filtered : trending;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col mt-20">
+    <div className="flex min-h-screen flex-col bg-primary text-textprimary">
+      <Head>
+        <title>{trimmed ? `${trimmed} — Search` : "Search"} — StreamSynx</title>
+      </Head>
+
       <NavBar />
-      <main className="flex-1 p-6">
-        {/* Search Section */}
-        <section className="max-w-4xl mx-auto">
-          <div className="flex flex-col space-y-4">
-            {/* Search Input */}
+
+      <main className="flex-1 px-4 pb-16 pt-24 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="heading-xl">Search</h1>
+          <p className="mt-2 text-sm text-textsecondary">
+            Films and series from TMDB. Your recent searches stay on this device.
+          </p>
+
+          {/* Search field */}
+          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 focus-within:border-accent/50">
+            <FiSearch className="h-[18px] w-[18px] shrink-0 text-textsecondary" />
             <input
-              type="text"
-              placeholder="Search for movies or TV shows..."
+              ref={inputRef}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search by title..."
+              className="w-full bg-transparent py-4 text-[15px] text-textprimary outline-none placeholder:text-textsecondary/70"
+              autoComplete="off"
             />
-
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4">
-              {/* Movie/TV Show Toggle */}
-              <div className="flex items-center space-x-2">
-                <label className="text-sm">Type:</label>
-                <button
-                  onClick={() => setIsMovie(null)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === null
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setIsMovie(true)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === true
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  Movies
-                </button>
-                <button
-                  onClick={() => setIsMovie(false)}
-                  className={`px-4 py-2 rounded-lg ${
-                    isMovie === false
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                >
-                  TV Shows
-                </button>
-              </div>
-
-              {/* Year Filter */}
-              <div className="flex items-center space-x-2 relative">
-                <label htmlFor="yearInput" className="text-sm">
-                  Year:
-                </label>
-                <input
-                  type="number"
-                  id="yearInput"
-                  placeholder="YYYY"
-                  value={year}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 4) {
-                      setYear(e.target.value);
-                    }
-                  }}
-                  className={`px-4 py-2 bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                    year && year.length !== 4 ? "border-red-500" : ""
-                  }`}
-                  aria-label="Year filter"
-                  maxLength={4}
-                />
-                {year && (
-                  <button
-                    onClick={() => setYear("")}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                    aria-label="Clear year filter"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-
-              {/* Genre Filter */}
-              <div className="flex items-center space-x-2">
-                <label className="text-sm">Genre:</label>
-                <select
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  className="px-4 py-2 bg-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="">All Genres</option>
-                  {genres.map((genre) => (
-                    <option key={genre.id} value={genre.id}>
-                      {genre.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="p-1 text-textsecondary transition-colors hover:text-textprimary"
+              >
+                <FiX size={17} />
+              </button>
+            )}
           </div>
-        </section>
 
-        {/* Results Section */}
-        <section className="max-w-4xl mx-auto mt-8">
-          {loading ? (
-            <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-between">
-              <Mosaic color="#ff7f50" size="medium" text="" textColor="" />
-            </div>
-          ) : query ? (
-            results.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {results.map((item) => (
-                  <MovieCard
-                    key={item.id}
-                    movie={item}
-                    onClick={() =>
-                      router.push(item.media_type === "tv" ? `/watchTv?tv_id=${item.id}` : `/watch?movie_id=${item.id}`)
-                    }
-                  />
-                ))}
+          {/* Filters */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {TYPES.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setType(option.id)}
+                className={`chip ${type === option.id ? "chip-active" : ""}`}
+              >
+                {option.label}
+              </button>
+            ))}
+
+            <span className="mx-1 h-5 w-px bg-white/10" />
+
+            <select
+              value={period}
+              onChange={(event) => setPeriod(event.target.value)}
+              className="chip cursor-pointer appearance-none pr-3"
+              aria-label="Filter by period"
+            >
+              {DECADES.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={genre}
+              onChange={(event) => setGenre(event.target.value)}
+              className="chip cursor-pointer appearance-none pr-3"
+              aria-label="Filter by genre"
+            >
+              <option value="">Any genre</option>
+              {genres.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+
+            {(period || genre || type !== "all") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPeriod("");
+                  setGenre("");
+                  setType("all");
+                }}
+                className="text-[12px] text-textsecondary transition-colors hover:text-accent"
+              >
+                Reset filters
+              </button>
+            )}
+          </div>
+
+          {/* Recent searches (localStorage only) */}
+          {recents.length > 0 && !trimmed && (
+            <div className="mt-8">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="section-label inline-flex items-center gap-1.5">
+                  <FiClock size={12} /> Recent searches
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setRecents(clearRecentSearches())}
+                  className="text-[12px] text-textsecondary transition-colors hover:text-accent"
+                >
+                  Clear all
+                </button>
               </div>
-            ) : (
-              <p className="text-center text-gray-300">No results found.</p>
-            )
-          ) : (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Most Searched</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {mostSearched.map((item) => (
-                  <MovieCard
-                    key={item.id}
-                    movie={item}
-                    onClick={() =>
-                      router.push(item.media_type === "tv" ? `/watchTv?tv_id=${item.id}` : `/watch?movie_id=${item.id}`)
-                    }
-                  />
+              <div className="flex flex-wrap gap-2">
+                {recents.map((item) => (
+                  <span key={item.query} className="chip pr-1.5">
+                    <button
+                      type="button"
+                      onClick={() => runSearch(item.query)}
+                      className="max-w-[200px] truncate"
+                    >
+                      {item.query}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${item.query}`}
+                      onClick={() => setRecents(removeRecentSearch(item.query))}
+                      className="rounded p-0.5 text-textsecondary/70 transition-colors hover:text-textprimary"
+                    >
+                      <FiX size={12} />
+                    </button>
+                  </span>
                 ))}
               </div>
             </div>
           )}
-        </section>
+
+          {/* Results */}
+          <div className="mt-10">
+            <h2 className="heading-lg mb-4">
+              {trimmed
+                ? loading
+                  ? "Searching…"
+                  : `${filtered.length} result${filtered.length === 1 ? "" : "s"} for “${trimmed}”`
+                : "Trending this week"}
+            </h2>
+
+            {loading ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {Array.from({ length: 12 }).map((_, index) => (
+                  <div key={index}>
+                    <div className="skeleton aspect-[2/3] w-full rounded-xl" />
+                    <div className="skeleton mt-2.5 h-3 w-4/5 rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : grid.length > 0 ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {grid.map((item) => (
+                  <MovieCard key={`${item.media_type}-${item.id}`} movie={item} />
+                ))}
+              </div>
+            ) : (
+              <div className="surface px-6 py-16 text-center">
+                <p className="text-sm text-textprimary">Nothing matched those filters.</p>
+                <p className="mt-1 text-xs text-textsecondary">
+                  Try a different spelling, or reset the filters above.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
+
       <Footer />
     </div>
   );
-};
-
-export default SearchPage;
+}
