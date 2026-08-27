@@ -1,7 +1,7 @@
 // pages/rooms/index.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { db, auth } from "../../firebase"; // Adjust path
+import { db } from "../../firebase";
 import {
   collection,
   query,
@@ -10,38 +10,27 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import NavBar from "../../components/NavBar"; // Adjust path
 import Footer from "../../components/Footer"; // Adjust path
 import CreateRoomModal from "../../components/CreateRoomModal"; // Adjust path
 import { Mosaic } from "react-loading-indicators";
 import { FaPlus, FaUsers, FaClock, FaCrown } from "react-icons/fa";
 import TimeAgo from "react-timeago"; // <-- Import TimeAgo
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { loginHref, useAuth } from "../../lib/auth";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router"; // <-- Import useRouter
 
 // Make sure to install react-timeago: npm install react-timeago
 
 const RoomsPage = () => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [allRooms, setAllRooms] = useState([]); // Store all fetched rooms initially
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [creatorUsernames, setCreatorUsernames] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter(); // Hook for navigation
-
-  // Auth Listener
-  useEffect(() => {
-    setAuthLoading(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Fetch ALL Rooms & Creator Usernames
   useEffect(() => {
@@ -159,10 +148,10 @@ const RoomsPage = () => {
             Please log in to view or create watch party rooms.
           </p>{" "}
           <button
-            onClick={() => router.push("/")}
-            className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"
+            onClick={() => router.push(loginHref("/rooms"))}
+            className="btn-primary"
           >
-            Log In
+            Sign in
           </button>{" "}
         </div>{" "}
         <Footer />{" "}
@@ -174,10 +163,6 @@ const RoomsPage = () => {
   return (
     // Added mt-16 for spacing below NavBar, themed background/text
     <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col font-poppins">
-      <Toaster
-        position="bottom-center"
-        toastOptions={{ className: "bg-secondary text-textprimary" }}
-      />
       <NavBar />
       {/* Removed pt-16 from main as mt-16 is on outer div */}
       <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">

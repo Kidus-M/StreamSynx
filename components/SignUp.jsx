@@ -1,167 +1,128 @@
-// components/SignUp.js (or wherever it's located)
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
-import { auth, db } from "../firebase"; // Adjust path
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, setDoc, collection, query, where, getDoc, getDocs } from "firebase/firestore";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
+import toast from "react-hot-toast";
 import AuthForm from "./AuthForm";
-import toast from 'react-hot-toast';
+import { auth } from "../firebase";
+import { createUserDocuments, ensureUserProfile, isUsernameTaken } from "../lib/userProfile";
 
-export default function SignUp({ setIsSignUp }) {
+const messageForError = (error) => {
+  switch (error.code) {
+    case "auth/email-already-in-use":
+      return "That email is already registered. Try signing in instead.";
+    case "auth/invalid-email":
+      return "That email address does not look right.";
+    case "auth/weak-password":
+      return "Passwords need at least 6 characters.";
+    default:
+      return "Sign up failed. Please try again.";
+  }
+};
+
+export default function SignUp({ redirectTo = "/" }) {
   const router = useRouter();
-  const [errorLabel, setErrorLabel] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setErrorLabel(false); setErrorMessage(""); setIsLoading(true); // Start loading
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setIsLoading(true);
 
-    const username = e.target.username.value.trim();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
+    const username = event.target.username.value.trim();
+    const email = event.target.email.value.trim();
+    const password = event.target.password.value;
 
-    if (!username || !email || !password) {
-      setErrorLabel(true); setErrorMessage("All fields are required.");
-      setIsLoading(false); return;
-    }
-    // Basic username validation (example)
     if (username.length < 3 || !/^[a-zA-Z0-9_]+$/.test(username)) {
-        setErrorLabel(true); setErrorMessage("Username must be 3+ characters (letters, numbers, underscore only).");
-        setIsLoading(false); return;
+      setErrorMessage("Usernames need 3+ characters: letters, numbers or underscores.");
+      setIsLoading(false);
+      return;
     }
-
 
     try {
-      // Check if username already exists
-      const usernameQuery = query(collection(db, "users"), where("username_lowercase", "==", username.toLowerCase())); // Check lowercase
-      const usernameSnapshot = await getDocs(usernameQuery);
-
-      if (!usernameSnapshot.empty) {
-        setErrorLabel(true); setErrorMessage("Username already taken.");
-        setIsLoading(false); return;
+      if (await isUsernameTaken(username)) {
+        setErrorMessage("That username is already taken.");
+        setIsLoading(false);
+        return;
       }
 
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(user, { displayName: username }).catch(() => {});
+      await createUserDocuments(user, username);
 
-      // Create user document in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        username: username,
-        username_lowercase: username.toLowerCase(), // Store lowercase version
-        email: email,
-        avatar: user.photoURL || null, // Use default avatar if needed
-        createdAt: new Date().toISOString(), // Add createdAt timestamp
-      });
-      // Also initialize friends, favorites, etc. (optional but good practice)
-      await setDoc(doc(db, "friends", user.uid), { friends: [] });
-      await setDoc(doc(db, "favorites", user.uid), { movies: [], shows: [], episodes: [] });
-      await setDoc(doc(db, "history", user.uid), { movies: [], episodes: [] });
-      await setDoc(doc(db, "watchlists", user.uid), { items: [] });
-      await setDoc(doc(db, "recommendations", user.uid), { recommendations: [] });
-
-      toast.success("Account created successfully!");
-      router.push("/home");
-
-    } catch (authError) {
-      console.error("Authentication error:", authError);
-      handleAuthError(authError); // Use centralized error handler
+      toast.success("Account created");
+      router.replace(redirectTo);
+    } catch (error) {
+      setErrorMessage(messageForError(error));
     } finally {
-        setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
-  // Modified Google Sign In/Up to check for existing user first
-   const handleGoogleSignUp = async () => {
-    const provider = new GoogleAuthProvider();
+  const handleGoogleSignUp = async () => {
     setIsLoading(true);
     try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (!userDoc.exists()) {
-             // If user doesn't exist in Firestore (first Google sign-in), create profile
-             const potentialUsername = user.displayName?.replace(/\s+/g, '') || user.email.split("@")[0];
-             const usernameQuery = query(collection(db, "users"), where("username_lowercase", "==", potentialUsername.toLowerCase()));
-             const usernameSnapshot = await getDocs(usernameQuery);
-             const finalUsername = usernameSnapshot.empty ? potentialUsername : `${potentialUsername}${Math.floor(Math.random() * 1000)}`;
-
-             await setDoc(userDocRef, {
-                uid: user.uid,
-                username: finalUsername,
-                username_lowercase: finalUsername.toLowerCase(),
-                email: user.email,
-                avatar: user.photoURL || null,
-                createdAt: new Date().toISOString(),
-             });
-              // Initialize other docs
-             await setDoc(doc(db, "friends", user.uid), { friends: [] });
-             await setDoc(doc(db, "favorites", user.uid), { movies: [], shows: [], episodes: [] });
-             await setDoc(doc(db, "history", user.uid), { movies: [], episodes: [] });
-             await setDoc(doc(db, "watchlists", user.uid), { items: [] });
-             await setDoc(doc(db, "recommendations", user.uid), { recommendations: [] });
-             toast.success(`Welcome, ${finalUsername}! Profile created.`);
-        } else {
-             toast.success(`Welcome back, ${userDoc.data().username}!`); // Already exists, just sign in
-        }
-        router.push("/home");
+      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+      const { username, created } = await ensureUserProfile(user);
+      toast.success(created ? `Welcome, ${username}` : `Welcome back, ${username}`);
+      router.replace(redirectTo);
     } catch (error) {
-        console.error("Google sign-up/in error:", error);
-        toast.error(`Google Sign-In failed: ${error.message}`);
+      if (error.code !== "auth/popup-closed-by-user") {
+        toast.error("Google sign-in failed. Please try again.");
+      }
     } finally {
-         setIsLoading(false);
-    }
-};
-
-
-  const handleAuthError = (error) => {
-    setErrorLabel(true);
-    switch (error.code) {
-      case "auth/email-already-in-use": setErrorMessage("Email already in use. Try signing in."); break;
-      case "auth/invalid-email": setErrorMessage("Invalid email format."); break;
-      case "auth/weak-password": setErrorMessage("Password should be at least 6 characters."); break;
-      default: setErrorMessage("Sign up failed. Please try again."); break;
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full p-4">
-       {/* Themed Title */}
-      <h1 className="text-3xl font-bold text-textprimary mb-6 font-poppins">SIGN UP</h1>
+    <div className="space-y-5">
       <AuthForm
         onSubmit={handleSignUp}
         fields={[
-          { name: "username", type: "text", placeholder: "Username" },
-          { name: "email", type: "email", placeholder: "Email Address" },
-          { name: "password", type: "password", placeholder: "Password (min. 6 characters)" },
+          {
+            name: "username",
+            type: "text",
+            label: "Username",
+            placeholder: "moviebuff",
+            autoComplete: "username",
+          },
+          {
+            name: "email",
+            type: "email",
+            label: "Email",
+            placeholder: "you@example.com",
+            autoComplete: "email",
+          },
+          {
+            name: "password",
+            type: "password",
+            label: "Password",
+            placeholder: "At least 6 characters",
+            autoComplete: "new-password",
+          },
         ]}
-        buttonText="Create Account"
-        errorLabel={errorLabel}
+        buttonText="Create account"
         errorMessage={errorMessage}
-        isLoading={isLoading} // Pass loading state
+        isLoading={isLoading}
       />
-      <div className="my-4 text-center text-textsecondary text-xs w-full max-w-sm">OR</div>
-       {/* Themed Google Button */}
+
+      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.16em] text-textsecondary/70">
+        <span className="h-px flex-1 bg-white/[0.08]" />
+        or
+        <span className="h-px flex-1 bg-white/[0.08]" />
+      </div>
+
       <button
+        type="button"
         onClick={handleGoogleSignUp}
-         disabled={isLoading}
-        className="w-full max-w-sm bg-secondary text-textprimary py-3 rounded-md mb-4 border border-secondary-light font-poppins flex items-center justify-center gap-2 hover:bg-secondary-light disabled:opacity-70 transition-colors"
+        disabled={isLoading}
+        className="btn-ghost h-12 w-full"
       >
-        <FcGoogle className="text-xl" />
-        Continue With Google
+        <FcGoogle className="h-5 w-5" />
+        Continue with Google
       </button>
-       {/* Themed Switch Link */}
-      <p className="text-textsecondary font-poppins text-sm">
-        Already have an account?{" "}
-        <button className="text-accent hover:text-accent-hover font-semibold underline" onClick={() => setIsSignUp(false)}>
-          Sign In
-        </button>
-      </p>
     </div>
   );
 }

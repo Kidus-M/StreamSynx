@@ -1,64 +1,223 @@
+import Head from "next/head";
 import { motion } from "framer-motion";
-import { Download, Smartphone } from "lucide-react";
-import NavBar  from "../../components/NavBar";
-import Footer  from "../../components/Footer";
+import {
+  FiCheck,
+  FiDownload,
+  FiMonitor,
+  FiShield,
+  FiSmartphone,
+  FiTv,
+  FiZap,
+} from "react-icons/fi";
+import NavBar from "../../components/NavBar";
+import Footer from "../../components/Footer";
+
+/** Short link the Downloader app on Android TV can actually be typed into. */
+const TV_SHORT_LINK = "streamsynx.vercel.app/tv.apk";
+
+const APPS = [
+  {
+    id: "tv",
+    icon: FiTv,
+    name: "Android TV",
+    version: "2.0.0",
+    size: "5.8 MB",
+    href: "/tv.apk",
+    primary: true,
+    tagline: "Built for the remote, not squeezed onto the big screen.",
+    points: [
+      "Native player with adaptive streaming, a real scrub bar and resume points",
+      "Ads, pop-ups and redirects blocked on every source",
+      "Full D-pad navigation with a collapsing menu rail",
+      "Search without a keyboard, cast and episode browsing built in",
+    ],
+  },
+  {
+    id: "android",
+    icon: FiSmartphone,
+    name: "Android",
+    version: "1.0.0",
+    size: "51 MB",
+    href: "/downloads/StreamSynx.apk",
+    primary: false,
+    tagline: "Your watchlist, favourites and buddies in your pocket.",
+    points: [
+      "Everything from the web app, offline-aware",
+      "Watchlists and history stay in sync with your account",
+      "Watch parties and buddy activity",
+    ],
+  },
+];
+
+const TV_STEPS = [
+  {
+    title: "Allow unknown sources",
+    body: "On the TV, open Settings → Device Preferences → Security & restrictions, and allow installs from the app you will download with.",
+  },
+  {
+    title: "Open Downloader",
+    body: (
+      <>
+        Install <span className="text-textprimary">Downloader by AFTVnews</span> from the Play
+        Store, then type <span className="text-accent">{TV_SHORT_LINK}</span> into its address
+        bar.
+      </>
+    ),
+  },
+  {
+    title: "Install and open",
+    body: "Confirm the install when prompted. StreamSynx TV then appears in your apps row, ready to sign in to.",
+  },
+];
+
+const AppCard = ({ app, index }) => {
+  const Icon = app.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className={`glass-card flex flex-col p-6 sm:p-7 ${
+        app.primary ? "border-accent/25 shadow-glow" : ""
+      }`}
+    >
+      <div className="flex items-start gap-4">
+        <span
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+            app.primary ? "bg-accent text-primary" : "bg-white/[0.06] text-accent"
+          }`}
+        >
+          <Icon className="h-5 w-5" />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 className="heading-lg">{app.name}</h2>
+            {app.primary && (
+              <span className="chip chip-active !py-1 text-[11px]">Just rebuilt</span>
+            )}
+          </div>
+          <p className="mt-1.5 text-sm leading-relaxed text-textsecondary">{app.tagline}</p>
+        </div>
+      </div>
+
+      <ul className="mt-6 space-y-2.5">
+        {app.points.map((point) => (
+          <li key={point} className="flex items-start gap-2.5">
+            <FiCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <span className="text-[13px] leading-relaxed text-textsecondary">{point}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-auto pt-7">
+        <a
+          href={app.href}
+          download
+          className={`${app.primary ? "btn-primary" : "btn-ghost"} w-full py-3`}
+        >
+          <FiDownload className="h-4 w-4" />
+          Download APK
+        </a>
+        <p className="mt-3 text-center text-[12px] text-textsecondary/70">
+          Version {app.version} · {app.size} · Android 6.0 and later
+        </p>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function DownloadPage() {
-    return (
-        <main className="min-h-screen bg-[#121212] text-[#EAEAEA] flex flex-col items-center justify-center font-[Poppins]">
-            {/* Animated Hero Section */}
-            <NavBar />
-            <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="text-center space-y-4 my-20"
-            >
-                <motion.div
-                    initial={{ scale: 0.9 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
-                    className="flex items-center justify-center gap-3"
-                >
-                    <Smartphone className="text-[#DAA520] w-8 h-8" />
-                    <h1 className="text-4xl font-semibold">StreamSynx App</h1>
-                </motion.div>
-                <p className="text-[#A0A0A0] max-w-md mx-auto">
-                    Take your watchlists, favorites, and buddies anywhere.
-                    Stream your world, now on Android.
-                </p>
-            </motion.div>
+  return (
+    <div className="flex min-h-screen flex-col bg-primary text-textprimary">
+      <Head>
+        <title>Get the app — StreamSynx</title>
+        <meta
+          name="description"
+          content="StreamSynx for Android TV and Android. A native big-screen player with ads and pop-ups blocked."
+        />
+      </Head>
 
-            {/* Animated Download Button */}
-            <motion.a
-                href="/downloads/StreamSynx.apk" // Place your APK file in /public/downloads
-                download
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="mt-10 flex items-center gap-3 px-6 py-3 rounded-2xl bg-[#DAA520] text-black font-medium shadow-lg hover:bg-[#C8941A] transition-colors"
-            >
-                <Download className="w-5 h-5" />
-                Download for Android
-            </motion.a>
+      <NavBar />
 
-            {/* Optional Preview / QR Code Section */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-12 text-center space-y-3"
-            >
-                <img
-                    src="/images/app-preview.png"
-                    alt="App Preview"
-                    className="w-75 h-auto rounded-2xl shadow-lg mx-auto"
-                />
-                <p className="text-[#A0A0A0] text-sm">
-                    Scan or click to download directly to your device
-                </p>
-            </motion.div>
+      <main className="flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-10">
+        <div className="mx-auto w-full max-w-6xl">
+          {/* Hero */}
+          <motion.header
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-2xl"
+          >
+            <p className="section-label mb-3">Apps</p>
+            <h1 className="heading-xl">Take StreamSynx off the browser</h1>
+            <p className="mt-4 text-[15px] leading-relaxed text-textsecondary">
+              The same catalogue, the same watchlist — on the screen you actually watch on. The
+              Android TV app is a native leanback client, so nothing about it is a website in a
+              box.
+            </p>
 
-            <Footer />
-        </main>
-    );
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="chip">
+                <FiShield className="h-3.5 w-3.5 text-accent" />
+                Ads blocked
+              </span>
+              <span className="chip">
+                <FiZap className="h-3.5 w-3.5 text-accent" />
+                Native player
+              </span>
+              <span className="chip">
+                <FiMonitor className="h-3.5 w-3.5 text-accent" />
+                D-pad first
+              </span>
+            </div>
+          </motion.header>
+
+          {/* Downloads */}
+          <section className="mt-12 grid gap-5 lg:grid-cols-2">
+            {APPS.map((app, index) => (
+              <AppCard key={app.id} app={app} index={index} />
+            ))}
+          </section>
+
+          {/* Sideload guide */}
+          <section className="mt-14">
+            <h2 className="heading-lg">Installing on a TV</h2>
+            <p className="mt-2 max-w-2xl text-sm text-textsecondary">
+              Android TV has no browser, so the APK is fetched on the device itself. This takes
+              about two minutes.
+            </p>
+
+            <ol className="mt-6 grid gap-4 sm:grid-cols-3">
+              {TV_STEPS.map((step, index) => (
+                <li key={step.title} className="surface p-5">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15 text-[12px] font-semibold text-accent">
+                    {index + 1}
+                  </span>
+                  <h3 className="mt-3.5 text-sm font-medium text-textprimary">{step.title}</h3>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-textsecondary">
+                    {step.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            <div className="surface mt-5 flex flex-wrap items-center justify-between gap-4 p-5">
+              <div>
+                <p className="section-label mb-1.5">Direct link for Downloader</p>
+                <p className="font-mono text-sm text-textprimary">{TV_SHORT_LINK}</p>
+              </div>
+              <p className="max-w-md text-[12px] leading-relaxed text-textsecondary/80">
+                Installing an APK outside the Play Store is expected here — StreamSynx is not
+                distributed through it. The file is served straight from this site.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
 }
