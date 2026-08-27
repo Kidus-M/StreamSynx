@@ -1,653 +1,471 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
-import NavBar from "../../../../components/NavBar"; // Adjust path
-import Footer from "../../../../components/Footer"; // Adjust path
-import EpisodeCard from "../../../../components/EpisodeCard"; // Adjust path
-import SearchCard from "../../../../components/MinimalCard"; // Adjust path
-import EmbeddedSourceSelector from "../../../../components/EmbeddedSourceSelector";
-import { getConfiguredEmbedSources, resolveEmbedSourceUrl } from "../../../../lib/embeddedSources";
-import {
-    FaStar,
-    FaRegStar,
-    FaHeart,
-    FaRegHeart,
-    FaShareAlt,
-    FaFilm, // Icon for Details
-    FaListOl, // Icon for Episodes
-    FaChevronLeft,
-    FaChevronRight,
-} from "react-icons/fa";
-import { auth, db } from "../../../../firebase"; // Adjust path
-import {
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    arrayUnion,
-    arrayRemove,
-} from "firebase/firestore";
-import { Mosaic } from "react-loading-indicators";
-import toast, { Toaster } from "react-hot-toast";
-import { IoClose } from "react-icons/io5";
-import Head from 'next/head';
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
+import NavBar from "../../../../components/NavBar";
+import Footer from "../../../../components/Footer";
+import PlayerShell from "../../../../components/PlayerShell";
+import MediaActions from "../../../../components/MediaActions";
+import CastRow from "../../../../components/CastRow";
+import RatingStars from "../../../../components/RatingStars";
+import Rail from "../../../../components/Rail";
+import MovieCard from "../../../../components/MinimalCard";
+import EpisodeBrowser, { hasAired } from "../../../../components/EpisodeBrowser";
+import { db } from "../../../../firebase";
+import { useAuth } from "../../../../lib/auth";
+import { addContinueWatching, setLastEpisode } from "../../../../lib/localStore";
+import { backdropUrl, posterUrl, tmdbGet } from "../../../../lib/tmdb";
 
-const BASE_URL = "https://api.themoviedb.org/3";
-const IMAGE_BASE_URL_W500 = "https://image.tmdb.org/t/p/w500";
-const IMAGE_BASE_URL_W185 = "https://image.tmdb.org/t/p/w185"; // For cast
-const IMAGE_BASE_URL_ORIGINAL = "https://image.tmdb.org/t/p/original";
-
-// --- MODAL VARIANT DEFINITIONS ---
-const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-const modalVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: "easeInOut" } },
-    exit: { opacity: 0, y: 50, scale: 0.95, transition: { duration: 0.3, ease: "easeInOut" } },
-};
-
-// --- Custom Hooks ---
-const useTVShow = (id, apiKey) => {
-  const [tvShow, setTVShow] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchTVShow = async () => {
-      setLoading(true);
-      setTVShow(null);
-      setError(null);
-
-      if (!id || !apiKey || id === "0") {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get(`${BASE_URL}/tv/${id}`, {
-          params: {
-            api_key: apiKey,
-            language: "en-US",
-            append_to_response: "credits,videos,recommendations",
-          },
-        });
-
-        if (response.data) setTVShow(response.data);
-        else throw new Error(`TV Show with ID ${id} not found.`);
-      } catch (err) {
-        console.error("Error in useTVShow:", err);
-        setError(err.message || "Failed to fetch TV show data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id && id !== "0") fetchTVShow();
-    else setLoading(false);
-  }, [id, apiKey]);
-
-  return { tvShow, loading, error };
-};
-
-const useTVSeasonsEpisodes = (id, seasonNumber, apiKey) => {
+/** Episodes for one season, with request cancellation on fast switching. */
+const useSeasonEpisodes = (showId, season) => {
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
-    let isLatestRequest = true;
+    if (!showId || !season) {
+      setEpisodes([]);
+      return undefined;
+    }
 
-    const fetchEpisodes = async () => {
-      if (!id || !apiKey || !seasonNumber || seasonNumber === 0) {
-        setEpisodes([]);
-        setLoading(false);
+    let active = true;
+    setLoading(true);
+    setEpisodes([]);
+
+    tmdbGet(`/tv/${showId}/season/${season}`)
+      .then(({ data }) => {
+        if (active) setEpisodes(data.episodes || []);
+      })
+      .catch((error) => {
+        console.error("Error loading season:", error);
+        if (active) setEpisodes([]);
+      })
+      .finally(() => active && setLoading(false));
+
+    return () => {
+      active = false;
+    };
+  }, [showId, season]);
+
+  return { episodes, loading };
+};
+
+const EpisodePage = () => {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { seriesID, season, episode } = router.query;
+
+  const showId = router.isReady ? seriesID || null : null;
+  const playingSeason = Number(season) || 1;
+  const playingEpisode = Number(episode) || 1;
+
+  const [show, setShow] = useState(null);
+  const [loadingShow, setLoadingShow] = useState(true);
+  const [viewSeason, setViewSeason] = useState(playingSeason);
+  const [rating, setRating] = useState(0);
+
+  useEffect(() => setViewSeason(playingSeason), [playingSeason]);
+
+  useEffect(() => {
+    if (!showId) return undefined;
+    let active = true;
+    setLoadingShow(true);
+
+    tmdbGet(`/tv/${showId}`, { append_to_response: "credits,recommendations" })
+      .then(({ data }) => active && setShow(data))
+      .catch((error) => console.error("Error loading show:", error))
+      .finally(() => active && setLoadingShow(false));
+
+    return () => {
+      active = false;
+    };
+  }, [showId]);
+
+  const { episodes: viewEpisodes, loading: loadingEpisodes } = useSeasonEpisodes(
+    showId,
+    viewSeason
+  );
+  const { episodes: playingSeasonEpisodes } = useSeasonEpisodes(
+    showId,
+    viewSeason === playingSeason ? null : playingSeason
+  );
+
+  const currentSeasonEpisodes =
+    viewSeason === playingSeason ? viewEpisodes : playingSeasonEpisodes;
+
+  const currentEpisode = useMemo(
+    () => currentSeasonEpisodes.find((item) => item.episode_number === playingEpisode) || null,
+    [currentSeasonEpisodes, playingEpisode]
+  );
+
+  const airedEpisodes = useMemo(
+    () =>
+      currentSeasonEpisodes
+        .filter(hasAired)
+        .sort((a, b) => a.episode_number - b.episode_number),
+    [currentSeasonEpisodes]
+  );
+
+  const positionInSeason = airedEpisodes.findIndex(
+    (item) => item.episode_number === playingEpisode
+  );
+
+  const seasonList = useMemo(
+    () => (show?.seasons || []).filter((item) => item.season_number > 0 && item.episode_count > 0),
+    [show]
+  );
+
+  const hasPrevious =
+    positionInSeason > 0 || seasonList.some((item) => item.season_number < playingSeason);
+  const hasNext =
+    (positionInSeason >= 0 && positionInSeason < airedEpisodes.length - 1) ||
+    seasonList.some((item) => item.season_number > playingSeason);
+
+  const goToEpisode = useCallback(
+    (nextSeason, nextEpisode) => {
+      router.push(`/watchTv/${showId}/${nextSeason}/${nextEpisode}`, undefined, {
+        shallow: true,
+        scroll: false,
+      });
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    },
+    [router, showId]
+  );
+
+  const step = useCallback(
+    async (direction) => {
+      const target = positionInSeason + direction;
+      if (positionInSeason >= 0 && target >= 0 && target < airedEpisodes.length) {
+        goToEpisode(playingSeason, airedEpisodes[target].episode_number);
         return;
       }
 
-      setLoading(true);
-      setEpisodes([]);
+      // Cross into the neighbouring season, skipping ones with nothing aired.
+      const candidates =
+        direction > 0
+          ? seasonList
+              .filter((item) => item.season_number > playingSeason)
+              .sort((a, b) => a.season_number - b.season_number)
+          : seasonList
+              .filter((item) => item.season_number < playingSeason)
+              .sort((a, b) => b.season_number - a.season_number);
 
+      for (const candidate of candidates) {
+        try {
+          const { data } = await tmdbGet(`/tv/${showId}/season/${candidate.season_number}`);
+          const aired = (data.episodes || [])
+            .filter(hasAired)
+            .sort((a, b) => a.episode_number - b.episode_number);
+          if (!aired.length) continue;
+
+          const target = direction > 0 ? aired[0] : aired[aired.length - 1];
+          goToEpisode(candidate.season_number, target.episode_number);
+          return;
+        } catch (error) {
+          console.error("Error looking up the next season:", error);
+        }
+      }
+
+      toast(direction > 0 ? "That was the latest episode." : "This is the first episode.");
+    },
+    [positionInSeason, airedEpisodes, playingSeason, seasonList, showId, goToEpisode]
+  );
+
+  const selectEpisode = useCallback(
+    (nextSeason, nextEpisode) => {
+      const target = viewEpisodes.find((item) => item.episode_number === nextEpisode);
+      if (target && !hasAired(target)) {
+        toast("That episode has not aired yet.");
+        return;
+      }
+      goToEpisode(nextSeason, nextEpisode);
+    },
+    [viewEpisodes, goToEpisode]
+  );
+
+  // Local resume point (works signed out).
+  useEffect(() => {
+    if (!show?.id) return;
+    setLastEpisode(show.id, playingSeason, playingEpisode);
+    addContinueWatching({
+      id: show.id,
+      media_type: "tv",
+      title: show.name,
+      poster_path: show.poster_path,
+      backdrop_path: currentEpisode?.still_path || show.backdrop_path,
+      season: playingSeason,
+      episode: playingEpisode,
+      episodeName: currentEpisode?.name || "",
+      href: `/watchTv/${show.id}/${playingSeason}/${playingEpisode}`,
+    });
+  }, [show?.id, show?.name, show?.poster_path, show?.backdrop_path, playingSeason, playingEpisode, currentEpisode?.name, currentEpisode?.still_path]);
+
+  // Cloud history.
+  useEffect(() => {
+    if (!user?.uid || !show?.id) return;
+
+    const save = async () => {
+      const ref = doc(db, "history", user.uid);
+      const entry = {
+        tvShowId: show.id,
+        tvShowName: show.name,
+        seasonNumber: playingSeason,
+        episodeNumber: playingEpisode,
+        watchedAt: new Date().toISOString(),
+        poster_path: show.poster_path,
+      };
       try {
-        const response = await axios.get(`${BASE_URL}/tv/${id}/season/${seasonNumber}`, {
-          params: { api_key: apiKey, language: "en-US" },
-          signal: controller.signal,
-        });
-
-        if (!isLatestRequest) return;
-        setEpisodes(response.data.episodes || []);
+        const snapshot = await getDoc(ref);
+        if (!snapshot.exists()) {
+          await setDoc(ref, { movies: [], episodes: [entry] });
+          return;
+        }
+        const recent = (snapshot.data().episodes || []).slice(-10);
+        const exists = recent.some(
+          (item) =>
+            item.tvShowId === show.id &&
+            item.seasonNumber === playingSeason &&
+            item.episodeNumber === playingEpisode
+        );
+        if (!exists) await updateDoc(ref, { episodes: arrayUnion(entry) });
       } catch (error) {
-        if (error?.code === "ERR_CANCELED") return;
-        console.error("Error fetching episodes:", error);
-        if (isLatestRequest) setEpisodes([]);
-      } finally {
-        if (isLatestRequest) setLoading(false);
+        console.error("Error saving history:", error);
       }
     };
 
-    fetchEpisodes();
+    save();
+  }, [user?.uid, show?.id, show?.name, show?.poster_path, playingSeason, playingEpisode]);
+
+  // Existing show rating.
+  useEffect(() => {
+    let active = true;
+    if (!user?.uid || !showId) {
+      setRating(0);
+      return () => {
+        active = false;
+      };
+    }
+
+    getDoc(doc(db, "ratings", user.uid))
+      .then((snapshot) => {
+        if (!active) return;
+        const entry = (snapshot.exists() ? snapshot.data().episodes || [] : []).find(
+          (item) => item.tvShowId === parseInt(showId, 10)
+        );
+        setRating(entry?.rating || 0);
+      })
+      .catch(() => {});
 
     return () => {
-      isLatestRequest = false;
-      controller.abort();
+      active = false;
     };
-  }, [id, apiKey, seasonNumber]);
+  }, [user?.uid, showId]);
 
-  return { episodes, loadingEpisodes: loading };
-};
+  const saveRating = useCallback(
+    async (score) => {
+      if (!user?.uid || !show?.id) {
+        toast("Sign in to rate titles.");
+        return;
+      }
+      const previous = rating;
+      setRating(score);
 
-// --- Main Component ---
-const TVShowPlayerPage = () => {
-    const router = useRouter();
-    const { seriesID: id, season, episode } = router.query; // Get S/E from URL
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+      const entry = {
+        tvShowId: show.id,
+        tvShowName: show.name,
+        rating: score,
+        type: "tv",
+        poster_path: show.poster_path,
+        ratedAt: new Date().toISOString(),
+      };
 
-    const isRouterReady = router.isReady;
-    const validId = isRouterReady ? id || null : null;
-
-    const { tvShow, loading: loadingShow, error } = useTVShow(validId, apiKey);
-    const recommendedShows = useMemo(() => {
-        return (tvShow?.recommendations?.results || [])
-            .filter((show) => show.poster_path)
-            .slice(0, 10);
-    }, [tvShow]);
-    const cast = useMemo(() => (tvShow?.credits?.cast || []).slice(0, 6), [tvShow]);
-    const creator = useMemo(() => tvShow?.created_by?.[0] || null, [tvShow]);
-    const trailerKey = useMemo(() => {
-        const videos = tvShow?.videos?.results || [];
-        const trailer =
-            videos.find((vid) => vid.type === "Trailer" && vid.site === "YouTube") ||
-            videos.find((vid) => vid.site === "YouTube");
-
-        return trailer?.key || "";
-    }, [tvShow]);
-
-    // State for selected S/E (player state)
-    const [selectedSeason, setSelectedSeason] = useState(1);
-    const [selectedEpisode, setSelectedEpisode] = useState(1);
-
-    // Use a separate state for the modal's viewed season
-    const [modalViewSeason, setModalViewSeason] = useState(1);
-    const { episodes, loadingEpisodes } = useTVSeasonsEpisodes(
-        validId,
-        modalViewSeason, // Fetch episodes based on what modal is viewing
-        apiKey
-    );
-    const shouldFetchSelectedSeason = selectedSeason !== modalViewSeason;
-    const { episodes: fetchedSelectedSeasonEpisodes } = useTVSeasonsEpisodes(
-        validId,
-        shouldFetchSelectedSeason ? selectedSeason : null,
-        apiKey
-    );
-    const selectedSeasonEpisodes = shouldFetchSelectedSeason
-        ? fetchedSelectedSeasonEpisodes
-        : episodes;
-
-    const [rating, setRating] = useState(0);
-    const [savedRating, setSavedRating] = useState(null);
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [friends, setFriends] = useState([]);
-    const [selectedFriend, setSelectedFriend] = useState("");
-    const [showRecommend, setShowRecommend] = useState(false);
-
-    // --- NEW: Modal State ---
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-    const [isEpisodesModalOpen, setIsEpisodesModalOpen] = useState(false);
-
-    const embedSources = useMemo(() => getConfiguredEmbedSources(), []);
-    const [selectedEmbedSourceId, setSelectedEmbedSourceId] = useState(embedSources[0]?.id || "");
-    const selectedEmbedSource = useMemo(
-        () => embedSources.find((source) => source.id === selectedEmbedSourceId) || embedSources[0],
-        [embedSources, selectedEmbedSourceId]
-    );
-    const tvPlayerUrl = useMemo(
-        () => resolveEmbedSourceUrl(selectedEmbedSource, {
-            mediaType: "tv",
-            tmdbId: tvShow?.id || validId,
-            season: selectedSeason,
-            episode: selectedEpisode,
-        }),
-        [selectedEmbedSource, tvShow?.id, validId, selectedSeason, selectedEpisode]
-    );
-    const displayTVShow = tvShow || {
-    id: validId,
-    name: loadingShow ? "Loading show details..." : "TV Show",
-    overview: loadingShow
-      ? "Show details are still loading. The player is ready above."
-      : "Show details could not be loaded right now.",
-    seasons: [],
-    poster_path: "",
-    backdrop_path: "",
-  };
-  const currentUser = auth.currentUser;
-
-    // Set initial S/E from URL query params
-    useEffect(() => {
-        if (isRouterReady) {
-            const seasonNum = season ? parseInt(season) : 1;
-            const episodeNum = episode ? parseInt(episode) : 1;
-            setSelectedSeason(seasonNum);
-            setSelectedEpisode(episodeNum);
-            setModalViewSeason(seasonNum); // Sync modal view
+      try {
+        const ref = doc(db, "ratings", user.uid);
+        const snapshot = await getDoc(ref);
+        if (snapshot.exists()) {
+          const others = (snapshot.data().episodes || []).filter(
+            (item) => item.tvShowId !== show.id
+          );
+          await updateDoc(ref, { episodes: [...others, entry] });
+        } else {
+          await setDoc(ref, { episodes: [entry] });
         }
-    }, [isRouterReady, season, episode]);
+        toast.success(`Rated ${score}/10`);
+      } catch (error) {
+        console.error("Error saving rating:", error);
+        toast.error("Could not save your rating.");
+        setRating(previous);
+      }
+    },
+    [user?.uid, show?.id, show?.name, show?.poster_path, rating]
+  );
 
-    // Fetch User-Specific Data (Your logic)
-    useEffect(() => {
-        if (!currentUser || !validId) { setIsFavorite(false); setSavedRating(null); setFriends([]); return; }
-        const fetchUserData = async () => {
-            try {
-                const favoritesRef = doc(db, "favorites", currentUser.uid);
-                const favoritesDoc = await getDoc(favoritesRef);
-                setIsFavorite( favoritesDoc.exists() && (favoritesDoc.data().episodes || []).some((ep) => ep.tvShowId === parseInt(validId)) );
-                const ratingsRef = doc(db, "ratings", currentUser.uid);
-                const ratingsDoc = await getDoc(ratingsRef);
-                if (ratingsDoc.exists()) {
-                    const showRating = (ratingsDoc.data().episodes || []).find((ep) => ep.tvShowId === parseInt(validId));
-                    setSavedRating(showRating?.rating || null); setRating(showRating?.rating || 0);
-                }
-                const friendsRef = doc(db, "friends", currentUser.uid);
-                const friendsDoc = await getDoc(friendsRef);
-                if (friendsDoc.exists()) {
-                    const friendIds = friendsDoc.data().friends || [];
-                    const friendsData = await Promise.all( friendIds.map(async (friendId) => { const userRef = doc(db, "users", friendId); const userDoc = await getDoc(userRef); return userDoc.exists() ? { uid: friendId, username: userDoc.data().username } : null; }) );
-                    setFriends(friendsData.filter(Boolean));
-                }
-            } catch (error) { console.error("Error fetching user data:", error); }
-        };
-        fetchUserData();
-    }, [currentUser, validId]);
+  const cast = useMemo(() => (show?.credits?.cast || []).slice(0, 12), [show]);
+  const recommendations = useMemo(
+    () => (show?.recommendations?.results || []).filter((item) => item.poster_path).slice(0, 16),
+    [show]
+  );
 
-    // Actions (Your logic)
-    const toggleFavoriteShow = async () => {
-        if (!currentUser || !tvShow) return toast.error("Please log in or wait for show to load.");
-        const favoritesRef = doc(db, "favorites", currentUser.uid);
-        const showData = { tvShowId: tvShow.id, tvShowName: tvShow.name, poster_path: tvShow.poster_path, type: "tv", favoritedAt: new Date().toISOString() };
-        try {
-            const favoritesDoc = await getDoc(favoritesRef);
-            if (favoritesDoc.exists()) {
-                const currentEpisodes = favoritesDoc.data().episodes || [];
-                const isCurrentlyFavorite = currentEpisodes.some(ep => ep.tvShowId === tvShow.id);
-                if (isCurrentlyFavorite) {
-                    await updateDoc(favoritesRef, { episodes: currentEpisodes.filter(ep => ep.tvShowId !== tvShow.id) });
-                    toast.success(`Removed "${tvShow.name}" from favorites`); setIsFavorite(false);
-                } else {
-                    await updateDoc(favoritesRef, { episodes: arrayUnion(showData) });
-                    toast.success(`Added "${tvShow.name}" to favorites`); setIsFavorite(true);
-                }
-            } else {
-                await setDoc(favoritesRef, { episodes: [showData] });
-                toast.success(`Added "${tvShow.name}" to favorites`); setIsFavorite(true);
-            }
-        } catch (err) { console.error("Error toggling favorite:", err); toast.error("Failed to update favorites."); }
-    };
-    const handleShowRating = (newRating) => { if (!currentUser) { toast.error("Please log in to rate."); return; } setRating(newRating); saveShowRating(newRating); };
-    const saveShowRating = async (newRating) => {
-        if (!currentUser || !tvShow) return;
-        const ratingsRef = doc(db, "ratings", currentUser.uid);
-        const ratingData = { tvShowId: tvShow.id, tvShowName: tvShow.name, rating: newRating, type: "tv", poster_path: tvShow.poster_path, ratedAt: new Date().toISOString() };
-        try {
-            const ratingsDoc = await getDoc(ratingsRef);
-            if (ratingsDoc.exists()) {
-                const currentEpisodes = ratingsDoc.data().episodes || [];
-                const existingIndex = currentEpisodes.findIndex(ep => ep.tvShowId === tvShow.id);
-                if (existingIndex >= 0) { const updatedEpisodes = [...currentEpisodes]; updatedEpisodes[existingIndex] = ratingData; await updateDoc(ratingsRef, { episodes: updatedEpisodes });
-                } else { await updateDoc(ratingsRef, { episodes: arrayUnion(ratingData) }); }
-            } else { await setDoc(ratingsRef, { episodes: [ratingData] }); }
-            setSavedRating(newRating); toast.success(`Rated "${tvShow.name}" ${newRating}/10`);
-        } catch (err) { console.error("Error saving rating:", err); toast.error("Failed to save rating."); setRating(savedRating || 0); }
-    };
-    const recommendShow = async () => {
-        if (!currentUser) { toast.error("Please log in."); return; } if (!selectedFriend) { toast.error("Please select a friend."); return; } if (!tvShow) { toast.error("Show data not loaded."); return; }
-        const recommendationRef = doc(db, "recommendations", selectedFriend);
-        const episodeData = { tvShowId: tvShow.id, tvShowName: tvShow.name, poster_path: tvShow.poster_path, recommendedBy: currentUser.uid, recommendedByUsername: currentUser.displayName || "Anonymous", recommendedAt: new Date().toISOString(), type: "tv" };
-        try {
-            await setDoc(recommendationRef, { episodes: arrayUnion(episodeData) }, { merge: true });
-            const friend = friends.find((f) => f.uid === selectedFriend);
-            toast.success( `Recommended "${tvShow.name}" to ${friend?.username || "friend"}` );
-            setSelectedFriend(""); setShowRecommend(false);
-        } catch (error) { console.error("Error recommending show:", error); toast.error("Failed to send recommendation."); }
-    };
-
-    // Save to History (Your logic)
-    useEffect(() => {
-        const saveToHistory = async () => {
-            if (!currentUser || !tvShow || !selectedSeason || !selectedEpisode || selectedEpisode === 0) return;
-            const historyRef = doc(db, "history", currentUser.uid);
-            const episodeData = { tvShowId: tvShow.id, tvShowName: tvShow.name, seasonNumber: selectedSeason, episodeNumber: selectedEpisode, watchedAt: new Date().toISOString(), poster_path: tvShow.poster_path };
-            try {
-                const historyDoc = await getDoc(historyRef);
-                if (historyDoc.exists()) {
-                    const recentEpisodes = (historyDoc.data().episodes || []).slice(-10);
-                    const alreadyExists = recentEpisodes.some((e) => e.tvShowId === tvShow.id && e.seasonNumber === selectedSeason && e.episodeNumber === selectedEpisode);
-                    if (!alreadyExists) await updateDoc(historyRef, { episodes: arrayUnion(episodeData) });
-                } else { await setDoc(historyRef, { movies: [], episodes: [episodeData] }); }
-            } catch (err) { console.error("Error saving episode to history:", err); }
-        };
-        if (selectedEpisode && selectedEpisode > 0) saveToHistory();
-    }, [tvShow, selectedSeason, selectedEpisode, currentUser]);
-
-    const isEpisodeReleased = useCallback((ep) => {
-        if (!ep?.air_date) return true;
-        return new Date(ep.air_date).getTime() <= Date.now();
-    }, []);
-
-    const goToEpisode = useCallback((seasonNumber, episodeNumber) => {
-        setSelectedSeason(seasonNumber);
-        setSelectedEpisode(episodeNumber);
-        setModalViewSeason(seasonNumber);
-        router.push(`/watchTv/${id}/${seasonNumber}/${episodeNumber}`, undefined, { shallow: true });
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, [router, id]);
-
-    const playableEpisodesInSeason = useMemo(() => {
-        return (selectedSeasonEpisodes || [])
-            .filter(isEpisodeReleased)
-            .sort((a, b) => a.episode_number - b.episode_number);
-    }, [selectedSeasonEpisodes, isEpisodeReleased]);
-
-    const currentEpisodeDetails = useMemo(() => {
-        return (selectedSeasonEpisodes || []).find((ep) => ep.episode_number === selectedEpisode) || null;
-    }, [selectedSeasonEpisodes, selectedEpisode]);
-
-    const isCurrentEpisodeReleased = currentEpisodeDetails ? isEpisodeReleased(currentEpisodeDetails) : true;
-
-    // --- Episode Click Handler (UPDATED) ---
-    const handleEpisodeClick = (episodeNumber, seasonNumber = selectedSeason) => {
-        const targetEpisode = (seasonNumber === selectedSeason ? selectedSeasonEpisodes : episodes)
-            ?.find((ep) => ep.episode_number === episodeNumber);
-        if (targetEpisode && !isEpisodeReleased(targetEpisode)) {
-            toast.error("This episode has not aired yet.");
-            return;
-        }
-        goToEpisode(seasonNumber, episodeNumber);
-    };
-
-    const navigateToAdjacentEpisode = async (direction) => {
-        if (!tvShow || !validId || !apiKey) return;
-
-        const currentIndex = playableEpisodesInSeason.findIndex((ep) => ep.episode_number === selectedEpisode);
-
-        if (direction === "next" && currentIndex >= 0 && currentIndex < playableEpisodesInSeason.length - 1) {
-            goToEpisode(selectedSeason, playableEpisodesInSeason[currentIndex + 1].episode_number);
-            return;
-        }
-
-        if (direction === "prev" && currentIndex > 0) {
-            goToEpisode(selectedSeason, playableEpisodesInSeason[currentIndex - 1].episode_number);
-            return;
-        }
-
-        const candidateSeasons = (tvShow.seasons || [])
-            .filter((s) => s.season_number > 0 && s.episode_count > 0)
-            .sort((a, b) => a.season_number - b.season_number);
-
-        const orderedCandidates = direction === "next"
-            ? candidateSeasons.filter((s) => s.season_number > selectedSeason)
-            : candidateSeasons.filter((s) => s.season_number < selectedSeason).reverse();
-
-        for (const seasonMeta of orderedCandidates) {
-            try {
-                const response = await axios.get(`${BASE_URL}/tv/${validId}/season/${seasonMeta.season_number}`, {
-                    params: { api_key: apiKey, language: "en-US" },
-                });
-
-                const releasedEpisodes = (response.data.episodes || [])
-                    .filter(isEpisodeReleased)
-                    .sort((a, b) => a.episode_number - b.episode_number);
-
-                if (!releasedEpisodes.length) {
-                    continue;
-                }
-
-                const target = direction === "next"
-                    ? releasedEpisodes[0]
-                    : releasedEpisodes[releasedEpisodes.length - 1];
-                goToEpisode(seasonMeta.season_number, target.episode_number);
-                return;
-            } catch (navError) {
-                console.error("Could not fetch adjacent season episodes:", navError);
-            }
-        }
-
-        toast(direction === "next" ? "You are at the latest released episode." : "You are at the earliest released episode.");
-    };
-
-    // --- Season Change Handler (UPDATED) ---
-    const handleSeasonChange = (seasonNum) => {
-        setModalViewSeason(seasonNum); // Change season *viewed in modal*
-        // Update URL to S/E 1 of new season
-        router.push(`/watchTv/${id}/${seasonNum}/1`, undefined, { shallow: true });
-        setSelectedSeason(seasonNum);
-        setSelectedEpisode(1);
-        // Don't close modal, just update the episode list
-    };
-
-    // --- Click handler for recommendation card ---
-    const handleRecClick = (recShowId) => {
-        router.push(`/watchTv/${recShowId}/1/1`); // Navigate to TV player page
-    };
-
-
-    // --- Render States ---
-    if (!isRouterReady) { return ( <div className="min-h-screen mt-16 bg-primary flex items-center justify-center"> <NavBar /> <Mosaic color="#DAA520" size="medium" /> </div> ); }
-    if (!validId) { return ( <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center"> <h2 className="text-2xl text-yellow-500 mb-4">TV Show Not Found</h2> <p className="text-textsecondary mb-6">No TV show was selected.</p> <button onClick={() => router.push("/home")} className="bg-accent hover:bg-accent-hover text-primary font-semibold py-2 px-6 rounded-lg transition-colors"> Go to Home </button> </div> <Footer /> </div> ); }
-
-    // --- Main Render (UPDATED) ---
+  if (router.isReady && !showId) {
     return (
-        <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins selection:bg-accent/30">
-            <Head>
-                <title>{tvShow ? `${tvShow.name} (S${selectedSeason} E${selectedEpisode}) - StreamSynx` : 'TV Show Details - StreamSynx'}</title>
-                <meta name="description" content={tvShow?.overview ? tvShow.overview.substring(0, 160) + '...' : 'Discover details about TV shows on StreamSynx.'} />
-            </Head>
-            <Toaster position="bottom-center" toastOptions={{ className: "bg-secondary/90 text-textprimary backdrop-blur-md border border-white/10" }} />
-            <NavBar />
-
-            {/* Cinematic Backdrop */}
-            {displayTVShow.backdrop_path && (
-                <div className="absolute top-0 left-0 w-full h-[80vh] -z-10 overflow-hidden" aria-hidden="true">
-                    <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10" />
-                    <img src={`${IMAGE_BASE_URL_ORIGINAL}${displayTVShow.backdrop_path}`} alt="" className="w-full h-full object-cover opacity-30 blur-2xl scale-110"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent z-20"></div>
-                </div>
-            )}
-
-            <main className="flex-1 w-full pt-20 md:pt-24 pb-12 flex flex-col">
-                {/* Contained Player Section */}
-                <section className="w-full max-w-[1800px] mx-auto px-4 md:px-32 relative z-30">
-                    <div className="tv-focusable tv-player-frame w-full aspect-video relative group rounded-2xl overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10 focus:border-accent"
-              role="region"
-              tabIndex={0}
-              aria-label="Video player">
-                        <iframe
-                            key={`${validId}-${selectedSeason}-${selectedEpisode}`}
-                            src={tvPlayerUrl}
-                            frameBorder="0"
-                            allowFullScreen
-                            className="tv-player-iframe w-full h-full absolute inset-0"
-                            title={`${displayTVShow.name} Player - S${selectedSeason} E${selectedEpisode}`}
-                  tabIndex={0}
-                        ></iframe>
-                    </div>
-                </section>
-
-                {/* Content Container below player */}
-                <div className="max-w-7xl mx-auto w-full px-4 md:px-8 mt-6 md:mt-8 space-y-8 md:space-y-12">
-                    
-                    {/* Now Playing & Action Bar */}
-                    <section className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
-                        <div className="flex-1">
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1.5">
-                                <span className="section-label text-accent">Now Playing</span>
-                                <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">{displayTVShow.name}</h1>
-                                <p className="text-sm md:text-base text-textsecondary font-medium">
-                                    <span className="text-textprimary">Season {selectedSeason} • Episode {selectedEpisode}</span>
-                                    {currentEpisodeDetails?.name && <span className="hidden sm:inline"> • {currentEpisodeDetails.name}</span>}
-                                </p>
-                            </motion.div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 bg-secondary/40 backdrop-blur-md p-1 rounded-2xl border border-white/[0.06]">
-                                <button onClick={() => navigateToAdjacentEpisode("prev")} className="action-btn" title="Previous Episode">
-                                    <FaChevronLeft className="w-3.5 h-3.5" /> <span className="hidden sm:block">Prev</span>
-                                </button>
-                                <div className="w-px h-5 bg-white/10"></div>
-                                <button onClick={() => navigateToAdjacentEpisode("next")} className="action-btn-primary" title="Next Episode">
-                                    <span className="hidden sm:block">Next</span> <FaChevronRight className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                                <button onClick={toggleFavoriteShow} disabled={!tvShow} className={`action-btn ${isFavorite ? "text-accent bg-accent/10 border border-accent/20" : ""} ${!tvShow ? "opacity-60" : ""}`} title="Favorite">
-                                    {isFavorite ? <FaHeart className="w-4 h-4" /> : <FaRegHeart className="w-4 h-4" />}
-                                </button>
-                                <button onClick={() => tvShow ? setShowRecommend(!showRecommend) : toast.error("Show details are still loading.")} disabled={!tvShow} className="action-btn disabled:opacity-60" title="Share">
-                                    <FaShareAlt className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </motion.div>
-                    </section>
-
-                    {(loadingShow || error) && (
-              <p className={`text-sm ${error ? "text-red-300" : "text-textsecondary"}`}>
-                {loadingShow ? "Loading show details..." : `Show details could not be loaded: ${error}`}
-              </p>
-            )}
-
-            {/* Quick Recommend Dropdown */}
-                    <AnimatePresence>
-                        {showRecommend && (
-                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-4 flex gap-3 max-w-md ml-auto relative z-40">
-                                <select value={selectedFriend} onChange={(e) => setSelectedFriend(e.target.value)} className="tv-focusable flex-1 bg-primary/50 text-sm rounded-lg border-none focus:ring-1 focus:ring-accent p-2.5">
-                                    <option value="">Select buddy to recommend...</option>
-                                    {friends.map((friend) => ( <option key={friend.uid} value={friend.uid}>{friend.username}</option> ))}
-                                </select>
-                                <button onClick={recommendShow} disabled={!selectedFriend} className="action-btn-primary px-5 disabled:opacity-50">Send</button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Inline Episodes Strip */}
-                    <section className="space-y-4">
-                        <div className="flex items-end justify-between">
-                            <h2 className="text-xl font-semibold text-white">Episodes</h2>
-                            
-                            {/* Inline Season Selector */}
-                            <div className="relative group">
-                                <select 
-                                    value={modalViewSeason} 
-                                    onChange={(e) => handleSeasonChange(Number(e.target.value))}
-                                    className="tv-focusable appearance-none bg-secondary/50 border border-white/10 hover:border-white/20 text-sm text-textprimary py-1.5 pl-4 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                                >
-                                    {(displayTVShow.seasons || []).filter(s => s.season_number !== 0).map(s => (
-                                        <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
-                                    ))}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-textsecondary group-hover:text-textprimary transition-colors">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {loadingEpisodes ? (
-                            <div className="h-40 flex items-center justify-center bg-secondary/20 rounded-xl"><Mosaic color="#DAA520" size="small" /></div>
-                        ) : episodes && episodes.length > 0 ? (
-                            <div className="flex overflow-x-auto gap-4 pb-4 episode-strip snap-x">
-                                {episodes.map((ep) => (
-                                    <div key={ep.id} className="snap-start">
-                                        <EpisodeCard
-                                            compact={true}
-                                            episode={ep}
-                                            showId={displayTVShow.id}
-                                            seasonNumber={modalViewSeason}
-                                            isSelected={selectedEpisode === ep.episode_number && selectedSeason === modalViewSeason}
-                                            isAvailable={isEpisodeReleased(ep)}
-                                            onWatchClick={() => handleEpisodeClick(ep.episode_number, modalViewSeason)}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="py-8 text-center text-textsecondary bg-secondary/20 rounded-xl border border-white/5">No episodes available for this season.</div>
-                        )}
-                    </section>
-
-                    <EmbeddedSourceSelector
-                        sources={embedSources}
-                        selectedSourceId={selectedEmbedSource?.id}
-                        mediaType="tv"
-                        onSelect={setSelectedEmbedSourceId}
-                    />
-                    {/* Inline Details Section */}
-                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8 border-t border-white/[0.06]">
-                        {/* Poster & Rating */}
-                        <div className="col-span-1 flex gap-6 lg:flex-col lg:gap-4">
-                            <img src={displayTVShow.poster_path ? `${IMAGE_BASE_URL_W500}${displayTVShow.poster_path}` : "/placeholder.jpg"} alt={displayTVShow.name} className="w-32 lg:w-full rounded-xl shadow-xl aspect-[2/3] object-cover border border-white/10" />
-                            <div className="flex-1 glass-card p-4 flex flex-col justify-center items-center gap-2">
-                                <span className="text-xs text-textsecondary font-medium">Your Rating</span>
-                                <div className="flex items-center gap-1.5">
-                                    {[...Array(5)].map((_, i) => (
-                                        <button key={i} onClick={() => handleShowRating((i + 1) * 2)} className="text-xl transition-transform hover:scale-110 active:scale-95">
-                                            {(i + 1) * 2 <= rating ? <FaStar className="text-accent drop-shadow-[0_0_8px_rgba(218,165,32,0.5)]" /> : <FaRegStar className="text-textsecondary/50 hover:text-textsecondary" />}
-                                        </button>
-                                    ))}
-                                </div>
-                                {savedRating && <span className="text-[10px] uppercase font-bold text-accent tracking-wider mt-1">{savedRating} / 10</span>}
-                            </div>
-                        </div>
-
-                        {/* Info & Cast */}
-                        <div className="col-span-1 lg:col-span-2 space-y-6">
-                            <div>
-                                <h3 className="text-xl font-semibold mb-3 text-white">Overview</h3>
-                                <p className="text-textsecondary leading-relaxed text-sm md:text-base">{displayTVShow.overview}</p>
-                            </div>
-                            
-                            {cast.length > 0 && (
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4 text-white">Top Cast</h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                        {cast.slice(0, 4).map(actor => (
-                                            <div key={actor.cast_id} className="flex items-center gap-3 bg-secondary/30 p-2 rounded-xl border border-white/[0.03]">
-                                                <img src={actor.profile_path ? `${IMAGE_BASE_URL_W185}${actor.profile_path}` : "/placeholder.jpg"} alt={actor.name} className="w-12 h-12 rounded-full object-cover shadow-inner" />
-                                                <div className="min-w-0">
-                                                    <p className="text-sm font-medium text-white truncate">{actor.name}</p>
-                                                    <p className="text-[11px] text-textsecondary truncate">{actor.character}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Recommendations */}
-                    {recommendedShows.length > 0 && (
-                        <section className="pt-8 border-t border-white/[0.06]">
-                            <h2 className="text-xl font-semibold mb-4 text-white">More Like This</h2>
-                            <div className="flex overflow-x-auto gap-4 pb-4 custom-scrollbar">
-                                {recommendedShows.map((recShow) => (
-                                    <div key={recShow.id} className="flex-shrink-0 w-40 md:w-48">
-                                        <SearchCard movie={{ ...recShow, media_type: "tv", poster_path: `${IMAGE_BASE_URL_W500}${recShow.poster_path}` }} onClick={() => router.push(`/watchTv/${recShow.id}/1/1`)} />
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-                </div>
-            </main>
-            <Footer />
+      <div className="flex min-h-screen flex-col bg-primary text-textprimary">
+        <NavBar />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">No series selected</h1>
+          <Link href="/" className="btn-primary">
+            Browse titles
+          </Link>
         </div>
+        <Footer />
+      </div>
     );
+  }
+
+  const title = show?.name || (loadingShow ? "Loading…" : "Series");
+  const episodeLabel = `S${playingSeason} · E${playingEpisode}`;
+
+  return (
+    <div className="flex min-h-screen flex-col bg-primary text-textprimary">
+      <Head>
+        <title>{show ? `${show.name} — ${episodeLabel} — StreamSynx` : "Watch — StreamSynx"}</title>
+        <meta
+          name="description"
+          content={show?.overview ? `${show.overview.substring(0, 155)}…` : "Watch on StreamSynx."}
+        />
+      </Head>
+
+      <NavBar />
+
+      {show?.backdrop_path && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] overflow-hidden" aria-hidden="true">
+          <img
+            src={backdropUrl(show.backdrop_path)}
+            alt=""
+            className="h-full w-full scale-110 object-cover opacity-20 blur-3xl"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/85 to-primary" />
+        </div>
+      )}
+
+      <main className="relative z-10 flex-1 px-4 pb-16 pt-20 sm:px-6 lg:px-10 lg:pt-24">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-10">
+            {/* Player + details */}
+            <div className="space-y-8">
+              <PlayerShell
+                mediaType="tv"
+                tmdbId={showId}
+                season={playingSeason}
+                episode={playingEpisode}
+                title={`${title} ${episodeLabel}`}
+                episodeLabel={currentEpisode?.name ? `Now: ${currentEpisode.name}` : episodeLabel}
+                onPrevious={() => step(-1)}
+                onNext={() => step(1)}
+                hasPrevious={hasPrevious}
+                hasNext={hasNext}
+              />
+
+              <section className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0">
+                  <p className="section-label text-accent">Now playing</p>
+                  <h1 className="mt-1.5 text-2xl font-semibold tracking-tighter text-textprimary md:text-4xl">
+                    {title}
+                  </h1>
+                  <p className="mt-2 text-[13px] text-textsecondary">
+                    <span className="font-medium text-textprimary">
+                      Season {playingSeason} · Episode {playingEpisode}
+                    </span>
+                    {currentEpisode?.name ? ` — ${currentEpisode.name}` : ""}
+                  </p>
+                  {(show?.genres || []).length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {show.genres.slice(0, 4).map((genre) => (
+                        <span key={genre.id} className="chip py-1">
+                          {genre.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {show && (
+                  <MediaActions
+                    media={{
+                      id: show.id,
+                      type: "tv",
+                      title: show.name,
+                      poster_path: show.poster_path,
+                    }}
+                  />
+                )}
+              </section>
+
+              <section
+                id="details"
+                className="grid grid-cols-1 gap-8 border-t border-white/[0.06] pt-8 lg:grid-cols-[200px_minmax(0,1fr)]"
+              >
+                <div className="flex gap-5 lg:flex-col">
+                  <img
+                    src={posterUrl(show?.poster_path) || "/placeholder.jpg"}
+                    alt=""
+                    className="w-28 shrink-0 rounded-xl border border-white/[0.08] object-cover shadow-card lg:w-full"
+                  />
+                  <div className="surface flex flex-1 items-center justify-center p-4">
+                    <RatingStars value={rating} onRate={saveRating} />
+                  </div>
+                </div>
+
+                <div className="space-y-7">
+                  <div>
+                    <h2 className="mb-2.5 text-[13px] font-semibold uppercase tracking-[0.14em] text-textsecondary">
+                      {currentEpisode?.overview ? "This episode" : "About the series"}
+                    </h2>
+                    <p className="max-w-3xl text-[15px] leading-relaxed text-textsecondary">
+                      {currentEpisode?.overview || show?.overview || "No description available."}
+                    </p>
+                  </div>
+
+                  <CastRow cast={cast} />
+                </div>
+              </section>
+            </div>
+
+            {/* Episode browser */}
+            <aside className="lg:sticky lg:top-24 lg:self-start">
+              <EpisodeBrowser
+                showId={showId}
+                seasons={show?.seasons || []}
+                episodes={viewEpisodes}
+                loading={loadingEpisodes || loadingShow}
+                viewSeason={viewSeason}
+                playingSeason={playingSeason}
+                playingEpisode={playingEpisode}
+                onSeasonChange={setViewSeason}
+                onSelectEpisode={selectEpisode}
+              />
+            </aside>
+          </div>
+
+          {recommendations.length > 0 && (
+            <section className="mt-12 border-t border-white/[0.06] pt-8">
+              <div className="-mx-4 sm:-mx-6 lg:-mx-10">
+                <Rail title="More like this">
+                  {recommendations.map((item) => (
+                    <MovieCard key={item.id} movie={{ ...item, media_type: "tv" }} />
+                  ))}
+                </Rail>
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
 };
 
-
-export default TVShowPlayerPage;
-
-
+export default EpisodePage;
