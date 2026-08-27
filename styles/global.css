@@ -200,3 +200,15 @@ select option {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Auth-page poster wall */
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+@keyframes marquee-down {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+.marquee-up { animation: marquee-up 70s linear infinite; }
+.marquee-down { animation: marquee-down 70s linear infinite; }

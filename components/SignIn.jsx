@@ -1,105 +1,138 @@
-// components/SignIn.js
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { FcGoogle } from "react-icons/fc";
-import { auth, db } from "../firebase"; // Adjust path
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import toast from "react-hot-toast";
 import AuthForm from "./AuthForm";
-import toast from 'react-hot-toast';
+import { auth } from "../firebase";
+import { ensureUserProfile } from "../lib/userProfile";
 
-export default function SignIn({ setIsSignUp }) {
+const messageForError = (error) => {
+  switch (error.code) {
+    case "auth/invalid-credential":
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+      return "Incorrect email or password.";
+    case "auth/invalid-email":
+      return "That email address does not look right.";
+    case "auth/user-disabled":
+      return "This account has been disabled.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Try again later or reset your password.";
+    default:
+      return "Sign in failed. Please try again.";
+  }
+};
+
+export default function SignIn({ redirectTo = "/" }) {
   const router = useRouter();
-  const [errorLabel, setErrorLabel] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setErrorLabel(false); setErrorMessage(""); setIsLoading(true);
+  const handleSignIn = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setIsLoading(true);
 
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-
-    if (!email || !password) {
-      setErrorLabel(true); setErrorMessage("Email and password are required.");
-      setIsLoading(false); return;
-    }
+    const email = event.target.email.value.trim();
+    const password = event.target.password.value;
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Signed in successfully!");
-      router.push("/home");
-    } catch (authError) {
-      console.error("Authentication error:", authError.code, authError.message);
-      handleAuthError(authError); // Call updated handler
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Welcome back");
+      router.replace(redirectTo);
+    } catch (error) {
+      setErrorMessage(messageForError(error));
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // Google Sign In (keep as is)
   const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider(); setIsLoading(true);
+    setIsLoading(true);
     try {
-        const result = await signInWithPopup(auth, provider); const user = result.user; const userDocRef = doc(db, "users", user.uid); const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists()) { const potentialUsername = user.displayName?.replace(/\s+/g, '') || user.email.split("@")[0]; const usernameQuery = query(collection(db, "users"), where("username_lowercase", "==", potentialUsername.toLowerCase())); const usernameSnapshot = await getDocs(usernameQuery); const finalUsername = usernameSnapshot.empty ? potentialUsername : `${potentialUsername}${Math.floor(Math.random() * 1000)}`; await setDoc(userDocRef, { uid: user.uid, username: finalUsername, username_lowercase: finalUsername.toLowerCase(), email: user.email, avatar: user.photoURL || null, createdAt: new Date().toISOString() }); await setDoc(doc(db, "friends", user.uid), { friends: [] }); await setDoc(doc(db, "favorites", user.uid), { movies: [], shows: [], episodes: [] }); await setDoc(doc(db, "history", user.uid), { movies: [], episodes: [] }); await setDoc(doc(db, "watchlists", user.uid), { items: [] }); await setDoc(doc(db, "recommendations", user.uid), { recommendations: [] }); toast.success(`Welcome, ${finalUsername}! Profile created.`);
-        } else { toast.success(`Welcome back, ${userDoc.data().username}!`); }
-        router.push("/home");
-    } catch (error) { console.error("Google sign-in error:", error); toast.error(`Google Sign-In failed: ${error.message || 'Please try again.'}`); // More robust error message
-    } finally { setIsLoading(false); }
-};
-
-  // --- UPDATED ERROR HANDLER ---
-  const handleAuthError = (error) => {
-    setErrorLabel(true); // Ensure error label is shown
-    switch (error.code) {
-      case "auth/invalid-credential": // Covers wrong email/password
-      case "auth/user-not-found":     // Fallback if older SDK/specific error
-      case "auth/wrong-password":     // Fallback
-        setErrorMessage("Incorrect email or password. Please try again.");
-        break;
-      case "auth/invalid-email":
-        setErrorMessage("Invalid email format.");
-        break;
-      // --- ADDED CASE ---
-      case "auth/user-disabled":
-        setErrorMessage("This account has been disabled.");
-        break;
-      // --- END ADDED CASE ---
-      case "auth/too-many-requests":
-         setErrorMessage("Too many attempts. Account temporarily locked. Please try again later or reset your password.");
-         break;
-      default: // Catch-all for other auth errors
-        setErrorMessage("Sign in failed. An unexpected error occurred.");
-        console.error(`Unhandled Sign In Error (${error.code}):`, error.message);
+      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+      const { username } = await ensureUserProfile(user);
+      toast.success(`Welcome, ${username}`);
+      router.replace(redirectTo);
+    } catch (error) {
+      if (error.code !== "auth/popup-closed-by-user") {
+        toast.error("Google sign-in failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
-  // --- END UPDATED ERROR HANDLER ---
+
+  const handleResetPassword = async () => {
+    const email = document.getElementById("email")?.value?.trim();
+    if (!email) {
+      setErrorMessage("Enter your email address first, then tap reset.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Password reset email sent.");
+    } catch {
+      toast.error("Could not send a reset email for that address.");
+    }
+  };
 
   return (
-    // Themed container
-    <div className="flex flex-col items-center justify-center w-full h-full p-4">
-      {/* Themed Title */}
-      <h1 className="text-3xl font-bold text-textprimary mb-6 font-poppins">SIGN IN</h1>
+    <div className="space-y-5">
       <AuthForm
         onSubmit={handleSignIn}
-        fields={[ { name: "email", type: "email", placeholder: "Email Address" }, { name: "password", type: "password", placeholder: "Password" } ]}
-        buttonText="Sign In"
-        errorLabel={errorLabel}
+        fields={[
+          {
+            name: "email",
+            type: "email",
+            label: "Email",
+            placeholder: "you@example.com",
+            autoComplete: "email",
+          },
+          {
+            name: "password",
+            type: "password",
+            label: "Password",
+            placeholder: "Your password",
+            autoComplete: "current-password",
+          },
+        ]}
+        buttonText="Sign in"
         errorMessage={errorMessage}
         isLoading={isLoading}
       />
-      <div className="my-4 text-center text-textsecondary text-xs w-full max-w-sm">OR</div>
-      {/* Themed Google Button */}
-      <button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full max-w-sm bg-secondary text-textprimary py-3 rounded-md mb-4 border border-secondary-light font-poppins flex items-center justify-center gap-2 hover:bg-secondary-light disabled:opacity-70 transition-colors">
-        <FcGoogle className="text-xl" /> Continue With Google
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleResetPassword}
+          className="text-[12px] text-textsecondary transition-colors hover:text-accent"
+        >
+          Forgot password?
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.16em] text-textsecondary/70">
+        <span className="h-px flex-1 bg-white/[0.08]" />
+        or
+        <span className="h-px flex-1 bg-white/[0.08]" />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={isLoading}
+        className="btn-ghost h-12 w-full"
+      >
+        <FcGoogle className="h-5 w-5" />
+        Continue with Google
       </button>
-      {/* Themed Switch Link */}
-      <p className="text-textsecondary font-poppins text-sm">
-        Don’t have an account?{" "}
-        <button className="text-accent hover:text-accent-hover font-semibold underline" onClick={() => setIsSignUp(true)}> Sign Up </button>
-      </p>
     </div>
   );
 }
