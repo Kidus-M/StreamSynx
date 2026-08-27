@@ -3,11 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthLayout from "../components/AuthLayout";
 import SignIn from "../components/SignIn";
-import { useAuth } from "../lib/auth";
-
-/** Where to land after signing in: `?next=` if it is a safe internal path. */
-export const safeNext = (next) =>
-  typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+import { safeNext, useAuth } from "../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();

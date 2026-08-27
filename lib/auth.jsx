@@ -34,6 +34,11 @@ export function loginHref(returnTo) {
   return `/login?next=${encodeURIComponent(returnTo)}`;
 }
 
+/** Where to land after signing in: `?next=` only when it is a safe internal path. */
+export function safeNext(next) {
+  return typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+}
+
 /** Redirects guests to the login page once auth has resolved. */
 export function useRequireAuth() {
   const { user, loading } = useAuth();

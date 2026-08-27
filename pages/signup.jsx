@@ -3,8 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthLayout from "../components/AuthLayout";
 import SignUpForm from "../components/SignUp";
-import { useAuth } from "../lib/auth";
-import { safeNext } from "./login";
+import { safeNext, useAuth } from "../lib/auth";
 
 export default function SignUpPage() {
   const router = useRouter();
