@@ -1,6 +1,6 @@
 // pages/buddies.js (or wherever it resides)
 import React, { useState, useEffect, useCallback } from "react";
-import { auth, db } from "../../firebase"; // Assuming firebase config is correct
+import { db } from "../../firebase";
 import NavBar from "../../components/NavBar"; // Assuming NavBar component exists
 import {
   doc,
@@ -17,7 +17,8 @@ import {
   onSnapshot,
   limit,
 } from "firebase/firestore";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { useAuth } from "../../lib/auth";
 import { Mosaic } from "react-loading-indicators";
 import { useRouter } from "next/router";
 import {
@@ -165,7 +166,8 @@ const BuddiesPage = () => {
   const [interactionLoading, setInteractionLoading] = useState({});
   const [activeTab, setActiveTab] = useState("friends");
 
-  const userId = auth.currentUser?.uid;
+  const { user: currentUser } = useAuth();
+  const userId = currentUser?.uid;
   const router = useRouter();
 
   // Data Fetching (Keep as is, uses onSnapshot)
@@ -551,10 +553,6 @@ const BuddiesPage = () => {
   return (
     // Themed background and text
     <div className="min-h-screen bg-primary text-textprimary font-poppins">
-      <toaster
-        position="bottom-center"
-        toastOptions={{ className: "bg-secondary text-textprimary" }}
-      />
       <NavBar />
       {/* Adjusted padding and max-width */}
       <main className="pt-20 pb-12 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">

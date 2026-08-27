@@ -113,7 +113,7 @@ const EventCard = ({ movie }) => {
           {/* Watch Party Button */}
           <motion.button
             className="mt-6 px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-all max-lg:px-6 max-lg:py-2"
-            onClick={() => router.push(`/movie/${movie.id}/watch-party`)}
+            onClick={() => router.push("/rooms")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
