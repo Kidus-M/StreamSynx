@@ -1,285 +1,330 @@
-// pages/profile.js (or wherever your profile page is)
-import React, { useEffect, useState } from "react";
-import NavBar from "../../components/NavBar"; // Adjust path
-import Footer from "../../components/Footer"; // Adjust path (Add Footer if missing)
-import { auth, db } from "../../firebase"; // Adjust path
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
-import StatsCard from "../../components/StatsCard"; // Adjust path
-import { Mosaic } from "react-loading-indicators";
-import toast from 'react-hot-toast';
-import { loginHref, useAuth } from '../../lib/auth';
-import { FaEdit, FaSave, FaSignOutAlt } from "react-icons/fa"; // Icons
 import { motion } from "framer-motion";
-// Genre Map (Ensure this covers IDs present in your data, including TV genres)
-const genreMap = {
-    28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
-    99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
-    27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", // Abbreviated
-    10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western",
-    // Common TV Genres (add more as needed)
-    10759: "Action & Adventure", 10762: "Kids", 10763: "News", 10764: "Reality",
-    10765: "Sci-Fi & Fantasy", 10766: "Soap", 10767: "Talk", 10768: "War & Politics",
+import toast from "react-hot-toast";
+import { FiEdit2, FiCheck, FiLogOut, FiX } from "react-icons/fi";
+import PageShell from "../../components/PageShell";
+import { auth, db } from "../../firebase";
+import { loginHref, useAuth } from "../../lib/auth";
+import { tmdbGet } from "../../lib/tmdb";
+
+const EMPTY_STATS = {
+  buddies: 0,
+  moviesWatched: 0,
+  episodesWatched: 0,
+  favoriteMovies: 0,
+  favoriteShows: 0,
+  watchlist: 0,
 };
 
+/** How many titles to look up when working out favourite genres. */
+const GENRE_SAMPLE = 12;
+
+/**
+ * History entries only store id/title/poster, so genres have to come from TMDB.
+ * We sample the most recent titles and tally the genres they belong to.
+ */
+const computeTopGenres = async ({ movieIds, showIds }) => {
+  const requests = [
+    ...movieIds.slice(0, GENRE_SAMPLE).map((id) => tmdbGet(`/movie/${id}`)),
+    ...showIds.slice(0, GENRE_SAMPLE).map((id) => tmdbGet(`/tv/${id}`)),
+  ];
+  if (!requests.length) return [];
+
+  const responses = await Promise.allSettled(requests);
+  const counts = new Map();
+
+  responses.forEach((response) => {
+    if (response.status !== "fulfilled") return;
+    (response.value.data?.genres || []).forEach((genre) => {
+      if (!genre?.name) return;
+      counts.set(genre.name, (counts.get(genre.name) || 0) + 1);
+    });
+  });
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([name, count]) => ({ name, count }));
+};
+
+const StatTile = ({ label, value }) => (
+  <div className="surface p-4">
+    <p className="text-[11px] uppercase tracking-[0.14em] text-textsecondary">{label}</p>
+    <p className="mt-1.5 text-2xl font-semibold tracking-tight text-textprimary tabular-nums">
+      {value}
+    </p>
+  </div>
+);
 
 export default function Profile() {
-  const [userData, setUserData] = useState(null); // Renamed from 'user' to avoid conflict
-  const [stats, setStats] = useState({
-    buddies: 0, moviesWatched: 0, episodesWatched: 0, topGenre: "N/A", // Default N/A
-    favoriteMovies: 0, favoriteEpisodes: 0, favoriteShows: 0 // Added favoriteShows
-  });
-  const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState(null); // Add error state
   const router = useRouter();
   const { user: currentUser, loading: authLoading } = useAuth();
 
+  const [userData, setUserData] = useState(null);
+  const [stats, setStats] = useState(EMPTY_STATS);
+  const [topGenres, setTopGenres] = useState([]);
+  const [genresLoading, setGenresLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    const fetchUserDataAndStats = async () => {
-        if (authLoading) return;
-        setLoading(true);
-        setError(null);
-        if (!currentUser) {
-            router.replace(loginHref("/profile"));
-            setLoading(false);
-            return;
-        }
+    if (authLoading) return;
+    if (!currentUser) {
+      router.replace(loginHref("/profile"));
+      return;
+    }
+
+    let active = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
 
       try {
-        // Fetch User Data
-        const userRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-             const data = userDoc.data();
-             setUserData(data);
-             setUsername(data.username); // Initialize username state
-        } else {
-             throw new Error("User data not found."); // Handle case where user doc doesn't exist
+        const [profile, history, favorites, friends, watchlist] = await Promise.all([
+          getDoc(doc(db, "users", currentUser.uid)),
+          getDoc(doc(db, "history", currentUser.uid)),
+          getDoc(doc(db, "favorites", currentUser.uid)),
+          getDoc(doc(db, "friends", currentUser.uid)),
+          getDoc(doc(db, "watchlists", currentUser.uid)),
+        ]);
+
+        if (!active) return;
+
+        if (profile.exists()) {
+          setUserData(profile.data());
+          setUsername(profile.data().username || "");
         }
 
-        // Fetch Stats Data (History, Favorites, Friends)
-        const historyDoc = await getDoc(doc(db, "history", currentUser.uid));
-        const favoritesDoc = await getDoc(doc(db, "favorites", currentUser.uid));
-        const friendsDoc = await getDoc(doc(db, "friends", currentUser.uid));
-
-        const historyData = historyDoc.exists() ? historyDoc.data() : { movies: [], episodes: [] }; // Default empty arrays
-        const favoritesData = favoritesDoc.exists() ? favoritesDoc.data() : { movies: [], episodes: [], shows: [] }; // Include shows
-        const friendsData = friendsDoc.exists() ? friendsDoc.data() : { friends: [] };
-
-        // Calculate Stats
-        const moviesWatched = historyData.movies?.length || 0;
-        const episodesWatched = historyData.episodes?.length || 0;
-        const favoriteMovies = favoritesData.movies?.length || 0;
-        const favoriteEpisodes = favoritesData.episodes?.length || 0;
-        const favoriteShows = favoritesData.shows?.length || 0; // Calculate favorite shows
-        const buddies = friendsData.friends?.length || 0;
-
-       // --- Calculate Top Genre ---
-       const genreCounts = {};
-       // Ensure history arrays exist before trying to combine/iterate
-       const allHistoryItems = [...(historyData.movies || []), ...(historyData.episodes || [])];
-
-       allHistoryItems.forEach((item) => {
-           if (!item) return; // Skip null/undefined items
-
-           let itemGenreIds = [];
-
-           // Check for genre_ids array (array of numbers)
-           if (Array.isArray(item.genre_ids) && item.genre_ids.length > 0) {
-               itemGenreIds = item.genre_ids.filter(id => typeof id === 'number'); // Ensure they are numbers
-           }
-           // Else, check for genres array (array of objects {id, name})
-           else if (Array.isArray(item.genres) && item.genres.length > 0) {
-               itemGenreIds = item.genres.map(g => g?.id).filter(id => typeof id === 'number'); // Safely map and filter
-           }
-           // If neither exists or is valid, itemGenreIds remains empty
-
-           // Count valid IDs
-           itemGenreIds.forEach((genreId) => {
-               // Double check genreId is valid before counting
-               if (genreId) {
-                   genreCounts[genreId] = (genreCounts[genreId] || 0) + 1;
-               }
-           });
-       });
-
-       // Find the top genre ID (This logic remains correct)
-       let topGenreName = "N/A"; // Default
-       if (Object.keys(genreCounts).length > 0) {
-           // Find the key (genre ID string) with the highest value
-           const topGenreId = Object.keys(genreCounts).reduce((a, b) => genreCounts[a] > genreCounts[b] ? a : b );
-           // Look up name in map, fallback to ID if not found
-           topGenreName = genreMap[topGenreId] || `Unknown (ID: ${topGenreId})`; // More descriptive fallback
-       }
-       // --- End Genre Calculation ---
+        const historyData = history.exists() ? history.data() : {};
+        const favoritesData = favorites.exists() ? favorites.data() : {};
+        const watchedMovies = historyData.movies || [];
+        const watchedEpisodes = historyData.episodes || [];
 
         setStats({
-            buddies, moviesWatched, episodesWatched,
-            topGenre: topGenreName, favoriteMovies, favoriteEpisodes, favoriteShows
+          buddies: (friends.exists() ? friends.data().friends || [] : []).length,
+          moviesWatched: new Set(watchedMovies.map((item) => item.id)).size,
+          episodesWatched: watchedEpisodes.length,
+          favoriteMovies: (favoritesData.movies || []).length,
+          favoriteShows: (favoritesData.episodes || []).length,
+          watchlist: (watchlist.exists() ? watchlist.data().items || [] : []).length,
         });
 
+        // Newest first, de-duplicated, so the sample reflects recent taste.
+        const byRecency = (entries, key) =>
+          Array.from(
+            new Set(
+              entries
+                .slice()
+                .sort((a, b) => new Date(b.watchedAt || 0) - new Date(a.watchedAt || 0))
+                .map((entry) => entry[key])
+                .filter(Boolean)
+            )
+          );
+
+        const movieIds = byRecency(
+          [...watchedMovies, ...(favoritesData.movies || [])],
+          "id"
+        );
+        const showIds = byRecency(
+          [...watchedEpisodes, ...(favoritesData.episodes || [])],
+          "tvShowId"
+        );
+
+        if (movieIds.length || showIds.length) {
+          setGenresLoading(true);
+          const genres = await computeTopGenres({ movieIds, showIds });
+          if (active) setTopGenres(genres);
+        }
       } catch (err) {
-        console.error("Error fetching user data/stats:", err);
-        setError(err.message || "Failed to load profile data.");
+        console.error("Error loading profile:", err);
+        if (active) setError("We could not load your profile right now.");
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+          setGenresLoading(false);
+        }
       }
     };
 
-    fetchUserDataAndStats();
+    load();
+    return () => {
+      active = false;
+    };
   }, [currentUser, authLoading, router]);
 
-  // Handle Save Username
-  const handleSave = async () => {
-    if (!currentUser || !username.trim()) {
-        toast.error("Username cannot be empty.");
-        return;
+  const handleSave = useCallback(async () => {
+    const trimmed = username.trim();
+    if (!currentUser || !trimmed) {
+      toast.error("Username cannot be empty.");
+      return;
     }
-     if (username.trim() === userData?.username) {
-         setIsEditing(false); // No changes made
-         return;
-     }
-
-     const userRef = doc(db, "users", currentUser.uid);
-     const savingToast = toast.loading("Saving username...");
 
     try {
-        await updateDoc(userRef, {
-            username: username.trim(),
-             // Also update lowercase version if used for searching elsewhere
-             username_lowercase: username.trim().toLowerCase(),
-        });
-        // Optimistically update local state first for better UX
-        setUserData(prev => ({...prev, username: username.trim()}));
-        toast.success("Username updated!", { id: savingToast });
-        setIsEditing(false);
-    } catch(err) {
-         console.error("Error updating username:", err);
-         toast.error("Failed to update username.", { id: savingToast });
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        username: trimmed,
+        username_lowercase: trimmed.toLowerCase(),
+      });
+      setUserData((previous) => ({ ...previous, username: trimmed }));
+      setIsEditing(false);
+      toast.success("Username updated");
+    } catch (err) {
+      console.error("Error updating username:", err);
+      toast.error("Could not update your username.");
     }
-  };
+  }, [currentUser, username]);
 
-  // Handle Logout
   const handleLogout = async () => {
-     const loggingOutToast = toast.loading("Logging out...");
-     try {
-        await signOut(auth);
-        toast.success("Logged out successfully.", { id: loggingOutToast });
-        router.push("/"); // Redirect to homepage after logout
-     } catch (err) {
-         console.error("Logout error:", err);
-         toast.error("Logout failed. Please try again.", { id: loggingOutToast });
-     }
+    try {
+      await signOut(auth);
+      toast.success("Signed out");
+      router.push("/");
+    } catch {
+      toast.error("Sign out failed. Please try again.");
+    }
   };
 
-  // --- Render Loading ---
-  if (loading) {
-    return (
-      <div className="min-h-screen mt-16 bg-primary flex flex-col items-center justify-center">
-        <NavBar />
-        <div className="flex-grow flex flex-col items-center justify-center">
-            <Mosaic color="#DAA520" size="medium" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const displayName = userData?.username || currentUser?.email?.split("@")[0] || "You";
 
-   // --- Render Error ---
-   if (error) {
-       return ( <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center justify-center px-4"> <NavBar /> <div className="text-center"> <h2 className="text-2xl text-red-500 mb-4">Error Loading Profile</h2> <p className="text-textsecondary mb-6">{error}</p> </div> <Footer /> </div> );
-    }
-
-  // --- Main Render ---
   return (
-    // Added mt-16 for spacing below NavBar
-    <div className="min-h-screen mt-16 bg-primary text-textprimary flex flex-col items-center p-4 md:p-6 font-poppins">
-      <NavBar />
-       {/* Main Profile Card - Themed */}
-      <div className="bg-secondary p-6 md:p-8 rounded-xl shadow-lg w-full max-w-3xl border border-secondary-light flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-6 text-textprimary">Profile</h1>
+    <PageShell title="Profile" description="Your account and viewing stats.">
+      {error && (
+        <p className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          {error}
+        </p>
+      )}
 
-        {/* Avatar */}
-        <img
-            src={userData?.avatar || `https://www.gravatar.com/avatar/${currentUser?.uid}?d=mp&f=y`} // Use UID for Gravatar seed, or userData.avatar
-            alt="User Avatar"
-            className="w-24 h-24 rounded-full mb-4 border-4 border-secondary-light shadow-md"
-        />
-
-        <div className="w-full max-w-xs text-center mb-6"> {/* Container for info/edit */}
-          {isEditing ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-3">
-              {/* Themed Input */}
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full p-3 bg-primary border border-secondary-light rounded-lg text-textprimary placeholder-textsecondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
-                placeholder="Enter new username"
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+        {/* Identity card */}
+        <div className="surface flex flex-col items-center p-6 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/15 text-2xl font-semibold text-accent ring-1 ring-inset ring-accent/25">
+            {userData?.avatar ? (
+              <img
+                src={userData.avatar}
+                alt=""
+                className="h-full w-full rounded-full object-cover"
               />
-              {/* Themed Save Button */}
-              <button
-                onClick={handleSave}
-                className="w-full flex items-center justify-center gap-2 bg-accent text-primary font-semibold py-2 rounded-lg hover:bg-accent-hover transition-colors duration-200"
-              >
-                 <FaSave /> Save Changes
-              </button>
-               {/* Cancel Button */}
-               <button
-                onClick={() => { setIsEditing(false); setUsername(userData?.username || ""); }} // Reset username on cancel
-                className="w-full text-sm text-textsecondary hover:text-textprimary transition-colors"
-              > Cancel </button>
+            ) : (
+              displayName.charAt(0).toUpperCase()
+            )}
+          </div>
+
+          {isEditing ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 w-full space-y-3">
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                className="input text-center"
+                placeholder="New username"
+              />
+              <div className="flex gap-2">
+                <button type="button" onClick={handleSave} className="btn-primary flex-1">
+                  <FiCheck className="h-4 w-4" /> Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setUsername(userData?.username || "");
+                  }}
+                  className="btn-ghost"
+                  aria-label="Cancel"
+                >
+                  <FiX className="h-4 w-4" />
+                </button>
+              </div>
             </motion.div>
           ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-3">
-               {/* Themed Display Text */}
-              <div className="text-center">
-                <p className="text-xl font-semibold text-textprimary">{userData?.username || "Username not set"}</p>
-                <p className="text-sm text-textsecondary mt-1">{currentUser?.email || 'Email not available'}</p>
-              </div>
-               {/* Themed Edit Button */}
+            <>
+              <h2 className="mt-4 text-lg font-semibold tracking-tight text-textprimary">
+                {displayName}
+              </h2>
+              <p className="mt-0.5 truncate text-sm text-textsecondary">{currentUser?.email}</p>
               <button
+                type="button"
                 onClick={() => setIsEditing(true)}
-                className="w-full flex items-center justify-center gap-2 border border-accent/50 text-accent font-medium py-2 px-6 rounded-lg hover:bg-accent/10 hover:text-accent-hover transition-all duration-200"
+                className="btn-ghost mt-5 w-full"
               >
-                <FaEdit /> Edit Username
+                <FiEdit2 className="h-3.5 w-3.5" /> Edit username
               </button>
-            </motion.div>
+            </>
           )}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn mt-2 w-full border border-red-500/25 bg-red-500/5 px-4 py-2.5 text-red-200 hover:bg-red-500/15"
+          >
+            <FiLogOut className="h-3.5 w-3.5" /> Sign out
+          </button>
         </div>
 
-        {/* Stats Section - Themed */}
-        <div className="w-full border-t border-secondary-light pt-6 mt-6">
-             <h2 className="text-lg font-semibold text-textprimary mb-4 text-center">Your Stats</h2>
-             {/* Updated Grid Columns for better responsiveness */}
-             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-5 w-full">
-               <StatsCard title="Buddies" value={stats.buddies} />
-               <StatsCard title="Movies Watched" value={stats.moviesWatched} />
-               <StatsCard title="Episodes Watched" value={stats.episodesWatched} />
-               <StatsCard title="Favorite Movies" value={stats.favoriteMovies} />
-                {/* Assuming favoriteShows was added */}
-               <StatsCard title="Favorite Shows" value={stats.favoriteShows} />
-               <StatsCard title="Favorite Episodes" value={stats.favoriteEpisodes} />
-               {/* Make Top Genre span 2 cols on smallest screens if 6 items look odd */}
-               <div className="sm:col-span-1">
-                    <StatsCard title="Top Genre" value={stats.topGenre} />
-               </div>
-             </div>
+        {/* Stats */}
+        <div className="space-y-6">
+          <section>
+            <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-textsecondary">
+              Your stats
+            </h2>
+            {loading ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="skeleton h-[86px] rounded-2xl" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <StatTile label="Films watched" value={stats.moviesWatched} />
+                <StatTile label="Episodes watched" value={stats.episodesWatched} />
+                <StatTile label="On watchlist" value={stats.watchlist} />
+                <StatTile label="Favorite films" value={stats.favoriteMovies} />
+                <StatTile label="Favorite series" value={stats.favoriteShows} />
+                <StatTile label="Buddies" value={stats.buddies} />
+              </div>
+            )}
+          </section>
+
+          <section className="surface p-5">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-textsecondary">
+              Genres you watch most
+            </h2>
+
+            {genresLoading ? (
+              <div className="mt-3 flex gap-2">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="skeleton h-8 w-28 rounded-full" />
+                ))}
+              </div>
+            ) : topGenres.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {topGenres.map((genre, index) => (
+                  <span
+                    key={genre.name}
+                    className={`chip ${index === 0 ? "chip-active" : ""}`}
+                    title={`${genre.count} title${genre.count === 1 ? "" : "s"}`}
+                  >
+                    {genre.name}
+                    <span className="text-[10px] opacity-70">{genre.count}</span>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-textsecondary">
+                Watch a few titles and your top genres will show up here.{" "}
+                <Link href="/" className="text-accent hover:text-accent-hover">
+                  Find something to watch
+                </Link>
+                .
+              </p>
+            )}
+          </section>
         </div>
-
-
-        {/* Logout Button - Themed */}
-        <button
-          onClick={handleLogout}
-          className="mt-8 flex items-center justify-center gap-2 border border-red-600/50 text-red-300 font-medium py-2 px-6 rounded-lg hover:bg-red-700/20 hover:text-red-200 transition-all duration-200"
-        >
-          <FaSignOutAlt /> Logout
-        </button>
       </div>
-       <Footer /> {/* Add Footer */}
-    </div>
+    </PageShell>
   );
 }

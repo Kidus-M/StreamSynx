@@ -87,13 +87,13 @@ const AuthLayout = ({ title, subtitle, eyebrow, children, footer, pageTitle }) =
 
       {/* Poster wall */}
       <div className="relative hidden overflow-hidden border-l border-white/[0.06] bg-primary-soft lg:block">
-        <div className="absolute inset-0 grid grid-cols-3 gap-3 p-3 opacity-[0.22]">
+        <div className="absolute inset-0 grid grid-cols-3 gap-3 p-3 opacity-40">
           <PosterColumn posters={columns[0]} direction="up" />
           <PosterColumn posters={columns[1]} direction="down" />
           <PosterColumn posters={columns[2]} direction="up" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-primary" />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-primary/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/30 to-primary" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-primary/40" />
 
         <div className="relative flex h-full items-end p-12">
           <div className="max-w-md">

@@ -212,3 +212,11 @@ select option {
 }
 .marquee-up { animation: marquee-up 70s linear infinite; }
 .marquee-down { animation: marquee-down 70s linear infinite; }
+
+/* Fade the bottom of the episode list so cut-off rows read as scrollable */
+@media (min-width: 1024px) {
+  .episode-scroller {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent 100%);
+  }
+}

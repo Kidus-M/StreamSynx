@@ -1516,3 +1516,302 @@ TypeError: Cannot read properties of undefined (reading 'components')
     at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
     at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
     at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   41879ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   41912ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   41912ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   41917ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   41918ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   41978ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   42002ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42016ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42485ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   42508ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   42509ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   42513ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42514ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42538ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   42596ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42597ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43070ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   43091ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   43091ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   43097ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43097ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43143ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   43160ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43172ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43606ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   43629ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   43630ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   43636ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43637ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43702ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   43720ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   43732ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44134ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   44154ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   44155ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   44159ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44160ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44202ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   44218ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44230ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44666ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   44685ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   44686ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   44691ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44692ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44740ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   44757ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   44770ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45191ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   45213ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   45213ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   45219ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45219ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45266ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   45281ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45291ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45700ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   45728ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   45729ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   45740ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45742ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45792ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   45810ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   45819ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46225ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   46246ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   46246ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   46252ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46252ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46300ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   46313ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46324ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46728ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   46746ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   46747ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   46754ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46754ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46799ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   46815ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   46826ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47237ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   47256ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   47257ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   47260ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47261ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47311ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   47327ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47341ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47760ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   47779ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   47781ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   47786ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47786ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47834ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   47851ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   47861ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48260ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   48280ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   48281ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   48285ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48286ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48333ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   48348ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48359ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48782ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   48805ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   48805ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   48809ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48810ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48856ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   48876ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   48892ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49388ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   49423ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/_app.js:1:1
+[   49424ms] ReferenceError: __turbopack_load_page_chunks__ is not defined
+    at http://localhost:3111/_next/static/chunks/pages/index.js:1:1
+[   49442ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49443ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49498ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   49518ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49772ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49798ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   49818ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   49841ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3111/_next/static/webpack/882bcfdc2ebfc3a1.webpack.hot-update.json:0
+[   50894ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3111/:0

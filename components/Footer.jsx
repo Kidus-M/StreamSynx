@@ -1,66 +1,132 @@
 import React from "react";
 import Link from "next/link";
-import { Download, Smartphone } from "lucide-react";
+import { FiDownload, FiSmartphone, FiTv } from "react-icons/fi";
+import { useAuth } from "../lib/auth";
+
+const BROWSE_LINKS = [
+  { name: "Home", href: "/" },
+  { name: "Search", href: "/search" },
+  { name: "Watch parties", href: "/rooms" },
+  { name: "Get the app", href: "/download" },
+];
+
+const LIBRARY_LINKS = [
+  { name: "Watchlist", href: "/watchList" },
+  { name: "Continue watching", href: "/history" },
+  { name: "Favorites", href: "/favorites" },
+  { name: "Recommended", href: "/recommended" },
+];
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const { user } = useAuth();
+  const year = new Date().getFullYear();
 
   return (
-      <footer className="bg-primary text-textsecondary border-t border-white/[0.06] relative overflow-hidden">
-        {/* Decorative glow effect */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-secondary/30 via-transparent to-transparent" />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-8">
-
-          {/* Left Section - TMDB & Info */}
-          <div className="text-center md:text-left max-w-sm">
-            <p className="text-textprimary font-semibold text-lg mb-2 tracking-tight">
-              Stream<span className="text-accent">Synx</span>
-            </p>
-            <p className="text-sm">
-              Powered by{" "}
-              <a
-                  href="https://www.themoviedb.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent hover:text-accent-hover transition-colors font-medium"
-              >
-                TMDB
-              </a>{" "}
-              (The Movie Database).
-            </p>
-            <p className="text-xs mt-1 text-textsecondary/60">
-              This product uses the TMDB API but is not endorsed or certified by TMDB.
-            </p>
-          </div>
-
-          {/* Middle Section - Download CTA */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-2 text-textprimary mb-2">
-              <Smartphone className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-base">Get the App</span>
-            </div>
-            <p className="text-sm mb-3 text-textsecondary/80">
-              Enjoy StreamSynx anywhere, anytime.
-            </p>
+    <footer className="mt-auto border-t border-white/[0.06] bg-primary">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 lg:gap-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
             <Link
-                href="/download"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-primary font-semibold shadow-lg shadow-accent/20 hover:bg-accent-hover hover:shadow-accent/30 transition-all duration-300"
+              href="/"
+              className="text-[17px] font-semibold tracking-tight text-textprimary transition-colors hover:text-accent"
             >
-              <Download className="w-4 h-4" />
-              Download Now
+              Stream<span className="text-accent">Synx</span>
             </Link>
+            <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-textsecondary">
+              A calm, fast place to find something to watch — films, series and everything in
+              between.
+            </p>
           </div>
 
-          {/* Right Section - Copyright */}
-          <div className="text-center md:text-right text-sm">
-            <p className="text-textprimary font-medium mb-1">
-              &copy; {currentYear} StreamSynx
-            </p>
-            <p className="text-textsecondary/60">All rights reserved.</p>
+          {/* Browse */}
+          <nav aria-label="Browse">
+            <h2 className="section-label mb-3">Browse</h2>
+            <ul className="space-y-2.5">
+              {BROWSE_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-[13px] text-textsecondary transition-colors hover:text-textprimary"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Library */}
+          <nav aria-label="Your library">
+            <h2 className="section-label mb-3">Your library</h2>
+            <ul className="space-y-2.5">
+              {LIBRARY_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-[13px] text-textsecondary transition-colors hover:text-textprimary"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+              {!user && (
+                <li>
+                  <Link
+                    href="/signup"
+                    className="text-[13px] text-accent transition-colors hover:text-accent-hover"
+                  >
+                    Create an account
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </nav>
+
+          {/* Apps */}
+          <div className="col-span-2 md:col-span-1">
+            <h2 className="section-label mb-3">Apps</h2>
+            <div className="space-y-2">
+              <Link
+                href="/download"
+                className="group flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-3 transition-colors hover:border-white/20"
+              >
+                <FiSmartphone className="h-4 w-4 shrink-0 text-accent" />
+                <span className="flex-1 text-[13px] font-medium text-textprimary">Android</span>
+                <FiDownload className="h-3.5 w-3.5 text-textsecondary transition-colors group-hover:text-textprimary" />
+              </Link>
+              <Link
+                href="/download"
+                className="group flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-3 transition-colors hover:border-white/20"
+              >
+                <FiTv className="h-4 w-4 shrink-0 text-accent" />
+                <span className="flex-1 text-[13px] font-medium text-textprimary">Android TV</span>
+                <FiDownload className="h-3.5 w-3.5 text-textsecondary transition-colors group-hover:text-textprimary" />
+              </Link>
+            </div>
           </div>
         </div>
-      </footer>
+
+        {/* Bottom bar */}
+        <div className="mt-12 flex flex-col-reverse items-start justify-between gap-4 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center">
+          <p className="text-[12px] text-textsecondary/70">
+            &copy; {year} StreamSynx. All rights reserved.
+          </p>
+          <p className="text-[12px] text-textsecondary/70">
+            Metadata from{" "}
+            <a
+              href="https://www.themoviedb.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-textsecondary transition-colors hover:text-accent"
+            >
+              TMDB
+            </a>
+            . This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </p>
+        </div>
+      </div>
+    </footer>
   );
 };
 

@@ -1,0 +1,188 @@
+[     911ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    1653ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1693ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    2262ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    2377ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    2397ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    2966ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    3078ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    3097ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    3585ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    3743ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    3763ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    4283ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    4429ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4443ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    5003ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    5137ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    5276ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    5835ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    5953ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    6062ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    6550ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    6658ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    6672ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    7178ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    7297ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    7337ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    7831ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    7948ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    7992ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    8489ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    8660ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    8732ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    9270ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    9406ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    9484ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[    9997ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   10115ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   10181ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   10669ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   10817ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   10895ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   11415ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   11525ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   11596ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   12102ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   12225ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   12295ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   12810ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   12935ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   13008ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   13526ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   13663ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   13717ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   14250ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   14354ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   14423ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   15001ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   15127ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   15194ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   15707ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   15841ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   15921ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   16475ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   16610ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   16707ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   17265ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   17441ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   17564ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   18059ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   18183ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   18272ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   18702ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   18843ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   18921ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   19386ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   19515ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   19642ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   20168ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   20318ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   20355ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   20794ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   20932ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   20975ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   21418ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   21554ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   21624ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   22059ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   22216ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   22230ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   22650ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   22785ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   22859ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   23302ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   23421ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   23491ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   23943ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   24076ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   24154ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   24675ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   24803ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   24884ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   25351ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   25473ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   25552ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   26026ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   26137ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   26203ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   26656ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   26772ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   26831ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   27309ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   27421ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   27494ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   27946ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   28074ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   28144ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   28712ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   28852ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   28974ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   29622ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   29736ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   29789ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   30232ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   30337ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   30413ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   30873ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   30980ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   31028ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   31469ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   31567ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   31577ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   32023ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   32151ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   32218ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   32643ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   32748ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   32759ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   33192ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   33322ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   33366ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   33818ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   33937ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   34002ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   34485ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   34656ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   34725ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   35176ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   35290ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   35351ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   35824ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   35941ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   36001ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   36449ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   36557ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   36616ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   37066ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   37200ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   37211ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   37664ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   37776ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   37840ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   38328ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   38455ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   38468ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   38998ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   39091ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   39157ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   39640ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   39765ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   39815ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   40254ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   40367ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   40380ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   40831ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   40932ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   41019ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   41565ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   41671ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   41736ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   42190ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[   42298ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   42311ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3112/_next/static/webpack/e0ebb46a7cd396e8.webpack.hot-update.json:0
+[   42675ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3112/_next/static/chunks/pages/_app.js:0
+[   42678ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3112/_next/static/chunks/main.js:0
+[   42681ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3112/_next/static/chunks/pages/index.js:0
+[   45027ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3112/favicon-16x16.png:0
+[   45281ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3112/favicon.ico:0

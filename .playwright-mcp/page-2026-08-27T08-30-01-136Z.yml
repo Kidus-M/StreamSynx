@@ -1,0 +1,38 @@
+- generic [active] [ref=f345e1]:
+  - generic [ref=f345e3]:
+    - generic [ref=f345e4]:
+      - generic [ref=f345e5]:
+        - link "StreamSynx" [ref=f345e6] [cursor=pointer]:
+          - /url: /
+        - link "Back to browsing" [ref=f345e7] [cursor=pointer]:
+          - /url: /
+      - generic [ref=f345e9]:
+        - paragraph [ref=f345e10]: Welcome back
+        - heading "Sign in to StreamSynx" [level=1] [ref=f345e11]
+        - paragraph [ref=f345e12]: Pick up your watchlist, history and watch parties where you left them.
+        - generic [ref=f345e14]:
+          - generic [ref=f345e15]:
+            - generic [ref=f345e16]:
+              - generic [ref=f345e17]: Email
+              - textbox "Email" [ref=f345e19]:
+                - /placeholder: you@example.com
+            - generic [ref=f345e20]:
+              - generic [ref=f345e21]: Password
+              - generic [ref=f345e22]:
+                - textbox "Password" [ref=f345e23]:
+                  - /placeholder: Your password
+                - button "Show password" [ref=f345e24] [cursor=pointer]
+            - button "Sign in" [ref=f345e28] [cursor=pointer]
+          - button "Forgot password?" [ref=f345e30] [cursor=pointer]
+          - generic [ref=f345e31]: or
+          - button "Continue with Google" [ref=f345e34] [cursor=pointer]
+        - generic [ref=f345e40]:
+          - text: New here?
+          - link "Create an account" [ref=f345e41] [cursor=pointer]:
+            - /url: /signup
+      - paragraph [ref=f345e42]: Movie and series data provided by TMDB.
+    - generic [ref=f345e51]:
+      - paragraph [ref=f345e52]: Thousands of films and series, one calm place to find them.
+      - paragraph [ref=f345e53]: Your watchlist, history and recommendations follow you across devices.
+  - button "Open Next.js Dev Tools" [ref=f345e59] [cursor=pointer]
+  - alert [ref=f345e63]

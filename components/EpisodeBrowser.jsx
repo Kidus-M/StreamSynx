@@ -236,7 +236,7 @@ const EpisodeBrowser = ({
           ))}
         </div>
       ) : episodes.length > 0 ? (
-        <div className="custom-scrollbar max-h-none space-y-1 overflow-y-auto pr-1 lg:max-h-[560px]">
+        <div className="custom-scrollbar episode-scroller max-h-none space-y-1 overflow-y-auto pr-1 lg:max-h-[560px]">
           {episodes.map((episode) => (
             <EpisodeRow
               key={episode.id ?? `${viewSeason}-${episode.episode_number}`}

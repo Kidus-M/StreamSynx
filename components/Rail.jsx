@@ -53,7 +53,8 @@ const Rail = ({ title, action, children, itemClassName = "w-[132px] sm:w-[150px]
       <div className="relative">
         <div
           ref={scrollerRef}
-          className="rail flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:gap-4 sm:px-6 lg:px-10"
+          // scroll-padding keeps snap points aligned with the page gutter
+          className="rail flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 px-4 pb-2 sm:gap-4 sm:scroll-pl-6 sm:px-6 lg:scroll-pl-10 lg:px-10"
         >
           {items.map((child, index) => (
             <div key={child.key ?? index} className={`shrink-0 snap-start ${itemClassName}`}>
