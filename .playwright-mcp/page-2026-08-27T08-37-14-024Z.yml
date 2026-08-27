@@ -1,0 +1,84 @@
+- generic [active] [ref=f366e1]:
+  - main [ref=f366e3]:
+    - navigation [ref=f366e5]:
+      - link "StreamSynx" [ref=f366e7] [cursor=pointer]:
+        - /url: /
+      - list [ref=f366e8]:
+        - listitem [ref=f366e9]:
+          - link "Home" [ref=f366e10] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=f366e11]:
+          - link "Watchlist" [ref=f366e12] [cursor=pointer]:
+            - /url: /watchList
+        - listitem [ref=f366e13]:
+          - link "Watch Parties" [ref=f366e14] [cursor=pointer]:
+            - /url: /rooms
+      - button "Search... ⌘K" [ref=f366e16] [cursor=pointer]:
+        - generic [ref=f366e20]: Search...
+        - generic [ref=f366e21]: ⌘K
+    - generic [ref=f366e23]:
+      - heading "StreamSynx App" [level=1] [ref=f366e27]
+      - paragraph [ref=f366e28]: Take your watchlists, favorites, and buddies anywhere. Stream your world, now on Android and Android TV.
+    - generic [ref=f366e29]:
+      - link "Download for Android" [ref=f366e30] [cursor=pointer]:
+        - /url: /downloads/StreamSynx.apk
+      - link "Download for Android TV" [ref=f366e34] [cursor=pointer]:
+        - /url: https://streamsynx.vercel.app/tv.apk
+    - generic [ref=f366e38]:
+      - img "App Preview" [ref=f366e39]
+      - paragraph [ref=f366e40]: For Downloader on Android TV, enter streamsynx.vercel.app/tv.apk directly.
+    - generic [ref=f366e42]:
+      - generic [ref=f366e43]:
+        - generic [ref=f366e44]:
+          - link "StreamSynx" [ref=f366e45] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=f366e46]: A calm, fast place to find something to watch — films, series and everything in between.
+        - navigation "Browse" [ref=f366e47]:
+          - heading "Browse" [level=2] [ref=f366e48]
+          - list [ref=f366e49]:
+            - listitem [ref=f366e50]:
+              - link "Home" [ref=f366e51] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=f366e52]:
+              - link "Search" [ref=f366e53] [cursor=pointer]:
+                - /url: /search
+            - listitem [ref=f366e54]:
+              - link "Watch parties" [ref=f366e55] [cursor=pointer]:
+                - /url: /rooms
+            - listitem [ref=f366e56]:
+              - link "Get the app" [ref=f366e57] [cursor=pointer]:
+                - /url: /download
+        - navigation "Your library" [ref=f366e58]:
+          - heading "Your library" [level=2] [ref=f366e59]
+          - list [ref=f366e60]:
+            - listitem [ref=f366e61]:
+              - link "Watchlist" [ref=f366e62] [cursor=pointer]:
+                - /url: /watchList
+            - listitem [ref=f366e63]:
+              - link "Continue watching" [ref=f366e64] [cursor=pointer]:
+                - /url: /history
+            - listitem [ref=f366e65]:
+              - link "Favorites" [ref=f366e66] [cursor=pointer]:
+                - /url: /favorites
+            - listitem [ref=f366e67]:
+              - link "Recommended" [ref=f366e68] [cursor=pointer]:
+                - /url: /recommended
+            - listitem [ref=f366e69]:
+              - link "Create an account" [ref=f366e70] [cursor=pointer]:
+                - /url: /signup
+        - generic [ref=f366e71]:
+          - heading "Apps" [level=2] [ref=f366e72]
+          - generic [ref=f366e73]:
+            - link "Android" [ref=f366e74] [cursor=pointer]:
+              - /url: /download
+            - link "Android TV" [ref=f366e81] [cursor=pointer]:
+              - /url: /download
+      - generic [ref=f366e89]:
+        - paragraph [ref=f366e90]: © 2026 StreamSynx. All rights reserved.
+        - paragraph [ref=f366e91]:
+          - text: Metadata from
+          - link "TMDB" [ref=f366e92] [cursor=pointer]:
+            - /url: https://www.themoviedb.org/
+          - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.
+  - button "Open Next.js Dev Tools" [ref=f366e98] [cursor=pointer]
+  - alert [ref=f366e102]

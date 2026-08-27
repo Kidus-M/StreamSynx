@@ -1,0 +1,315 @@
+- generic [active] [ref=f368e1]:
+  - generic [ref=f368e3]:
+    - banner [ref=f368e4]:
+      - navigation [ref=f368e5]:
+        - link "StreamSynx" [ref=f368e7] [cursor=pointer]:
+          - /url: /
+        - list [ref=f368e8]:
+          - listitem [ref=f368e9]:
+            - link "Home" [ref=f368e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f368e11]:
+            - link "Watchlist" [ref=f368e12] [cursor=pointer]:
+              - /url: /login?next=%2FwatchList
+          - listitem [ref=f368e13]:
+            - link "Watch Parties" [ref=f368e14] [cursor=pointer]:
+              - /url: /login?next=%2Frooms
+        - generic [ref=f368e15]:
+          - button "Search... ⌘K" [ref=f368e16] [cursor=pointer]:
+            - generic [ref=f368e20]: Search...
+            - generic [ref=f368e21]: ⌘K
+          - generic [ref=f368e22]:
+            - link "Sign in" [ref=f368e123] [cursor=pointer]:
+              - /url: /login?next=%2Fwatch%3Fmovie_id%3D1078605
+            - link "Sign up" [ref=f368e124] [cursor=pointer]:
+              - /url: /signup
+    - main [ref=f368e23]:
+      - generic [ref=f368e24]:
+        - generic [ref=f368e25]:
+          - region "Weapons player" [ref=f368e125]:
+            - iframe [ref=f368e126]:
+              - generic [ref=f369e1]:
+                - alert [ref=f369e2]
+                - region "Video Player - Weapons" [ref=f369e5]:
+                  - group:
+                    - button "Server Selection" [ref=f369e10] [cursor=pointer]
+                    - generic [ref=f369e13]:
+                      - button "Seek backward -10 seconds" [ref=f369e14] [cursor=pointer]
+                      - button "Play" [pressed] [ref=f369e20] [cursor=pointer]
+                      - button "Seek forward 10 seconds" [ref=f369e23] [cursor=pointer]
+                    - slider "Seek" [ref=f369e30] [cursor=pointer]
+                    - generic [ref=f369e33]:
+                      - button "Mute" [ref=f369e34] [cursor=pointer]
+                      - slider "Volume" [ref=f369e39] [cursor=pointer]
+                      - generic [ref=f369e42]:
+                        - generic [ref=f369e43]: 0:13
+                        - generic [ref=f369e44]: /
+                        - generic [ref=f369e45]: 2:02:09
+                      - generic [ref=f369e46]:
+                        - button "Captions" [ref=f369e47] [cursor=pointer]
+                        - button "Settings" [ref=f369e51] [cursor=pointer]
+                      - button "PiP" [ref=f369e54] [cursor=pointer]
+                      - button "Google Cast disconnected" [ref=f369e60] [cursor=pointer]
+                      - button "Fullscreen" [ref=f369e63] [cursor=pointer]
+          - generic [ref=f368e127]:
+            - generic [ref=f368e128]:
+              - generic [ref=f368e129]: Server
+              - generic [ref=f368e133]:
+                - button "VidNest" [pressed] [ref=f368e134] [cursor=pointer]
+                - button "VidKing" [ref=f368e135] [cursor=pointer]
+                - button "VidSrc" [ref=f368e136] [cursor=pointer]
+                - button "VidFast" [ref=f368e137] [cursor=pointer]
+            - button "Reload player" [ref=f368e140] [cursor=pointer]
+        - generic [ref=f368e31]:
+          - generic [ref=f368e32]:
+            - paragraph [ref=f368e33]: Now playing
+            - heading "Weapons" [level=1] [ref=f368e145]
+            - generic [ref=f368e146]:
+              - generic [ref=f368e147]: "2025"
+              - generic [ref=f368e149]: 2h 9m
+              - generic [ref=f368e151]: 7.3 TMDB
+              - generic [ref=f368e152]: Horror
+              - generic [ref=f368e153]: Mystery
+          - generic [ref=f368e154]:
+            - button "Favorite" [ref=f368e155] [cursor=pointer]
+            - button "Copy link" [ref=f368e159] [cursor=pointer]
+            - button "Recommend" [ref=f368e165] [cursor=pointer]
+        - generic [ref=f368e35]:
+          - generic [ref=f368e38]:
+            - group "Your rating out of 10" [ref=f368e39]:
+              - generic [ref=f368e40]:
+                - button "Rate 1 out of 10" [ref=f368e43] [cursor=pointer]
+                - button "Rate 2 out of 10" [ref=f368e44] [cursor=pointer]
+              - generic [ref=f368e45]:
+                - button "Rate 3 out of 10" [ref=f368e48] [cursor=pointer]
+                - button "Rate 4 out of 10" [ref=f368e49] [cursor=pointer]
+              - generic [ref=f368e50]:
+                - button "Rate 5 out of 10" [ref=f368e53] [cursor=pointer]
+                - button "Rate 6 out of 10" [ref=f368e54] [cursor=pointer]
+              - generic [ref=f368e55]:
+                - button "Rate 7 out of 10" [ref=f368e58] [cursor=pointer]
+                - button "Rate 8 out of 10" [ref=f368e59] [cursor=pointer]
+              - generic [ref=f368e60]:
+                - button "Rate 9 out of 10" [ref=f368e63] [cursor=pointer]
+                - button "Rate 10 out of 10" [ref=f368e64] [cursor=pointer]
+            - generic [ref=f368e65]: Rate 7/10
+          - generic [ref=f368e66]:
+            - generic [ref=f368e67]:
+              - heading "Overview" [level=2] [ref=f368e178]
+              - paragraph [ref=f368e179]: When all but one child from the same class mysteriously vanish on the same night at exactly the same time, a community is left questioning who or what is behind their disappearance.
+            - generic [ref=f368e180]:
+              - heading "Director" [level=3] [ref=f368e181]
+              - paragraph [ref=f368e182]: Zach Cregger
+            - generic [ref=f368e183]:
+              - heading "Cast" [level=3] [ref=f368e184]
+              - generic [ref=f368e185]:
+                - generic [ref=f368e186]:
+                  - paragraph [ref=f368e188]: Julia Garner
+                  - paragraph [ref=f368e189]: Justine
+                - generic [ref=f368e190]:
+                  - paragraph [ref=f368e192]: Josh Brolin
+                  - paragraph [ref=f368e193]: Archer
+                - generic [ref=f368e194]:
+                  - paragraph [ref=f368e196]: Alden Ehrenreich
+                  - paragraph [ref=f368e197]: Paul
+                - generic [ref=f368e198]:
+                  - paragraph [ref=f368e200]: Austin Abrams
+                  - paragraph [ref=f368e201]: James
+                - generic [ref=f368e202]:
+                  - paragraph [ref=f368e204]: Benedict Wong
+                  - paragraph [ref=f368e205]: Marcus
+                - generic [ref=f368e206]:
+                  - paragraph [ref=f368e208]: Amy Madigan
+                  - paragraph [ref=f368e209]: Gladys
+                - generic [ref=f368e210]:
+                  - paragraph [ref=f368e212]: Cary Christopher
+                  - paragraph [ref=f368e213]: Alex
+                - generic [ref=f368e214]:
+                  - paragraph [ref=f368e216]: Toby Huss
+                  - paragraph [ref=f368e217]: Captain Ed
+                - generic [ref=f368e218]:
+                  - paragraph [ref=f368e220]: Whitmer Thomas
+                  - paragraph [ref=f368e221]: Alex's Dad
+                - generic [ref=f368e222]:
+                  - paragraph [ref=f368e224]: Callie Schuttera
+                  - paragraph [ref=f368e225]: Alex's Mom
+                - generic [ref=f368e226]:
+                  - paragraph [ref=f368e228]: June Diane Raphael
+                  - paragraph [ref=f368e229]: Donna
+                - generic [ref=f368e230]:
+                  - paragraph [ref=f368e232]: Scarlett Sher
+                  - paragraph [ref=f368e233]: Narrator (voice)
+        - generic [ref=f368e236]:
+          - heading "More like this" [level=2] [ref=f368e238]
+          - generic [ref=f368e239]:
+            - generic [ref=f368e240]:
+              - button "Open The Prodigy" [ref=f368e242] [cursor=pointer]:
+                - generic [ref=f368e243]:
+                  - generic [ref=f368e244]: "6.2"
+                  - button "Add to watchlist" [ref=f368e247]
+                - generic [ref=f368e250]:
+                  - heading "The Prodigy" [level=3] [ref=f368e251]
+                  - paragraph [ref=f368e252]: 2019 · Film · Horror · Thriller
+              - button "Open Scary Stories to Tell in the Dark" [ref=f368e254] [cursor=pointer]:
+                - generic [ref=f368e255]:
+                  - generic [ref=f368e256]: "6.5"
+                  - button "Add to watchlist" [ref=f368e259]
+                - generic [ref=f368e262]:
+                  - heading "Scary Stories to Tell in the Dark" [level=3] [ref=f368e263]
+                  - paragraph [ref=f368e264]: 2019 · Film · Horror · Mystery
+              - 'button "Open The Conjuring: Last Rites" [ref=f368e266] [cursor=pointer]':
+                - generic [ref=f368e267]:
+                  - generic [ref=f368e268]: "6.9"
+                  - button "Add to watchlist" [ref=f368e271]
+                - generic [ref=f368e274]:
+                  - 'heading "The Conjuring: Last Rites" [level=3] [ref=f368e275]'
+                  - paragraph [ref=f368e276]: 2025 · Film · Horror
+              - button "Open The Wretched" [ref=f368e278] [cursor=pointer]:
+                - generic [ref=f368e279]:
+                  - generic [ref=f368e280]: "6.0"
+                  - button "Add to watchlist" [ref=f368e283]
+                - generic [ref=f368e286]:
+                  - heading "The Wretched" [level=3] [ref=f368e287]
+                  - paragraph [ref=f368e288]: 2019 · Film · Horror · Mystery
+              - button "Open The Blackcoat's Daughter" [ref=f368e290] [cursor=pointer]:
+                - generic [ref=f368e291]:
+                  - generic [ref=f368e292]: "5.9"
+                  - button "Add to watchlist" [ref=f368e295]
+                - generic [ref=f368e298]:
+                  - heading "The Blackcoat's Daughter" [level=3] [ref=f368e299]
+                  - paragraph [ref=f368e300]: 2017 · Film · Horror · Mystery
+              - button "Open House of 1000 Corpses" [ref=f368e302] [cursor=pointer]:
+                - generic [ref=f368e303]:
+                  - generic [ref=f368e304]: "6.2"
+                  - button "Add to watchlist" [ref=f368e307]
+                - generic [ref=f368e310]:
+                  - heading "House of 1000 Corpses" [level=3] [ref=f368e311]
+                  - paragraph [ref=f368e312]: 2003 · Film · Horror
+              - button "Open Dark Harvest" [ref=f368e314] [cursor=pointer]:
+                - generic [ref=f368e315]:
+                  - generic [ref=f368e316]: "6.0"
+                  - button "Add to watchlist" [ref=f368e319]
+                - generic [ref=f368e322]:
+                  - heading "Dark Harvest" [level=3] [ref=f368e323]
+                  - paragraph [ref=f368e324]: 2023 · Film · Horror · Fantasy
+              - button "Open I Am Not a Serial Killer" [ref=f368e326] [cursor=pointer]:
+                - generic [ref=f368e327]:
+                  - generic [ref=f368e328]: "6.3"
+                  - button "Add to watchlist" [ref=f368e331]
+                - generic [ref=f368e334]:
+                  - heading "I Am Not a Serial Killer" [level=3] [ref=f368e335]
+                  - paragraph [ref=f368e336]: 2016 · Film · Horror · Mystery
+              - button "Open Sleepy Hollow" [ref=f368e338] [cursor=pointer]:
+                - generic [ref=f368e339]:
+                  - generic [ref=f368e340]: "7.2"
+                  - button "Add to watchlist" [ref=f368e343]
+                - generic [ref=f368e346]:
+                  - heading "Sleepy Hollow" [level=3] [ref=f368e347]
+                  - paragraph [ref=f368e348]: 1999 · Film · Fantasy · Thriller
+              - button "Open Warlock" [ref=f368e350] [cursor=pointer]:
+                - generic [ref=f368e351]:
+                  - generic [ref=f368e352]: "6.3"
+                  - button "Add to watchlist" [ref=f368e355]
+                - generic [ref=f368e358]:
+                  - heading "Warlock" [level=3] [ref=f368e359]
+                  - paragraph [ref=f368e360]: 1989 · Film · Horror · Fantasy
+              - button "Open Scream" [ref=f368e362] [cursor=pointer]:
+                - generic [ref=f368e363]:
+                  - generic [ref=f368e365]: "7.4"
+                  - button "Add to watchlist" [ref=f368e368]
+                - generic [ref=f368e371]:
+                  - heading "Scream" [level=3] [ref=f368e372]
+                  - paragraph [ref=f368e373]: 1996 · Film · Crime · Horror
+              - button "Open Witch Hunt" [ref=f368e375] [cursor=pointer]:
+                - generic [ref=f368e376]:
+                  - generic [ref=f368e378]: "6.6"
+                  - button "Add to watchlist" [ref=f368e381]
+                - generic [ref=f368e384]:
+                  - heading "Witch Hunt" [level=3] [ref=f368e385]
+                  - paragraph [ref=f368e386]: 2021 · Film · Horror · Fantasy
+              - button "Open The Nun" [ref=f368e388] [cursor=pointer]:
+                - generic [ref=f368e389]:
+                  - generic [ref=f368e391]: "5.9"
+                  - button "Add to watchlist" [ref=f368e394]
+                - generic [ref=f368e397]:
+                  - heading "The Nun" [level=3] [ref=f368e398]
+                  - paragraph [ref=f368e399]: 2018 · Film · Horror
+              - button "Open Night of the Living Dead" [ref=f368e401] [cursor=pointer]:
+                - generic [ref=f368e402]:
+                  - generic [ref=f368e404]: "7.6"
+                  - button "Add to watchlist" [ref=f368e407]
+                - generic [ref=f368e410]:
+                  - heading "Night of the Living Dead" [level=3] [ref=f368e411]
+                  - paragraph [ref=f368e412]: 1968 · Film · Horror · Thriller
+              - button "Open Lady in White" [ref=f368e414] [cursor=pointer]:
+                - generic [ref=f368e415]:
+                  - generic [ref=f368e417]: "6.1"
+                  - button "Add to watchlist" [ref=f368e420]
+                - generic [ref=f368e423]:
+                  - heading "Lady in White" [level=3] [ref=f368e424]
+                  - paragraph [ref=f368e425]: 1988 · Film · Mystery · Horror
+              - button "Open Cobweb" [ref=f368e427] [cursor=pointer]:
+                - generic [ref=f368e428]:
+                  - generic [ref=f368e430]: "6.4"
+                  - button "Add to watchlist" [ref=f368e433]
+                - generic [ref=f368e436]:
+                  - heading "Cobweb" [level=3] [ref=f368e437]
+                  - paragraph [ref=f368e438]: 2023 · Film · Horror
+            - button "Scroll left"
+            - button "Scroll right" [ref=f368e440] [cursor=pointer]
+    - contentinfo [ref=f368e71]:
+      - generic [ref=f368e72]:
+        - generic [ref=f368e73]:
+          - generic [ref=f368e74]:
+            - link "StreamSynx" [ref=f368e75] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f368e76]: A calm, fast place to find something to watch — films, series and everything in between.
+          - navigation "Browse" [ref=f368e77]:
+            - heading "Browse" [level=2] [ref=f368e78]
+            - list [ref=f368e79]:
+              - listitem [ref=f368e80]:
+                - link "Home" [ref=f368e81] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f368e82]:
+                - link "Search" [ref=f368e83] [cursor=pointer]:
+                  - /url: /search
+              - listitem [ref=f368e84]:
+                - link "Watch parties" [ref=f368e85] [cursor=pointer]:
+                  - /url: /rooms
+              - listitem [ref=f368e86]:
+                - link "Get the app" [ref=f368e87] [cursor=pointer]:
+                  - /url: /download
+          - navigation "Your library" [ref=f368e88]:
+            - heading "Your library" [level=2] [ref=f368e89]
+            - list [ref=f368e90]:
+              - listitem [ref=f368e91]:
+                - link "Watchlist" [ref=f368e92] [cursor=pointer]:
+                  - /url: /watchList
+              - listitem [ref=f368e93]:
+                - link "Continue watching" [ref=f368e94] [cursor=pointer]:
+                  - /url: /history
+              - listitem [ref=f368e95]:
+                - link "Favorites" [ref=f368e96] [cursor=pointer]:
+                  - /url: /favorites
+              - listitem [ref=f368e97]:
+                - link "Recommended" [ref=f368e98] [cursor=pointer]:
+                  - /url: /recommended
+              - listitem [ref=f368e99]:
+                - link "Create an account" [ref=f368e100] [cursor=pointer]:
+                  - /url: /signup
+          - generic [ref=f368e101]:
+            - heading "Apps" [level=2] [ref=f368e102]
+            - generic [ref=f368e103]:
+              - link "Android" [ref=f368e104] [cursor=pointer]:
+                - /url: /download
+              - link "Android TV" [ref=f368e111] [cursor=pointer]:
+                - /url: /download
+        - generic [ref=f368e119]:
+          - paragraph [ref=f368e120]: © 2026 StreamSynx. All rights reserved.
+          - paragraph [ref=f368e121]:
+            - text: Metadata from
+            - link "TMDB" [ref=f368e122] [cursor=pointer]:
+              - /url: https://www.themoviedb.org/
+            - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.
+  - button "Open Next.js Dev Tools" [ref=f368e448] [cursor=pointer]
+  - alert [ref=f368e452]

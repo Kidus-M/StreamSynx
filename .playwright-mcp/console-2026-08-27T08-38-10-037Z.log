@@ -1,0 +1,17 @@
+[      20ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    2238ms] [LOG] [Fast Refresh] done in 2219ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    3383ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    3610ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    3812ms] [WARNING] Allow attribute will take precedence over 'allowfullscreen'. @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:854
+[    4134ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4134ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /watch, path: /watch} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4135ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/watch?movie_id=1078605 color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/watch?movie_id=1078605, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787819894171} /_vercel/insights/view @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4204ms] [WARNING] document.domain mutation is ignored because the surrounding agent cluster is origin-keyed. @ https://vidnest.fun/_next/static/chunks/59188ca5beae901a.js:0
+[    4526ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://sub.wyzie.io/search?id=1078605&key=wyzie-bdc33980f1590134693cda293930eade:0
+[    9532ms] [ERROR] [subtitles] vdrk fallback failed: Error: timeout after 5000 ms
+    at https://vidnest.fun/_next/static/chunks/90f23833500a4740.js:1:8668 @ https://vidnest.fun/_next/static/chunks/90f23833500a4740.js:0
+[   14396ms] Uncaught TypeError: ma is not a function
+    at <anonymous> (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a0425ea00d7ab7a2%2F130989:0:22978)
+    at notify (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a0425ea00d7ab7a2%2F130989:0:22972)
+    at change (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a0425ea00d7ab7a2%2F130989:0:24612)
+    at <anonymous> (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a0425ea00d7ab7a2%2F130989:0:23817)
