@@ -1,0 +1,41 @@
+- generic [active] [ref=f365e1]:
+  - generic [ref=f365e3]:
+    - generic [ref=f365e4]:
+      - generic [ref=f365e5]:
+        - link "StreamSynx" [ref=f365e6] [cursor=pointer]:
+          - /url: /
+        - link "Back to browsing" [ref=f365e7] [cursor=pointer]:
+          - /url: /
+      - generic [ref=f365e9]:
+        - paragraph [ref=f365e10]: Free account
+        - heading "Create your account" [level=1] [ref=f365e11]
+        - paragraph [ref=f365e12]: Save titles, keep your history in sync and watch together with friends.
+        - generic [ref=f365e14]:
+          - generic [ref=f365e15]:
+            - generic [ref=f365e16]:
+              - generic [ref=f365e17]: Username
+              - textbox "Username" [ref=f365e19]:
+                - /placeholder: moviebuff
+            - generic [ref=f365e20]:
+              - generic [ref=f365e21]: Email
+              - textbox "Email" [ref=f365e23]:
+                - /placeholder: you@example.com
+            - generic [ref=f365e24]:
+              - generic [ref=f365e25]: Password
+              - generic [ref=f365e26]:
+                - textbox "Password" [ref=f365e27]:
+                  - /placeholder: At least 6 characters
+                - button "Show password" [ref=f365e28] [cursor=pointer]
+            - button "Create account" [ref=f365e32] [cursor=pointer]
+          - generic [ref=f365e33]: or
+          - button "Continue with Google" [ref=f365e36] [cursor=pointer]
+        - generic [ref=f365e42]:
+          - text: Already have an account?
+          - link "Sign in" [ref=f365e43] [cursor=pointer]:
+            - /url: /login
+      - paragraph [ref=f365e44]: Movie and series data provided by TMDB.
+    - generic [ref=f365e53]:
+      - paragraph [ref=f365e54]: Thousands of films and series, one calm place to find them.
+      - paragraph [ref=f365e55]: Your watchlist, history and recommendations follow you across devices.
+  - button "Open Next.js Dev Tools" [ref=f365e61] [cursor=pointer]
+  - alert [ref=f365e65]

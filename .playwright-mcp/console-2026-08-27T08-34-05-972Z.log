@@ -1,0 +1,13 @@
+[      26ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[     985ms] [LOG] [Fast Refresh] done in 958ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    2621ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    2675ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    2676ms] [WARNING] [HMR] Invalid message: {"type":"isrManifest","data":{"/history":true,"/watchTv/[seriesID]/[season]/[episode]":true,"/":true,"/search":true,"/login":true,"/watch":true}}
+TypeError: Cannot read properties of undefined (reading 'components')
+    at handleStaticIndicator (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:177:46)
+    at processMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:191:17)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:69:13)
+    at WebSocket.handleMessage (webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:68:17) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4842ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4842ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /history, path: /history} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    4843ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/history color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/history, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787819650814} /_vercel/insights/view @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27

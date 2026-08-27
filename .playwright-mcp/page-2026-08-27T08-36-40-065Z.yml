@@ -1,0 +1,93 @@
+- generic [ref=f364e3]:
+  - banner [ref=f364e4]:
+    - navigation [ref=f364e5]:
+      - link "StreamSynx" [ref=f364e7] [cursor=pointer]:
+        - /url: /
+      - list [ref=f364e8]:
+        - listitem [ref=f364e9]:
+          - link "Home" [ref=f364e10] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=f364e11]:
+          - link "Watchlist" [ref=f364e12] [cursor=pointer]:
+            - /url: /watchList
+        - listitem [ref=f364e13]:
+          - link "Watch Parties" [ref=f364e14] [cursor=pointer]:
+            - /url: /rooms
+      - button "Search... ⌘K" [ref=f364e16] [cursor=pointer]:
+        - generic [ref=f364e20]: Search...
+        - generic [ref=f364e21]: ⌘K
+  - main [ref=f364e23]:
+    - generic [ref=f364e24]:
+      - generic [ref=f364e26]:
+        - heading "Profile" [level=1] [ref=f364e27]
+        - paragraph [ref=f364e28]: Your account and viewing stats.
+      - generic [ref=f364e29]:
+        - generic [ref=f364e30]:
+          - generic [ref=f364e31]: "Y"
+          - heading "You" [level=2] [ref=f364e32]
+          - paragraph
+          - button "Edit username" [ref=f364e33] [cursor=pointer]
+          - button "Sign out" [ref=f364e36] [cursor=pointer]
+        - generic [ref=f364e40]:
+          - heading "Your stats" [level=2] [ref=f364e42]
+          - generic [ref=f364e50]:
+            - heading "Genres you watch most" [level=2] [ref=f364e51]
+            - paragraph [ref=f364e52]:
+              - text: Watch a few titles and your top genres will show up here.
+              - link "Find something to watch" [ref=f364e53] [cursor=pointer]:
+                - /url: /
+              - text: .
+  - contentinfo [ref=f364e54]:
+    - generic [ref=f364e55]:
+      - generic [ref=f364e56]:
+        - generic [ref=f364e57]:
+          - link "StreamSynx" [ref=f364e58] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=f364e59]: A calm, fast place to find something to watch — films, series and everything in between.
+        - navigation "Browse" [ref=f364e60]:
+          - heading "Browse" [level=2] [ref=f364e61]
+          - list [ref=f364e62]:
+            - listitem [ref=f364e63]:
+              - link "Home" [ref=f364e64] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=f364e65]:
+              - link "Search" [ref=f364e66] [cursor=pointer]:
+                - /url: /search
+            - listitem [ref=f364e67]:
+              - link "Watch parties" [ref=f364e68] [cursor=pointer]:
+                - /url: /rooms
+            - listitem [ref=f364e69]:
+              - link "Get the app" [ref=f364e70] [cursor=pointer]:
+                - /url: /download
+        - navigation "Your library" [ref=f364e71]:
+          - heading "Your library" [level=2] [ref=f364e72]
+          - list [ref=f364e73]:
+            - listitem [ref=f364e74]:
+              - link "Watchlist" [ref=f364e75] [cursor=pointer]:
+                - /url: /watchList
+            - listitem [ref=f364e76]:
+              - link "Continue watching" [ref=f364e77] [cursor=pointer]:
+                - /url: /history
+            - listitem [ref=f364e78]:
+              - link "Favorites" [ref=f364e79] [cursor=pointer]:
+                - /url: /favorites
+            - listitem [ref=f364e80]:
+              - link "Recommended" [ref=f364e81] [cursor=pointer]:
+                - /url: /recommended
+            - listitem [ref=f364e82]:
+              - link "Create an account" [ref=f364e83] [cursor=pointer]:
+                - /url: /signup
+        - generic [ref=f364e84]:
+          - heading "Apps" [level=2] [ref=f364e85]
+          - generic [ref=f364e86]:
+            - link "Android" [ref=f364e87] [cursor=pointer]:
+              - /url: /download
+            - link "Android TV" [ref=f364e94] [cursor=pointer]:
+              - /url: /download
+      - generic [ref=f364e102]:
+        - paragraph [ref=f364e103]: © 2026 StreamSynx. All rights reserved.
+        - paragraph [ref=f364e104]:
+          - text: Metadata from
+          - link "TMDB" [ref=f364e105] [cursor=pointer]:
+            - /url: https://www.themoviedb.org/
+          - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.

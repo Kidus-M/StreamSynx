@@ -1,0 +1,25 @@
+- generic [ref=f360e3]:
+  - banner [ref=f360e4]:
+    - navigation [ref=f360e5]:
+      - link "StreamSynx" [ref=f360e7] [cursor=pointer]:
+        - /url: /
+      - list [ref=f360e8]:
+        - listitem [ref=f360e9]:
+          - link "Home" [ref=f360e10] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=f360e11]:
+          - link "Watchlist" [ref=f360e12] [cursor=pointer]:
+            - /url: /watchList
+        - listitem [ref=f360e13]:
+          - link "Watch Parties" [ref=f360e14] [cursor=pointer]:
+            - /url: /rooms
+      - button "Search... ⌘K" [ref=f360e16] [cursor=pointer]:
+        - generic [ref=f360e20]: Search...
+        - generic [ref=f360e21]: ⌘K
+  - main [ref=f360e23]:
+    - heading "Buddies" [level=1] [ref=f360e24]
+    - navigation "Tabs" [ref=f360e26]:
+      - button "Friends" [ref=f360e27] [cursor=pointer]
+      - button "Requests" [ref=f360e28] [cursor=pointer]
+      - button "Add Friends" [ref=f360e29] [cursor=pointer]
+    - status "Loading" [ref=f360e32]

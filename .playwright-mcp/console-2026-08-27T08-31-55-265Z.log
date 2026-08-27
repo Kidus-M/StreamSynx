@@ -1,0 +1,24 @@
+[      35ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[     266ms] [LOG] [Fast Refresh] done in 231ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1040ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:29834
+[    1290ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1546ms] [WARNING] Allow attribute will take precedence over 'allowfullscreen'. @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom.development.js:854
+[    1895ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1896ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /watchTv/[seriesID]/[season]/[episode], path: /watchTv/1396/1/1} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1896ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/watchTv/1396/1/1 color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/watchTv/1396/1/1, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787819517161} /_vercel/insights/view @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    1966ms] [WARNING] document.domain mutation is ignored because the surrounding agent cluster is origin-keyed. @ https://vidnest.fun/_next/static/chunks/0d46faf1dd018e20.js:0
+[    5300ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://sub.wyzie.io/search?id=1396&season=1&episode=1&key=wyzie-bdc33980f1590134693cda293930eade:0
+[    5516ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://sub.wyzie.io/search?id=1396&season=1&episode=1&key=wyzie-bdc33980f1590134693cda293930eade:0
+[    7133ms] [LOG] Container: Media element found, attaching listeners @ https://vidnest.fun/_next/static/chunks/0d46faf1dd018e20.js:0
+[    7215ms] [ERROR] Unsafe attempt to load URL https://cache.vdrk.site/v2/tv/1396/1/1/English.vtt from frame with URL https://vidnest.fun/tv/1396/1/1. Domains, protocols and ports must match.
+ @ https://vidnest.fun/tv/1396/1/1:0
+[   12117ms] Uncaught TypeError: ma is not a function
+    at <anonymous> (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a04258df7d872c11%2F130989:0:22978)
+    at notify (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a04258df7d872c11%2F130989:0:22972)
+    at change (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a04258df7d872c11%2F130989:0:24612)
+    at <anonymous> (https://fetch.streaming-1.workers.dev/fetch?url=https%3A%2F%2Fwr.zoquehagseed.qpon%2Fr1a04258df7d872c11%2F130989:0:23817)
+[   35382ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   35848ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   38797ms] [LOG] [Fast Refresh] done in 2948ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   53395ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   56487ms] [LOG] [Fast Refresh] done in 3091ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27

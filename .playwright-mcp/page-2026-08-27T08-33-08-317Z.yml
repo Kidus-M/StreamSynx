@@ -1,0 +1,100 @@
+- generic [active] [ref=f353e1]:
+  - generic [ref=f353e3]:
+    - banner [ref=f353e4]:
+      - navigation [ref=f353e5]:
+        - generic [ref=f353e6]:
+          - button "Open menu" [ref=f353e7] [cursor=pointer]
+          - link "StreamSynx" [ref=f353e9] [cursor=pointer]:
+            - /url: /
+        - button "Search" [ref=f353e11] [cursor=pointer]
+    - main [ref=f353e16]:
+      - generic [ref=f353e18]:
+        - generic [ref=f353e19]:
+          - region "Loading… S1 · E1 player" [ref=f353e21]:
+            - paragraph [ref=f353e25]: No player available for this title.
+          - generic [ref=f353e27]:
+            - paragraph [ref=f353e28]: Now playing
+            - heading "Loading…" [level=1] [ref=f353e29]
+            - paragraph [ref=f353e30]:
+              - generic [ref=f353e31]: Season 1 · Episode 1
+        - complementary [ref=f353e32]:
+          - region "Episodes" [ref=f353e33]:
+            - heading "Episodes" [level=2] [ref=f353e36]
+        - generic [ref=f353e43]:
+          - generic [ref=f353e46]:
+            - group "Your rating out of 10" [ref=f353e47]:
+              - generic [ref=f353e48]:
+                - button "Rate 1 out of 10" [ref=f353e51] [cursor=pointer]
+                - button "Rate 2 out of 10" [ref=f353e52] [cursor=pointer]
+              - generic [ref=f353e53]:
+                - button "Rate 3 out of 10" [ref=f353e56] [cursor=pointer]
+                - button "Rate 4 out of 10" [ref=f353e57] [cursor=pointer]
+              - generic [ref=f353e58]:
+                - button "Rate 5 out of 10" [ref=f353e61] [cursor=pointer]
+                - button "Rate 6 out of 10" [ref=f353e62] [cursor=pointer]
+              - generic [ref=f353e63]:
+                - button "Rate 7 out of 10" [ref=f353e66] [cursor=pointer]
+                - button "Rate 8 out of 10" [ref=f353e67] [cursor=pointer]
+              - generic [ref=f353e68]:
+                - button "Rate 9 out of 10" [ref=f353e71] [cursor=pointer]
+                - button "Rate 10 out of 10" [ref=f353e72] [cursor=pointer]
+            - generic [ref=f353e73]: Rate this title
+          - generic [ref=f353e75]:
+            - heading "About the series" [level=2] [ref=f353e76]
+            - paragraph [ref=f353e77]: No description available.
+    - contentinfo [ref=f353e78]:
+      - generic [ref=f353e79]:
+        - generic [ref=f353e80]:
+          - generic [ref=f353e81]:
+            - link "StreamSynx" [ref=f353e82] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f353e83]: A calm, fast place to find something to watch — films, series and everything in between.
+          - navigation "Browse" [ref=f353e84]:
+            - heading "Browse" [level=2] [ref=f353e85]
+            - list [ref=f353e86]:
+              - listitem [ref=f353e87]:
+                - link "Home" [ref=f353e88] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f353e89]:
+                - link "Search" [ref=f353e90] [cursor=pointer]:
+                  - /url: /search
+              - listitem [ref=f353e91]:
+                - link "Watch parties" [ref=f353e92] [cursor=pointer]:
+                  - /url: /rooms
+              - listitem [ref=f353e93]:
+                - link "Get the app" [ref=f353e94] [cursor=pointer]:
+                  - /url: /download
+          - navigation "Your library" [ref=f353e95]:
+            - heading "Your library" [level=2] [ref=f353e96]
+            - list [ref=f353e97]:
+              - listitem [ref=f353e98]:
+                - link "Watchlist" [ref=f353e99] [cursor=pointer]:
+                  - /url: /watchList
+              - listitem [ref=f353e100]:
+                - link "Continue watching" [ref=f353e101] [cursor=pointer]:
+                  - /url: /history
+              - listitem [ref=f353e102]:
+                - link "Favorites" [ref=f353e103] [cursor=pointer]:
+                  - /url: /favorites
+              - listitem [ref=f353e104]:
+                - link "Recommended" [ref=f353e105] [cursor=pointer]:
+                  - /url: /recommended
+              - listitem [ref=f353e106]:
+                - link "Create an account" [ref=f353e107] [cursor=pointer]:
+                  - /url: /signup
+          - generic [ref=f353e108]:
+            - heading "Apps" [level=2] [ref=f353e109]
+            - generic [ref=f353e110]:
+              - link "Android" [ref=f353e111] [cursor=pointer]:
+                - /url: /download
+              - link "Android TV" [ref=f353e118] [cursor=pointer]:
+                - /url: /download
+        - generic [ref=f353e126]:
+          - paragraph [ref=f353e127]: © 2026 StreamSynx. All rights reserved.
+          - paragraph [ref=f353e128]:
+            - text: Metadata from
+            - link "TMDB" [ref=f353e129] [cursor=pointer]:
+              - /url: https://www.themoviedb.org/
+            - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.
+  - button "Open Next.js Dev Tools" [ref=f353e135] [cursor=pointer]
+  - alert [ref=f353e139]

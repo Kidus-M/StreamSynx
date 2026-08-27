@@ -352,9 +352,10 @@ const EpisodePage = () => {
 
       <main className="relative z-10 flex-1 px-4 pb-16 pt-20 sm:px-6 lg:px-10 lg:pt-24">
         <div className="mx-auto max-w-[1400px]">
+          {/* On phones the episode list sits between the player and the details;
+              on desktop it becomes a sticky right-hand column. */}
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-10">
-            {/* Player + details */}
-            <div className="space-y-8">
+            <div className="space-y-8 lg:col-start-1 lg:row-start-1">
               <PlayerShell
                 mediaType="tv"
                 tmdbId={showId}
@@ -403,6 +404,24 @@ const EpisodePage = () => {
                 )}
               </section>
 
+            </div>
+
+            {/* Episode browser */}
+            <aside className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 lg:self-start">
+              <EpisodeBrowser
+                showId={showId}
+                seasons={show?.seasons || []}
+                episodes={viewEpisodes}
+                loading={loadingEpisodes || loadingShow}
+                viewSeason={viewSeason}
+                playingSeason={playingSeason}
+                playingEpisode={playingEpisode}
+                onSeasonChange={setViewSeason}
+                onSelectEpisode={selectEpisode}
+              />
+            </aside>
+
+            <div className="lg:col-start-1 lg:row-start-2">
               <section
                 id="details"
                 className="grid grid-cols-1 gap-8 border-t border-white/[0.06] pt-8 lg:grid-cols-[200px_minmax(0,1fr)]"
@@ -432,21 +451,6 @@ const EpisodePage = () => {
                 </div>
               </section>
             </div>
-
-            {/* Episode browser */}
-            <aside className="lg:sticky lg:top-24 lg:self-start">
-              <EpisodeBrowser
-                showId={showId}
-                seasons={show?.seasons || []}
-                episodes={viewEpisodes}
-                loading={loadingEpisodes || loadingShow}
-                viewSeason={viewSeason}
-                playingSeason={playingSeason}
-                playingEpisode={playingEpisode}
-                onSeasonChange={setViewSeason}
-                onSelectEpisode={selectEpisode}
-              />
-            </aside>
           </div>
 
           {recommendations.length > 0 && (

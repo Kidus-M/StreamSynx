@@ -128,7 +128,7 @@ const PlayerShell = ({
       {showControls && (
         <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-primary-soft/90 px-3 py-3 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
-            <span className="hidden shrink-0 items-center gap-1.5 pr-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-textsecondary sm:flex">
+            <span className="flex shrink-0 items-center gap-1.5 pr-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-textsecondary">
               <FiServer className="h-3.5 w-3.5" />
               Server
             </span>
