@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.streamsynx",
+      "sha256_cert_fingerprints": [
+        "5E:8E:FA:AD:D7:0D:C5:62:B2:DA:C5:A5:EB:46:DD:18:05:7B:58:27:37:E3:7E:1E:44:F5:A6:92:07:3B:AE:FA"
+      ]
+    }
+  }
+]
