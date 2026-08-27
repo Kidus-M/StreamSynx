@@ -1,37 +1,67 @@
 import React, { useState } from "react";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
-/** Five stars mapped to a 0-10 score, with hover preview. */
+/**
+ * Five stars mapped to a 0-10 score. Each star has two hit areas: the left half
+ * gives the odd score (1, 3, 5, 7, 9), the right half the even one.
+ */
 const RatingStars = ({ value = 0, onRate, disabled = false }) => {
   const [hover, setHover] = useState(0);
   const shown = hover || value;
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="flex items-center gap-1" onMouseLeave={() => setHover(0)}>
+      <div
+        className="flex items-center gap-1"
+        onMouseLeave={() => setHover(0)}
+        role="group"
+        aria-label="Your rating out of 10"
+      >
         {[1, 2, 3, 4, 5].map((step) => {
-          const score = step * 2;
+          const full = step * 2;
+          const half = full - 1;
+          const Icon = shown >= full ? FaStar : shown >= half ? FaStarHalfAlt : FaRegStar;
+
           return (
-            <button
-              key={step}
-              type="button"
-              disabled={disabled}
-              onMouseEnter={() => setHover(score)}
-              onClick={() => onRate?.(score)}
-              aria-label={`Rate ${score} out of 10`}
-              className="tv-focusable p-0.5 transition-transform duration-150 hover:scale-110 active:scale-95 disabled:cursor-not-allowed"
-            >
-              <FaStar
-                className={`h-[18px] w-[18px] transition-colors duration-150 ${
-                  score <= shown ? "text-accent" : "text-white/15"
+            <span key={step} className="relative inline-flex">
+              <Icon
+                className={`h-6 w-6 transition-colors duration-150 ${
+                  shown >= half ? "text-accent" : "text-white/15"
                 }`}
+                aria-hidden="true"
               />
-            </button>
+
+              {/* Left half = odd score */}
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseEnter={() => setHover(half)}
+                onFocus={() => setHover(half)}
+                onClick={() => onRate?.(half)}
+                aria-label={`Rate ${half} out of 10`}
+                className="tv-focusable absolute inset-y-0 left-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"
+              />
+              {/* Right half = even score */}
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseEnter={() => setHover(full)}
+                onFocus={() => setHover(full)}
+                onClick={() => onRate?.(full)}
+                aria-label={`Rate ${full} out of 10`}
+                className="tv-focusable absolute inset-y-0 right-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"
+              />
+            </span>
           );
         })}
       </div>
+
       <span className="text-[11px] text-textsecondary">
-        {value ? `You rated ${value}/10` : "Rate this title"}
+        {hover
+          ? `Rate ${hover}/10`
+          : value
+          ? `You rated ${value}/10`
+          : "Rate this title"}
       </span>
     </div>
   );

@@ -1,7 +1,7 @@
 // pages/rooms/[roomId].jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
-import { db, auth, rtdb } from "../../firebase"; // Adjust path
+import { db, rtdb } from "../../firebase";
 import {
   doc,
   getDoc,
@@ -24,13 +24,13 @@ import {
   remove,
   get
 } from "firebase/database";
-import { onAuthStateChanged } from "firebase/auth";
 import NavBar from "../../components/NavBar"; // Adjust path
 import Footer from "../../components/Footer"; // Adjust path
 import ChatInterface from "../../components/ChatInterface"; // Adjust path
 import EpisodeCard from "../../components/RoomEpisodeCard"; // *** Ensure this path is correct ***
 import { Mosaic } from "react-loading-indicators";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { loginHref, useAuth } from "../../lib/auth";
 import {
   FaUsers,
   FaSignOutAlt,
@@ -75,8 +75,7 @@ const RoomPage = () => {
   const { roomId } = router.query;
 
   // Auth State
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [currentUserFriends, setCurrentUserFriends] = useState([]); // State for friend UIDs
 
   // Room State
@@ -106,16 +105,6 @@ const RoomPage = () => {
   const [episodes, setEpisodes] = useState([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const seasonSectionRef = useRef(null);
-
-  // --- Auth Listener ---
-  useEffect(() => {
-    setAuthLoading(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // --- Fetch Current User's Friends List UIDs (Real-time) ---
   useEffect(() => {
@@ -150,8 +139,8 @@ const RoomPage = () => {
       return;
     }
     if (!currentUser) {
-      toast.error("Please log in to access rooms.");
-      router.push("/");
+      toast.error("Please sign in to access rooms.");
+      router.push(loginHref(`/rooms/${roomId}`));
       return;
     }
 
@@ -880,10 +869,6 @@ const handleRemoveMember = async (memberUidToRemove) => {
   const isCreator = currentUser.uid === roomData.createdBy;
   return (
     <div className="min-h-screen bg-primary text-textprimary flex flex-col font-poppins">
-      <Toaster
-        position="bottom-center"
-        toastOptions={{ className: "bg-secondary text-textprimary" }}
-      />
       <NavBar />
 
       {/* Background Image */}
