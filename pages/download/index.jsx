@@ -129,95 +129,79 @@ const AppCard = ({ app, index }) => {
 };
 
 export default function DownloadPage() {
-  return (
-    <div className="flex min-h-screen flex-col bg-primary text-textprimary">
-      <Head>
-        <title>Get the app — StreamSynx</title>
-        <meta
-          name="description"
-          content="StreamSynx for Android TV and Android. A native big-screen player with ads and pop-ups blocked."
-        />
-      </Head>
+    return (
+        <main className="min-h-screen bg-primary text-textprimary flex flex-col items-center justify-center">
+            {/* Animated Hero Section */}
+            <NavBar />
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                className="text-center space-y-4 my-20"
+            >
+                <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className="flex items-center justify-center gap-3"
+                >
+                    <Smartphone className="text-accent w-8 h-8" />
+                    <h1 className="text-4xl font-semibold">StreamSynx App</h1>
+                </motion.div>
+                <p className="text-textsecondary max-w-md mx-auto">
+                    Take your watchlists, favorites, and buddies anywhere.
+                    Stream your world, now on Android and Android TV.
+                </p>
+            </motion.div>
 
-      <NavBar />
+            {/* Animated Download Buttons */}
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                <motion.a
+                    href="/downloads/StreamSynx.apk"
+                    download
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl bg-accent text-primary font-medium shadow-lg hover:bg-accent-hover transition-colors"
+                >
+                    <Download className="w-5 h-5" />
+                    Download for Android
+                </motion.a>
 
-      <main className="flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-10">
-        <div className="mx-auto w-full max-w-6xl">
-          {/* Hero */}
-          <motion.header
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-2xl"
-          >
-            <p className="section-label mb-3">Apps</p>
-            <h1 className="heading-xl">Take StreamSynx off the browser</h1>
-            <p className="mt-4 text-[15px] leading-relaxed text-textsecondary">
-              The same catalogue, the same watchlist — on the screen you actually watch on. The
-              Android TV app is a native leanback client, so nothing about it is a website in a
-              box.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              <span className="chip">
-                <FiShield className="h-3.5 w-3.5 text-accent" />
-                Ads blocked
-              </span>
-              <span className="chip">
-                <FiZap className="h-3.5 w-3.5 text-accent" />
-                Native player
-              </span>
-              <span className="chip">
-                <FiMonitor className="h-3.5 w-3.5 text-accent" />
-                D-pad first
-              </span>
-            </div>
-          </motion.header>
-
-          {/* Downloads */}
-          <section className="mt-12 grid gap-5 lg:grid-cols-2">
-            {APPS.map((app, index) => (
-              <AppCard key={app.id} app={app} index={index} />
-            ))}
-          </section>
-
-          {/* Sideload guide */}
-          <section className="mt-14">
-            <h2 className="heading-lg">Installing on a TV</h2>
-            <p className="mt-2 max-w-2xl text-sm text-textsecondary">
-              Android TV has no browser, so the APK is fetched on the device itself. This takes
-              about two minutes.
-            </p>
-
-            <ol className="mt-6 grid gap-4 sm:grid-cols-3">
-              {TV_STEPS.map((step, index) => (
-                <li key={step.title} className="surface p-5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15 text-[12px] font-semibold text-accent">
-                    {index + 1}
-                  </span>
-                  <h3 className="mt-3.5 text-sm font-medium text-textprimary">{step.title}</h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-textsecondary">
-                    {step.body}
-                  </p>
-                </li>
-              ))}
-            </ol>
-
-            <div className="surface mt-5 flex flex-wrap items-center justify-between gap-4 p-5">
-              <div>
-                <p className="section-label mb-1.5">Direct link for Downloader</p>
-                <p className="font-mono text-sm text-textprimary">{TV_SHORT_LINK}</p>
-              </div>
-              <p className="max-w-md text-[12px] leading-relaxed text-textsecondary/80">
-                Installing an APK outside the Play Store is expected here — StreamSynx is not
-                distributed through it. The file is served straight from this site.
-              </p>
+                <motion.a
+                    href="https://streamsynx.vercel.app/tv.apk"
+                    download
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-accent/60 text-accent font-medium shadow-lg hover:bg-accent hover:text-primary transition-colors"
+                >
+                    <Tv className="w-5 h-5" />
+                    Download for Android TV
+                </motion.a>
             </div>
           </section>
         </div>
       </main>
 
-      <Footer />
-    </div>
-  );
+            {/* Optional Preview / QR Code Section */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-12 text-center space-y-3"
+            >
+                <img
+                    src="/images/app-preview.png"
+                    alt="App Preview"
+                    className="w-75 h-auto rounded-2xl shadow-lg mx-auto"
+                />
+                <p className="text-textsecondary text-sm">
+                    For Downloader on Android TV, enter streamsynx.vercel.app/tv.apk directly.
+                </p>
+            </motion.div>
+
+            <Footer />
+        </main>
+    );
 }
