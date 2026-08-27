@@ -36,15 +36,16 @@ const APPS = [
     id: "android",
     icon: FiSmartphone,
     name: "Android",
-    version: "1.0.0",
-    size: "51 MB",
+    version: "2.0.0",
+    size: "55 MB",
     href: "/downloads/StreamSynx.apk",
-    primary: false,
-    tagline: "Your watchlist, favourites and buddies in your pocket.",
+    primary: true,
+    tagline: "Now with a real player, and a rebuilt interface.",
     points: [
-      "Everything from the web app on a phone or tablet",
-      "Watchlists and history stay with your account",
-      "Watch parties and buddy activity",
+      "Built-in player — no more handing you off to a browser full of ads",
+      "Provider pages are resolved off-screen, so their ads never render",
+      "Buddies fixed: accepted requests actually show up on both sides",
+      "Shared posters open the title straight in the app",
     ],
   },
 ];
@@ -95,7 +96,7 @@ const AppCard = ({ app, index }) => {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 className="heading-lg">{app.name}</h2>
             {app.primary && (
-              <span className="chip chip-active !py-1 text-[11px]">Just rebuilt</span>
+              <span className="chip chip-active !py-1 text-[11px]">Version 2</span>
             )}
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-textsecondary">{app.tagline}</p>
