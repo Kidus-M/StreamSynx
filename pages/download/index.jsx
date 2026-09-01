@@ -36,7 +36,7 @@ const APPS = [
     id: "android",
     icon: FiSmartphone,
     name: "Android",
-    version: "2.0.0",
+    version: "2.1.0",
     size: "55 MB",
     href: "/downloads/StreamSynx.apk",
     primary: true,
@@ -44,6 +44,7 @@ const APPS = [
     points: [
       "Built-in player — no more handing you off to a browser full of ads",
       "Provider pages are resolved off-screen, so their ads never render",
+      "Discover buddies by taste: pick eight titles, get matched on what they share",
       "Buddies fixed: accepted requests actually show up on both sides",
       "Shared posters open the title straight in the app",
     ],
