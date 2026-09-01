@@ -172,9 +172,21 @@ const BuddiesPage = () => {
   const [interactionLoading, setInteractionLoading] = useState({});
   const [activeTab, setActiveTab] = useState("friends");
 
+  // Taste matching
+  const [matches, setMatches] = useState([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesLoaded, setMatchesLoaded] = useState(false);
+  const [needsPicks, setNeedsPicks] = useState(false);
+  const [openMatch, setOpenMatch] = useState(null);
+
   const { user: currentUser } = useAuth();
   const userId = currentUser?.uid;
   const router = useRouter();
+
+  // Deep link from the profile page: /buddies?tab=discover
+  useEffect(() => {
+    if (router.isReady && router.query.tab === "discover") setActiveTab("discover");
+  }, [router.isReady, router.query.tab]);
 
   // Data Fetching (Keep as is, uses onSnapshot)
   useEffect(() => {
@@ -317,6 +329,52 @@ const BuddiesPage = () => {
     return () => clearTimeout(timerId);
   }, [searchQuery, userId, db]); // Added db dependency
 
+  /**
+   * Ranks other viewers by how closely their taste picks line up with mine.
+   * People already on my friends list, and anyone whose request is sitting in
+   * my inbox, are filtered out — the point of Discover is strangers worth
+   * meeting, not a re-listing of the people I already watch with.
+   */
+  const runDiscovery = useCallback(async () => {
+    if (!userId) return;
+    setMatchesLoading(true);
+
+    try {
+      const profileSnap = await getDoc(doc(db, "users", userId));
+      const profileData = profileSnap.exists() ? profileSnap.data() : {};
+
+      const me = {
+        uid: userId,
+        tasteProfile: profileData.tasteProfile || null,
+        tastePicks: readTastePicks(profileData),
+        friendIds: friends.map((friend) => friend.uid),
+      };
+
+      const excludeIds = new Set([
+        ...friends.map((friend) => friend.uid),
+        ...friendRequests.map((request) => request.fromUserId),
+      ]);
+
+      const result = await discoverBuddies(me, { excludeIds });
+      setMatches(result.matches);
+      setNeedsPicks(result.needsPicks);
+    } catch (error) {
+      console.error("Error finding taste matches:", error);
+      toast.error("Could not load your matches right now.");
+      setMatches([]);
+    } finally {
+      setMatchesLoading(false);
+      setMatchesLoaded(true);
+    }
+  }, [userId, friends, friendRequests]);
+
+  // Discovery is expensive relative to the other tabs, so it only runs when
+  // the tab is actually opened, and then only once until refreshed.
+  useEffect(() => {
+    if (activeTab !== "discover" || loading || matchesLoaded || matchesLoading) return;
+    runDiscovery();
+  }, [activeTab, loading, matchesLoaded, matchesLoading, runDiscovery]);
+
   // Interaction Handlers (Keep logic as is)
   const setLoadingState = (targetUserId, isLoading) => {
     setInteractionLoading((prev) => ({ ...prev, [targetUserId]: isLoading }));
@@ -443,6 +501,78 @@ const BuddiesPage = () => {
     }
 
     switch (activeTab) {
+      case "discover":
+        return (
+          <div>
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-textprimary">Your taste matches</h2>
+                <p className="mt-1 text-sm text-textsecondary">
+                  Ranked by how much your picks, genres, filmmakers and eras overlap.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={runDiscovery}
+                disabled={matchesLoading}
+                className="btn-ghost px-3 py-2 text-xs"
+              >
+                <FiRefreshCw className={`h-3.5 w-3.5 ${matchesLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </button>
+            </div>
+
+            {matchesLoading && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="skeleton h-[230px] rounded-2xl" />
+                ))}
+              </div>
+            )}
+
+            {!matchesLoading && needsPicks && (
+              <div className="surface flex flex-col items-center gap-3 px-6 py-14 text-center">
+                <p className="text-base font-medium text-textprimary">
+                  Pick the titles that represent you first
+                </p>
+                <p className="max-w-sm text-sm text-textsecondary">
+                  Four films and four series is all it takes. They go on your profile, and they are
+                  what we match other viewers against.
+                </p>
+                <Link href="/profile#taste" className="btn-primary mt-1">
+                  Choose my picks
+                </Link>
+              </div>
+            )}
+
+            {!matchesLoading && !needsPicks && !matches.length && (
+              <div className="surface flex flex-col items-center gap-3 px-6 py-14 text-center">
+                <p className="text-base font-medium text-textprimary">No close matches yet</p>
+                <p className="max-w-sm text-sm text-textsecondary">
+                  Not many viewers share your taste right now. Adding more picks widens the net —
+                  check back as more people join.
+                </p>
+              </div>
+            )}
+
+            {!matchesLoading && matches.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {matches.map((match) => (
+                  <BuddyMatchCard
+                    key={match.user.uid}
+                    match={match}
+                    onOpen={setOpenMatch}
+                    onAddFriend={handleSendFriendRequest}
+                    requestSent={!!sentRequests[match.user.uid]}
+                    isFriend={friends.some((friend) => friend.uid === match.user.uid)}
+                    isLoading={interactionLoading[match.user.uid]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
       case "requests":
         return (
           <div>
@@ -561,7 +691,11 @@ const BuddiesPage = () => {
     <div className="min-h-screen bg-primary text-textprimary font-poppins">
       <NavBar />
       {/* Adjusted padding and max-width */}
-      <main className="pt-20 pb-12 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <main
+        className={`pt-20 pb-12 mx-auto px-4 sm:px-6 lg:px-8 w-full ${
+          activeTab === "discover" ? "max-w-4xl" : "max-w-2xl"
+        }`}
+      >
         {/* Themed heading */}
         <h1 className="text-3xl font-bold mb-6 text-textprimary text-center sm:text-left">
           Buddies
@@ -582,6 +716,17 @@ const BuddiesPage = () => {
             >
               {" "}
               Friends{" "}
+            </button>
+            <button
+              onClick={() => setActiveTab("discover")}
+              className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ease-in-out ${
+                activeTab === "discover"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-textsecondary hover:text-textprimary hover:border-secondary-light"
+              }`}
+            >
+              {" "}
+              Discover{" "}
             </button>
             <button
               onClick={() => setActiveTab("requests")}
@@ -619,6 +764,17 @@ const BuddiesPage = () => {
           {renderTabContent()}
         </div>
       </main>
+
+      {openMatch && (
+        <BuddyProfileModal
+          match={openMatch}
+          onClose={() => setOpenMatch(null)}
+          onAddFriend={handleSendFriendRequest}
+          requestSent={!!sentRequests[openMatch.user.uid]}
+          isFriend={friends.some((friend) => friend.uid === openMatch.user.uid)}
+          isLoading={interactionLoading[openMatch.user.uid]}
+        />
+      )}
     </div>
   );
 };
