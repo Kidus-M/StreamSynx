@@ -7,9 +7,11 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiEdit2, FiCheck, FiLogOut, FiX } from "react-icons/fi";
 import PageShell from "../../components/PageShell";
+import { TastePicksEditor } from "../../components/TastePicks";
 import { auth, db } from "../../firebase";
 import { loginHref, useAuth } from "../../lib/auth";
 import { tmdbGet } from "../../lib/tmdb";
+import { EMPTY_TASTE_PICKS, readTastePicks, savePublicStats } from "../../lib/tasteProfile";
 
 const EMPTY_STATS = {
   buddies: 0,
@@ -26,6 +28,9 @@ const GENRE_SAMPLE = 12;
 /**
  * History entries only store id/title/poster, so genres have to come from TMDB.
  * We sample the most recent titles and tally the genres they belong to.
+ *
+ * Ids are kept alongside names because taste matching needs them: they are the
+ * fallback signal for anyone who has not filled in all eight taste picks.
  */
 const computeTopGenres = async ({ movieIds, showIds }) => {
   const requests = [
@@ -41,14 +46,13 @@ const computeTopGenres = async ({ movieIds, showIds }) => {
     if (response.status !== "fulfilled") return;
     (response.value.data?.genres || []).forEach((genre) => {
       if (!genre?.name) return;
-      counts.set(genre.name, (counts.get(genre.name) || 0) + 1);
+      const entry = counts.get(genre.id) || { id: String(genre.id), name: genre.name, count: 0 };
+      entry.count += 1;
+      counts.set(genre.id, entry);
     });
   });
 
-  return Array.from(counts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([name, count]) => ({ name, count }));
+  return Array.from(counts.values()).sort((a, b) => b.count - a.count);
 };
 
 const StatTile = ({ label, value }) => (
@@ -66,6 +70,7 @@ export default function Profile() {
 
   const [userData, setUserData] = useState(null);
   const [stats, setStats] = useState(EMPTY_STATS);
+  const [tastePicks, setTastePicks] = useState(EMPTY_TASTE_PICKS);
   const [topGenres, setTopGenres] = useState([]);
   const [genresLoading, setGenresLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -100,6 +105,7 @@ export default function Profile() {
         if (profile.exists()) {
           setUserData(profile.data());
           setUsername(profile.data().username || "");
+          setTastePicks(readTastePicks(profile.data()));
         }
 
         const historyData = history.exists() ? history.data() : {};
@@ -107,14 +113,21 @@ export default function Profile() {
         const watchedMovies = historyData.movies || [];
         const watchedEpisodes = historyData.episodes || [];
 
-        setStats({
+        const nextStats = {
           buddies: (friends.exists() ? friends.data().friends || [] : []).length,
           moviesWatched: new Set(watchedMovies.map((item) => item.id)).size,
           episodesWatched: watchedEpisodes.length,
           favoriteMovies: (favoritesData.movies || []).length,
           favoriteShows: (favoritesData.episodes || []).length,
           watchlist: (watchlist.exists() ? watchlist.data().items || [] : []).length,
-        });
+        };
+        setStats(nextStats);
+
+        // Buddies cannot read these private documents, so mirror the counts
+        // onto the public profile for the match modal to show.
+        savePublicStats(currentUser.uid, nextStats).catch((statsError) =>
+          console.error("Could not publish profile stats:", statsError)
+        );
 
         // Newest first, de-duplicated, so the sample reflects recent taste.
         const byRecency = (entries, key) =>
@@ -191,6 +204,9 @@ export default function Profile() {
   };
 
   const displayName = userData?.username || currentUser?.email?.split("@")[0] || "You";
+
+  // Empty taste slots fall back to the genres this account actually watches.
+  const fallbackGenreIds = topGenres.slice(0, 5).map((genre) => genre.id);
 
   return (
     <PageShell title="Profile" description="Your account and viewing stats.">
@@ -302,7 +318,7 @@ export default function Profile() {
               </div>
             ) : topGenres.length ? (
               <div className="mt-3 flex flex-wrap gap-2">
-                {topGenres.map((genre, index) => (
+                {topGenres.slice(0, 3).map((genre, index) => (
                   <span
                     key={genre.name}
                     className={`chip ${index === 0 ? "chip-active" : ""}`}
@@ -323,6 +339,24 @@ export default function Profile() {
               </p>
             )}
           </section>
+
+          {currentUser && !loading && (
+            <div id="taste" className="scroll-mt-24">
+              <TastePicksEditor
+                uid={currentUser.uid}
+                initialPicks={tastePicks}
+                fallbackGenreIds={fallbackGenreIds}
+                onSaved={(picks) => setTastePicks(picks)}
+              />
+              <p className="mt-3 text-sm text-textsecondary">
+                Once you have a few saved,{" "}
+                <Link href="/buddies?tab=discover" className="text-accent hover:text-accent-hover">
+                  Discover
+                </Link>{" "}
+                ranks viewers with taste like yours.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </PageShell>

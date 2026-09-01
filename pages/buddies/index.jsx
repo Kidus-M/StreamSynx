@@ -30,6 +30,12 @@ import {
   FaTimes,
   FaTrashAlt,
 } from "react-icons/fa"; // Import icons
+import Link from "next/link";
+import { FiRefreshCw } from "react-icons/fi";
+import BuddyMatchCard from "../../components/BuddyMatchCard";
+import BuddyProfileModal from "../../components/BuddyProfileModal";
+import { discoverBuddies } from "../../lib/buddyDiscovery";
+import { readTastePicks } from "../../lib/tasteProfile";
 
 // --- Updated UserListItem with Theme ---
 const UserListItem = ({
