@@ -16,10 +16,22 @@ import Footer from "../../../components/Footer";
  */
 const APP_SCHEME = "streamsynx://title";
 
+const SITE = "https://streamsynx.vercel.app";
+
 /** How long to wait for the app to take over before showing the fallback CTAs. */
 const HANDOFF_MS = 1200;
 
-export default function OpenTitlePage({ title, overview, poster, backdrop, meta, type, id, watchHref }) {
+export default function OpenTitlePage({
+  title,
+  overview,
+  poster,
+  backdrop,
+  meta,
+  type,
+  id,
+  watchHref,
+  year,
+}) {
   const [triedApp, setTriedApp] = useState(false);
 
   const openInApp = useCallback(() => {
@@ -39,21 +51,46 @@ export default function OpenTitlePage({ title, overview, poster, backdrop, meta,
   }, [openInApp]);
 
   const pageTitle = `${title} — StreamSynx`;
-  const canonical = `https://streamsynx.vercel.app/open/${type}/${id}`;
+  const canonical = `${SITE}/open/${type}/${id}`;
+  const cardImage = `${SITE}/api/og?type=${type}&id=${id}`;
+  const summary = overview || `Watch ${title} free on StreamSynx.`;
+  const headline = year ? `${title} (${year})` : title;
 
   return (
     <div className="flex min-h-screen flex-col bg-primary text-textprimary">
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={overview || `Watch ${title} on StreamSynx.`} />
+        <meta name="description" content={summary} />
         <link rel="canonical" href={canonical} />
-        {/* Rich previews wherever the poster's link gets pasted. */}
-        <meta property="og:type" content="video.other" />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={overview || `Watch ${title} on StreamSynx.`} />
+
+        {/*
+          The card a pasted link turns into. Everything a crawler needs is here
+          and static — the image is drawn per title by /api/og — because this is
+          the whole reason a shared title is a link now rather than a screenshot
+          the app rendered on the phone.
+        */}
+        <meta property="og:site_name" content="StreamSynx" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content={type === "tv" ? "video.tv_show" : "video.movie"} />
+        <meta property="og:title" content={headline} />
+        <meta property="og:description" content={summary} />
         <meta property="og:url" content={canonical} />
-        {backdrop && <meta property="og:image" content={backdrop} />}
+        <meta property="og:image" content={cardImage} />
+        <meta property="og:image:secure_url" content={cardImage} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={`${headline} on StreamSynx`} />
+
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={headline} />
+        <meta name="twitter:description" content={summary} />
+        <meta name="twitter:image" content={cardImage} />
+
+        {/* Read by the /open page's own handoff, and by iOS Safari banners. */}
+        <meta property="al:android:url" content={`${APP_SCHEME}/${type}/${id}`} />
+        <meta property="al:android:package" content="com.example.streamsynx" />
+        <meta property="al:android:app_name" content="StreamSynx" />
       </Head>
 
       <NavBar />
@@ -174,6 +211,7 @@ export async function getServerSideProps({ params }) {
       id,
       title,
       meta,
+      year,
       overview: data.overview || "",
       poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : null,
       backdrop: data.backdrop_path
