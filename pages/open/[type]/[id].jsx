@@ -60,7 +60,7 @@ export default function OpenTitlePage({
     <div className="flex min-h-screen flex-col bg-primary text-textprimary">
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={summary} />
+        <meta key="description" name="description" content={summary} />
         <link rel="canonical" href={canonical} />
 
         {/*
@@ -69,11 +69,11 @@ export default function OpenTitlePage({
           the whole reason a shared title is a link now rather than a screenshot
           the app rendered on the phone.
         */}
-        <meta property="og:site_name" content="StreamSynx" />
+        <meta key="og:site_name" property="og:site_name" content="StreamSynx" />
         <meta property="og:locale" content="en_US" />
-        <meta property="og:type" content={type === "tv" ? "video.tv_show" : "video.movie"} />
-        <meta property="og:title" content={headline} />
-        <meta property="og:description" content={summary} />
+        <meta key="og:type" property="og:type" content={type === "tv" ? "video.tv_show" : "video.movie"} />
+        <meta key="og:title" property="og:title" content={headline} />
+        <meta key="og:description" property="og:description" content={summary} />
         <meta property="og:url" content={canonical} />
         <meta property="og:image" content={cardImage} />
         <meta property="og:image:secure_url" content={cardImage} />
@@ -82,7 +82,7 @@ export default function OpenTitlePage({
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content={`${headline} on StreamSynx`} />
 
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={headline} />
         <meta name="twitter:description" content={summary} />
         <meta name="twitter:image" content={cardImage} />

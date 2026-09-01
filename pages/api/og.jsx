@@ -44,7 +44,7 @@ export default async function handler(request) {
   const date = data.release_date || data.first_air_date || "";
   const year = date ? date.slice(0, 4) : "";
   const rating = data.vote_average ? Number(data.vote_average).toFixed(1) : "";
-  const overview = truncate(data.overview || "", 180);
+  const overview = truncate(data.overview || "", 150);
   const genres = (data.genres || []).slice(0, 2).map((genre) => genre.name);
 
   const poster = data.poster_path
@@ -121,7 +121,15 @@ export default async function handler(request) {
             />
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              // 1200 canvas − 128 padding − 286 poster − 48 gap. Stated rather
+              // than left to `flex: 1`, which lets satori overrun and clip.
+              width: 738,
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <div
                 style={{
@@ -132,11 +140,16 @@ export default async function handler(request) {
                   height: 38,
                   borderRadius: 12,
                   backgroundColor: ACCENT,
-                  color: BG,
-                  fontSize: 24,
                 }}
               >
-                ▶
+                {/*
+                  Drawn, not typed. The font @vercel/og bundles is Noto Sans
+                  Latin, which has no ▶ and no ★ — a literal glyph comes out of
+                  the renderer as a tofu box.
+                */}
+                <svg width="16" height="18" viewBox="0 0 16 18">
+                  <path d="M2 1.5 L14 9 L2 16.5 Z" fill={BG} />
+                </svg>
               </div>
               <div
                 style={{
@@ -180,12 +193,18 @@ export default async function handler(request) {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 7,
+                    gap: 8,
                     color: ACCENT,
                     fontWeight: 600,
                   }}
                 >
-                  ★ {rating}
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z"
+                      fill={ACCENT}
+                    />
+                  </svg>
+                  {rating}
                 </div>
               )}
               {meta.map((part) => (

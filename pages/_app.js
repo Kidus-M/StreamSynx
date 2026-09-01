@@ -15,16 +15,22 @@ export default function App({ Component, pageProps }) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <title>StreamSynx — Watch movies & TV shows</title>
+        {/*
+          Every one of these carries a `key`. That is what lets a route replace a
+          default instead of appending next to it — two og:title tags in a
+          document is a coin flip over which one a crawler builds its card from.
+        */}
         <meta
+          key="description"
           name="description"
           content="Stream trending, popular and top-rated movies and TV shows. Track your watch history, build a watchlist and share recommendations with friends on StreamSynx."
         />
         <meta name="keywords" content="movies, tv shows, streaming, trending, watchlist, recommendations, watch party" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="StreamSynx" />
-        <meta property="og:title" content="StreamSynx — Watch movies & TV shows" />
-        <meta property="og:description" content="A calm, fast place to find something to watch." />
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta key="og:type" property="og:type" content="website" />
+        <meta key="og:site_name" property="og:site_name" content="StreamSynx" />
+        <meta key="og:title" property="og:title" content="StreamSynx — Watch movies & TV shows" />
+        <meta key="og:description" property="og:description" content="A calm, fast place to find something to watch." />
+        <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
       </Head>
 
       <TvRemoteNavigation />
