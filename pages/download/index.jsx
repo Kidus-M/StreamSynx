@@ -15,6 +15,13 @@ import Footer from "../../components/Footer";
 /** Short link the Downloader app on Android TV can actually be typed into. */
 const TV_SHORT_LINK = "streamsynx.vercel.app/tv.apk";
 
+/**
+ * Stated here rather than measured, because the file is served straight from
+ * `public/` and there is no request in front of it to read a length from. Keep
+ * it in step with the APK when one is dropped in.
+ */
+const APK_SIZE = "55 MB";
+
 const APPS = [
   {
     id: "tv",
@@ -36,17 +43,17 @@ const APPS = [
     id: "android",
     icon: FiSmartphone,
     name: "Android",
-    version: "2.1.0",
-    size: "55 MB",
+    version: "2.2.0",
+    size: APK_SIZE,
     href: "/downloads/StreamSynx.apk",
     primary: true,
-    tagline: "Now with a real player, and a rebuilt interface.",
+    tagline: "A player that behaves like a player, and links that behave like links.",
     points: [
-      "Built-in player — no more handing you off to a browser full of ads",
-      "Provider pages are resolved off-screen, so their ads never render",
-      "Discover buddies by taste: pick eight titles, get matched on what they share",
-      "Buddies fixed: accepted requests actually show up on both sides",
-      "Shared posters open the title straight in the app",
+      "Rebuilt player: full screen with no tab bar over the picture, and the server picker actually reachable",
+      "Double-tap to skip, hold for 2x, drag the scrub bar, lock the screen, zoom to fill",
+      "Falls through to the next server on its own when one will not hand over a stream",
+      "Sharing sends a link, not a screenshot — it unfurls into a card with the poster wherever you paste it",
+      "Episodes and playback speed can be changed without leaving the video",
     ],
   },
 ];
@@ -97,7 +104,9 @@ const AppCard = ({ app, index }) => {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 className="heading-lg">{app.name}</h2>
             {app.primary && (
-              <span className="chip chip-active !py-1 text-[11px]">Version 2</span>
+              <span className="chip chip-active !py-1 text-[11px]">
+                Version {app.version}
+              </span>
             )}
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-textsecondary">{app.tagline}</p>
@@ -123,7 +132,7 @@ const AppCard = ({ app, index }) => {
           Download APK
         </a>
         <p className="mt-3 text-center text-[12px] text-textsecondary/70">
-          Version {app.version} · {app.size} · Android 6.0 and later
+          Version {app.version} · {app.size} · Android 7.0 and later
         </p>
       </div>
     </motion.div>
