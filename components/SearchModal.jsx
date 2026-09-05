@@ -93,8 +93,14 @@ const SearchModal = ({ isOpen, onClose }) => {
   const [recents, setRecents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isMac, setIsMac] = useState(false);
 
   const trimmed = query.trim();
+
+  // Set after mount so the shortcut hint never mismatches the server render.
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || ""));
+  }, []);
 
   // Reset + focus each time the palette opens.
   useEffect(() => {
@@ -375,19 +381,34 @@ const SearchModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Footer */}
-            {trimmed && !loading && visible.length > 0 && (
-              <button
-                type="button"
-                onClick={seeAll}
-                className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3 text-xs text-textsecondary transition-colors hover:text-textprimary"
-              >
-                <span>
-                  See all results for <span className="text-textprimary">{trimmed}</span>
+            {!loading && visible.length > 0 && (
+              <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] px-4 py-3 text-xs text-textsecondary">
+                {trimmed ? (
+                  <button
+                    type="button"
+                    onClick={seeAll}
+                    className="min-w-0 truncate text-left transition-colors hover:text-textprimary"
+                  >
+                    See all results for <span className="text-textprimary">{trimmed}</span>
+                  </button>
+                ) : (
+                  <span />
+                )}
+                <span className="flex shrink-0 items-center gap-3">
+                  <span className="hidden items-center gap-1.5 sm:flex">
+                    <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px]">
+                      Enter
+                    </kbd>
+                    Watch
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px]">
+                      {isMac ? "⌘" : "Ctrl"} ↵
+                    </kbd>
+                    Watchlist
+                  </span>
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px]">Enter</kbd>
-                </span>
-              </button>
+              </div>
             )}
           </motion.div>
         </motion.div>

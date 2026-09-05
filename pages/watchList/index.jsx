@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { doc, getDoc } from "firebase/firestore";
 import { FaListAlt } from "react-icons/fa";
 import PageShell, { AuthGate, EmptyState } from "../../components/PageShell";
 import MovieCard from "../../components/MinimalCard";
-import { db } from "../../firebase";
-import { useAuth } from "../../lib/auth";
+import { useWatchlist } from "../../lib/watchlist";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -14,34 +12,9 @@ const FILTERS = [
 ];
 
 const WatchlistPage = () => {
-  const { user } = useAuth();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Shared store: removing a title from a card drops it from this grid at once.
+  const { items, loading } = useWatchlist();
   const [filter, setFilter] = useState("all");
-
-  useEffect(() => {
-    let active = true;
-    if (!user?.uid) {
-      setItems([]);
-      setLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-
-    setLoading(true);
-    getDoc(doc(db, "watchlists", user.uid))
-      .then((snapshot) => {
-        if (!active) return;
-        setItems(snapshot.exists() ? snapshot.data()?.items || [] : []);
-      })
-      .catch((error) => console.error("Error loading watchlist:", error))
-      .finally(() => active && setLoading(false));
-
-    return () => {
-      active = false;
-    };
-  }, [user?.uid]);
 
   const filtered = useMemo(
     () => (filter === "all" ? items : items.filter((item) => item.media_type === filter)),
