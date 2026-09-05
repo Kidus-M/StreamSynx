@@ -1,19 +1,14 @@
 // components/MinimalCard.jsx — the poster card used across the app.
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { FaPlus, FaCheck, FaStar, FaPlay } from "react-icons/fa";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import toast from "react-hot-toast";
-import { db } from "../firebase";
-import { useAuth, loginHref } from "../lib/auth";
 import { genreNames, mediaTypeOf, posterUrl, titleOf, watchHref, yearOf } from "../lib/tmdb";
+import { useWatchlist } from "../lib/watchlist";
 
 const MovieCard = ({ movie, onClick, priority = false }) => {
   const router = useRouter();
-  const { user } = useAuth();
-  const userId = user?.uid;
+  const { isSaved, toggle } = useWatchlist();
 
-  const [isAdded, setIsAdded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const data = useMemo(() => {
@@ -29,80 +24,15 @@ const MovieCard = ({ movie, onClick, priority = false }) => {
     };
   }, [movie]);
 
-  // Reflect the item's watchlist state for signed-in users.
-  useEffect(() => {
-    let active = true;
-    if (!userId || !data.id) {
-      setIsAdded(false);
-      return () => {
-        active = false;
-      };
-    }
-
-    getDoc(doc(db, "watchlists", userId))
-      .then((snapshot) => {
-        if (!active) return;
-        const items = snapshot.exists() ? snapshot.data()?.items || [] : [];
-        setIsAdded(
-          items.some((item) => item.id === data.id && item.media_type === data.mediaType)
-        );
-      })
-      .catch(() => active && setIsAdded(false));
-
-    return () => {
-      active = false;
-    };
-  }, [userId, data.id, data.mediaType]);
+  const isAdded = isSaved(movie);
 
   const toggleWatchlist = useCallback(
-    async (event) => {
+    (event) => {
       event.stopPropagation();
       event.preventDefault();
-
-      if (!userId) {
-        toast("Sign in to save titles to your watchlist.");
-        router.push(loginHref(router.asPath));
-        return;
-      }
-      if (!data.id) return;
-
-      const wasAdded = isAdded;
-      setIsAdded(!wasAdded);
-
-      const entry = {
-        id: data.id,
-        media_type: data.mediaType,
-        ...(movie?.title ? { title: movie.title } : {}),
-        ...(movie?.name ? { name: movie.name } : {}),
-        ...(movie?.poster_path ? { poster_path: movie.poster_path } : {}),
-      };
-
-      try {
-        const ref = doc(db, "watchlists", userId);
-        const snapshot = await getDoc(ref);
-
-        if (wasAdded) {
-          const items = snapshot.exists() ? snapshot.data()?.items || [] : [];
-          await updateDoc(ref, {
-            items: items.filter(
-              (item) => !(item.id === entry.id && item.media_type === entry.media_type)
-            ),
-          });
-          toast.success("Removed from watchlist");
-        } else if (snapshot.exists()) {
-          await updateDoc(ref, { items: arrayUnion(entry) });
-          toast.success("Added to watchlist");
-        } else {
-          await setDoc(ref, { items: [entry] });
-          toast.success("Added to watchlist");
-        }
-      } catch (error) {
-        console.error("Error updating watchlist:", error);
-        toast.error("Could not update your watchlist.");
-        setIsAdded(wasAdded);
-      }
+      toggle(movie);
     },
-    [userId, isAdded, data, movie, router]
+    [toggle, movie]
   );
 
   const open = useCallback(

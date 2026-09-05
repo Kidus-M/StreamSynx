@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiSearch, FiX, FiClock, FiTrendingUp, FiCornerDownLeft } from "react-icons/fi";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaPlus, FaCheck } from "react-icons/fa";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -10,6 +10,7 @@ import {
   removeRecentSearch,
 } from "../lib/localStore";
 import { mediaTypeOf, posterUrl, tmdbGet, titleOf, watchHref, yearOf } from "../lib/tmdb";
+import { useWatchlist } from "../lib/watchlist";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -17,41 +18,65 @@ const FILTERS = [
   { id: "tv", label: "Series" },
 ];
 
-const ResultRow = ({ item, active, onSelect, onHover }) => {
+const ResultRow = ({ item, active, saved, onSelect, onHover, onToggleSave }) => {
   const poster = posterUrl(item.poster_path);
   const type = mediaTypeOf(item);
+  const title = titleOf(item);
 
+  // A row is a container, not a button: the save control has to sit outside the
+  // clickable area rather than nested inside it.
   return (
-    <button
-      type="button"
+    <div
       onMouseMove={onHover}
-      onClick={onSelect}
-      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
+      className={`group/row flex w-full items-center gap-1 rounded-xl pr-1.5 transition-colors ${
         active ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"
       }`}
     >
-      <div className="h-14 w-10 shrink-0 overflow-hidden rounded-md bg-secondary">
-        {poster ? (
-          <img src={poster} alt="" loading="lazy" className="h-full w-full object-cover" />
-        ) : null}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-textprimary">{titleOf(item)}</p>
-        <p className="mt-0.5 flex items-center gap-2 truncate text-xs text-textsecondary">
-          <span className="rounded border border-white/10 px-1.5 py-px text-[10px] uppercase tracking-wide">
-            {type === "tv" ? "Series" : "Film"}
-          </span>
-          {yearOf(item) && <span>{yearOf(item)}</span>}
-          {item.vote_average > 0 && (
-            <span className="inline-flex items-center gap-1">
-              <FaStar className="h-2.5 w-2.5 text-accent" />
-              {item.vote_average.toFixed(1)}
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-2 text-left"
+      >
+        <div className="h-14 w-10 shrink-0 overflow-hidden rounded-md bg-secondary">
+          {poster ? (
+            <img src={poster} alt="" loading="lazy" className="h-full w-full object-cover" />
+          ) : null}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-textprimary">{title}</p>
+          <p className="mt-0.5 flex items-center gap-2 truncate text-xs text-textsecondary">
+            <span className="rounded border border-white/10 px-1.5 py-px text-[10px] uppercase tracking-wide">
+              {type === "tv" ? "Series" : "Film"}
             </span>
-          )}
-        </p>
-      </div>
+            {yearOf(item) && <span>{yearOf(item)}</span>}
+            {item.vote_average > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <FaStar className="h-2.5 w-2.5 text-accent" />
+                {item.vote_average.toFixed(1)}
+              </span>
+            )}
+          </p>
+        </div>
+      </button>
+
       {active && <FiCornerDownLeft className="h-4 w-4 shrink-0 text-textsecondary" />}
-    </button>
+
+      <button
+        type="button"
+        onClick={onToggleSave}
+        aria-label={saved ? `Remove ${title} from watchlist` : `Add ${title} to watchlist`}
+        title={saved ? "Remove from watchlist" : "Add to watchlist"}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
+          saved
+            ? "bg-accent text-primary"
+            : `border border-white/10 bg-white/[0.04] text-textsecondary hover:bg-accent hover:text-primary ${
+                active ? "opacity-100" : "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+              }`
+        }`}
+      >
+        {saved ? <FaCheck size={11} /> : <FaPlus size={11} />}
+      </button>
+    </div>
   );
 };
 
@@ -59,6 +84,7 @@ const SearchModal = ({ isOpen, onClose }) => {
   const router = useRouter();
   const inputRef = useRef(null);
   const listRef = useRef(null);
+  const { isSaved, toggle } = useWatchlist();
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -147,6 +173,16 @@ const SearchModal = ({ isOpen, onClose }) => {
     [onClose, router, trimmed]
   );
 
+  // Saving keeps the palette open — you can queue up several titles in one pass.
+  const saveItem = useCallback(
+    (item, event) => {
+      event?.stopPropagation?.();
+      event?.preventDefault?.();
+      toggle(item);
+    },
+    [toggle]
+  );
+
   const seeAll = useCallback(() => {
     if (!trimmed) return;
     setRecents(addRecentSearch(trimmed));
@@ -172,6 +208,11 @@ const SearchModal = ({ isOpen, onClose }) => {
     }
     if (event.key === "Enter") {
       event.preventDefault();
+      // Ctrl/Cmd + Enter saves the highlighted row instead of opening it.
+      if ((event.metaKey || event.ctrlKey) && visible[activeIndex]) {
+        saveItem(visible[activeIndex]);
+        return;
+      }
       if (visible[activeIndex]) openItem(visible[activeIndex]);
       else seeAll();
     }
@@ -315,8 +356,10 @@ const SearchModal = ({ isOpen, onClose }) => {
                     <ResultRow
                       item={item}
                       active={index === activeIndex}
+                      saved={isSaved(item)}
                       onHover={() => setActiveIndex(index)}
                       onSelect={() => openItem(item)}
+                      onToggleSave={(event) => saveItem(item, event)}
                     />
                   </div>
                 ))}
