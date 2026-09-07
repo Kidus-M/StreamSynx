@@ -34,6 +34,7 @@ const PlayerShell = ({
   const [loaded, setLoaded] = useState(false);
   const [slow, setSlow] = useState(false);
   const slowTimer = useRef(null);
+  const frameRef = useRef(null);
 
   // Restore the visitor's preferred server after mount (keeps SSR markup stable).
   useEffect(() => {
@@ -62,10 +63,18 @@ const PlayerShell = ({
     return () => clearTimeout(slowTimer.current);
   }, [url, nonce]);
 
-  const handleLoaded = useCallback(() => {
+  const handleLoaded = useCallback((event) => {
     setLoaded(true);
     setSlow(false);
     clearTimeout(slowTimer.current);
+
+    // Hand the embed the keyboard as soon as it is ready, but only while nothing
+    // else is focused - otherwise space/arrows scroll the page instead of
+    // reaching the player's own play/pause and volume controls.
+    const active = document.activeElement;
+    if (!active || active === document.body || active === frameRef.current) {
+      event.currentTarget?.focus?.({ preventScroll: true });
+    }
   }, []);
 
   const selectSource = useCallback((id) => {
@@ -79,6 +88,7 @@ const PlayerShell = ({
     <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black shadow-lift">
       {/* Video frame */}
       <div
+        ref={frameRef}
         className="tv-focusable tv-player-frame relative aspect-video w-full bg-black"
         role="region"
         tabIndex={0}

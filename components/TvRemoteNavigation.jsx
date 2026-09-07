@@ -13,7 +13,19 @@ const FOCUSABLE_SELECTOR = [
 ].join(",");
 
 const NAV_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
-const ENTER_KEYS = new Set(["Enter", " "]);
+const ENTER_KEYS = new Set(["Enter", " ", "Spacebar"]);
+const EXIT_KEYS = new Set(["Escape", "Esc", "Backspace"]);
+// Keys the embedded player owns once focus is inside it: play/pause and the
+// volume/seek arrows. The page must never scroll or move TV focus on these.
+const PLAYER_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  " ",
+  "Spacebar",
+]);
+const PLAYER_FRAME_SELECTOR = ".tv-player-frame";
 const TYPING_SELECTOR = "input, textarea, select, [contenteditable='true']";
 
 function isVisible(element) {
@@ -82,12 +94,37 @@ function scoreCandidate(fromRect, candidateRect, direction) {
 function getFocusableElements() {
   return Array.from(document.querySelectorAll(FOCUSABLE_SELECTOR))
     .filter(isVisible)
+    // The player iframe is entered with Enter/Space, never by arrowing onto it,
+    // so remote navigation always lands on the frame around it.
+    .filter((element) => !isInsidePlayer(element))
     .filter((element, index, elements) => elements.indexOf(element) === index);
+}
+
+function isFullyVisible(element) {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
 }
 
 function focusElement(element) {
   element.focus({ preventScroll: true });
-  element.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
+  // Only scroll when the target is actually off screen - recentering something
+  // already in view reads as the page jumping under you.
+  if (!isFullyVisible(element)) {
+    element.scrollIntoView({ block: "center", inline: "center", behavior: "auto" });
+  }
+}
+
+const getPlayerFrame = (element) => element?.closest?.(PLAYER_FRAME_SELECTOR) || null;
+
+// True only once focus has moved onto the embed itself, i.e. the viewer is
+// "inside" the player rather than sitting on the frame around it.
+function isInsidePlayer(element) {
+  return Boolean(element) && element.tagName === "IFRAME" && Boolean(getPlayerFrame(element));
 }
 
 function findFirstFocusable(elements) {
@@ -121,12 +158,32 @@ export default function TvRemoteNavigation() {
     const handleKeyDown = (event) => {
       const activeElement = document.activeElement;
 
-      if (ENTER_KEYS.has(event.key) && activeElement?.matches?.(".tv-player-frame")) {
+      if (ENTER_KEYS.has(event.key) && activeElement?.matches?.(PLAYER_FRAME_SELECTOR)) {
         const iframe = activeElement.querySelector("iframe");
         if (iframe) {
           event.preventDefault();
           event.stopPropagation();
           iframe.focus({ preventScroll: true });
+        }
+        return;
+      }
+
+      if (isInsidePlayer(activeElement)) {
+        // Escape hands control back to the frame so the remote can leave the player.
+        if (EXIT_KEYS.has(event.key)) {
+          const frame = getPlayerFrame(activeElement);
+          if (frame) {
+            event.preventDefault();
+            event.stopPropagation();
+            frame.focus({ preventScroll: true });
+          }
+          return;
+        }
+
+        // Play/pause and volume belong to the embed: swallow the browser's
+        // default page scroll and never steal focus out of the player.
+        if (PLAYER_KEYS.has(event.key) && !event.altKey && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
         }
         return;
       }
