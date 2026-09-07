@@ -220,3 +220,35 @@ select option {
     mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent 100%);
   }
 }
+
+/*
+ * Keep the page still while the embed handles a keypress.
+ *
+ * The players are cross-origin iframes, so their own shortcuts (space to
+ * pause, arrows for volume) are handled entirely inside the provider's
+ * document - the keydown never reaches this page and no listener here can
+ * preventDefault it. The provider's page is not scrollable, so the browser
+ * chains the key's default scroll out of the iframe and moves the page under
+ * the video instead.
+ *
+ * Making the frame its own contained scroll container gives that chain
+ * somewhere to land: it absorbs the scroll and `contain` stops it from
+ * reaching the document. The ::after gives the frame a 1px scroll range,
+ * because a container with nothing to scroll is not treated as a chain
+ * target. Trade-off: the wheel no longer scrolls the page while the pointer
+ * sits over the video.
+ */
+.tv-player-frame {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.tv-player-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: calc(100% + 1px);
+  pointer-events: none;
+}

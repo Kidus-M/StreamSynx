@@ -77,6 +77,14 @@ const PlayerShell = ({
     }
   }, []);
 
+  // The frame absorbs the scroll the browser chains out of the embed when a
+  // key is pressed inside it (see .tv-player-frame in global.css). Snapping it
+  // back keeps the video pixel-aligned and leaves room to absorb the next one.
+  const handleFrameScroll = useCallback((event) => {
+    if (event.currentTarget.scrollTop !== 0) event.currentTarget.scrollTop = 0;
+    if (event.currentTarget.scrollLeft !== 0) event.currentTarget.scrollLeft = 0;
+  }, []);
+
   const selectSource = useCallback((id) => {
     setSourceId(id);
     setPreferredSourceId(id);
@@ -90,6 +98,7 @@ const PlayerShell = ({
       <div
         ref={frameRef}
         className="tv-focusable tv-player-frame relative aspect-video w-full bg-black"
+        onScroll={handleFrameScroll}
         role="region"
         tabIndex={0}
         aria-label={title ? `${title} player` : "Video player"}
