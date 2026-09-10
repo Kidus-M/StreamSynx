@@ -46,7 +46,7 @@ const CONTENT = {
   [NUDGE_TASTE]: {
     icon: FiFilm,
     eyebrow: "Your taste profile",
-    title: "Four films, four series — that is you",
+    title: "Four films, four series — that’s you",
     body: "Pick the titles that represent you. They sit on your profile, and they are what we match other viewers against.",
     cta: { label: "Choose my picks", href: () => "/profile#taste" },
   },
@@ -138,7 +138,7 @@ const NudgeCard = ({ id, asPath, onDismiss, onOptOut, onAct }) => {
         onClick={onOptOut}
         className="mt-3 text-[11px] text-textsecondary/70 underline-offset-2 transition-colors hover:text-textsecondary hover:underline"
       >
-        Do not show this again
+        Don’t show this again
       </button>
     </motion.div>
   );
@@ -202,7 +202,6 @@ export default function NudgeHost() {
       if (document.body.style.overflow === "hidden") return;
 
       const { pathname } = route.current;
-      console.log("[nudge-debug] evaluate", { pathname, routerPath: window.location.pathname, quiet: isQuietRoute(pathname) });
       if (isQuietRoute(pathname)) return;
       // Cheap gate first: no Firestore read for someone whose prompts are
       // already spent, snoozed, or used up for this session.
@@ -223,7 +222,6 @@ export default function NudgeHost() {
 
       // Counted on display, not on dismissal, so a prompt someone ignores
       // still uses up one of its turns.
-      console.log("[nudge-debug] RECORD", id, "on", pathname);
       recordNudgeShown(id);
       setNudgeId(id);
     };

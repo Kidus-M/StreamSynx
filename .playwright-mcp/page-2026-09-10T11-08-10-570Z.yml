@@ -1,0 +1,766 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e3]:
+    - banner [ref=f3e4]:
+      - navigation [ref=f3e5]:
+        - link "StreamSynx" [ref=f3e7] [cursor=pointer]:
+          - /url: /
+        - list [ref=f3e8]:
+          - listitem [ref=f3e9]:
+            - link "Home" [ref=f3e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f3e12]:
+            - link "Watchlist" [ref=f3e13] [cursor=pointer]:
+              - /url: /login?next=%2FwatchList
+          - listitem [ref=f3e14]:
+            - link "Watch Parties" [ref=f3e15] [cursor=pointer]:
+              - /url: /login?next=%2Frooms
+        - generic [ref=f3e16]:
+          - button "Search... ⌘K" [ref=f3e17] [cursor=pointer]:
+            - generic [ref=f3e21]: Search...
+            - generic [ref=f3e22]: ⌘K
+          - generic [ref=f3e23]:
+            - link "Sign in" [ref=f3e277] [cursor=pointer]:
+              - /url: /login?next=%2F
+            - link "Sign up" [ref=f3e278] [cursor=pointer]:
+              - /url: /signup
+    - main [ref=f3e24]:
+      - region "Trending now" [ref=f3e279]:
+        - generic [ref=f3e285]:
+          - generic [ref=f3e286]:
+            - generic [ref=f3e287]: "#5 Trending"
+            - generic [ref=f3e288]: Series
+          - heading "Last Seen" [level=1] [ref=f3e289]
+          - generic [ref=f3e290]:
+            - generic [ref=f3e291]: "9.5"
+            - generic [ref=f3e294]: "2026"
+            - generic [ref=f3e296]: Crime · Drama · Mystery
+          - paragraph [ref=f3e297]: When emergency dispatcher Ian Ridley receives a frantic call from a teenager he believes could be his long-missing daughter, he stops at nothing to find her.
+          - generic [ref=f3e298]:
+            - link "Watch now" [ref=f3e299] [cursor=pointer]:
+              - /url: /watchTv/258230/1/1
+            - link "More info" [ref=f3e302] [cursor=pointer]:
+              - /url: /watchTv/258230/1/1#details
+        - generic [ref=f3e305]:
+          - button "Show Drawn Together" [ref=f3e306] [cursor=pointer]
+          - button "Show Moana" [ref=f3e307] [cursor=pointer]
+          - button "Show Why Did I Get Married Again?" [ref=f3e308] [cursor=pointer]
+          - 'button "Show PAW Patrol: The Dino Movie" [ref=f3e309] [cursor=pointer]'
+          - button "Show Last Seen" [ref=f3e310] [cursor=pointer]
+          - button "Show Made in Korea" [ref=f3e311] [cursor=pointer]
+      - generic [ref=f3e34]:
+        - generic [ref=f3e312]:
+          - heading "Trending movies" [level=2] [ref=f3e314]
+          - generic [ref=f3e315]:
+            - generic [ref=f3e316]:
+              - button "Open Moana" [ref=f3e318] [cursor=pointer]:
+                - generic [ref=f3e319]:
+                  - generic [ref=f3e320]: "6.9"
+                  - button "Add to watchlist" [ref=f3e323]
+                - generic [ref=f3e326]:
+                  - heading "Moana" [level=3] [ref=f3e327]
+                  - paragraph [ref=f3e328]: 2026 · Film · Family · Fantasy
+              - button "Open The Runner" [ref=f3e330] [cursor=pointer]:
+                - generic [ref=f3e331]:
+                  - generic [ref=f3e332]: "6.7"
+                  - button "Add to watchlist" [ref=f3e335]
+                - generic [ref=f3e338]:
+                  - heading "The Runner" [level=3] [ref=f3e339]
+                  - paragraph [ref=f3e340]: 2026 · Film · Thriller · Action
+              - 'button "Open Spider-Man: Brand New Day" [ref=f3e342] [cursor=pointer]':
+                - generic [ref=f3e343]:
+                  - generic [ref=f3e344]: "7.9"
+                  - button "Add to watchlist" [ref=f3e347]
+                - generic [ref=f3e350]:
+                  - 'heading "Spider-Man: Brand New Day" [level=3] [ref=f3e351]'
+                  - paragraph [ref=f3e352]: 2026 · Film · Sci-Fi · Action
+              - button "Open The Odyssey" [ref=f3e354] [cursor=pointer]:
+                - generic [ref=f3e355]:
+                  - generic [ref=f3e356]: "8.0"
+                  - button "Add to watchlist" [ref=f3e359]
+                - generic [ref=f3e362]:
+                  - heading "The Odyssey" [level=3] [ref=f3e363]
+                  - paragraph [ref=f3e364]: 2026 · Film · Adventure · Action
+              - button "Open Mayday" [ref=f3e366] [cursor=pointer]:
+                - generic [ref=f3e367]:
+                  - generic [ref=f3e368]: "7.9"
+                  - button "Add to watchlist" [ref=f3e371]
+                - generic [ref=f3e374]:
+                  - heading "Mayday" [level=3] [ref=f3e375]
+                  - paragraph [ref=f3e376]: 2026 · Film · Action · Comedy
+              - button "Open Coyote vs. Acme" [ref=f3e378] [cursor=pointer]:
+                - generic [ref=f3e379]:
+                  - generic [ref=f3e380]: "7.7"
+                  - button "Add to watchlist" [ref=f3e383]
+                - generic [ref=f3e386]:
+                  - heading "Coyote vs. Acme" [level=3] [ref=f3e387]
+                  - paragraph [ref=f3e388]: 2026 · Film · Comedy · Adventure
+              - button "Open Obsession" [ref=f3e390] [cursor=pointer]:
+                - generic [ref=f3e391]:
+                  - generic [ref=f3e392]: "8.2"
+                  - button "Add to watchlist" [ref=f3e395]
+                - generic [ref=f3e398]:
+                  - heading "Obsession" [level=3] [ref=f3e399]
+                  - paragraph [ref=f3e400]: 2026 · Film · Horror · Thriller
+              - button "Open Practical Magic 2" [ref=f3e402] [cursor=pointer]:
+                - generic [ref=f3e403]:
+                  - generic [ref=f3e404]: "6.5"
+                  - button "Add to watchlist" [ref=f3e407]
+                - generic [ref=f3e410]:
+                  - heading "Practical Magic 2" [level=3] [ref=f3e411]
+                  - paragraph [ref=f3e412]: 2026 · Film · Romance · Fantasy
+              - button "Open One Night Only" [ref=f3e414] [cursor=pointer]:
+                - generic [ref=f3e415]:
+                  - generic [ref=f3e416]: "6.8"
+                  - button "Add to watchlist" [ref=f3e419]
+                - generic [ref=f3e422]:
+                  - heading "One Night Only" [level=3] [ref=f3e423]
+                  - paragraph [ref=f3e424]: 2026 · Film · Comedy · Romance
+              - 'button "Open PAW Patrol: The Dino Movie" [ref=f3e426] [cursor=pointer]':
+                - generic [ref=f3e427]:
+                  - generic [ref=f3e428]: "7.0"
+                  - button "Add to watchlist" [ref=f3e431]
+                - generic [ref=f3e434]:
+                  - 'heading "PAW Patrol: The Dino Movie" [level=3] [ref=f3e435]'
+                  - paragraph [ref=f3e436]: 2026 · Film · Animation · Adventure
+              - button "Open Mutiny" [ref=f3e438] [cursor=pointer]:
+                - generic [ref=f3e439]:
+                  - generic [ref=f3e440]: "6.4"
+                  - button "Add to watchlist" [ref=f3e443]
+                - generic [ref=f3e446]:
+                  - heading "Mutiny" [level=3] [ref=f3e447]
+                  - paragraph [ref=f3e448]: 2026 · Film · Action · Thriller
+              - button "Open Drawn Together" [ref=f3e450] [cursor=pointer]:
+                - generic [ref=f3e451]:
+                  - generic [ref=f3e452]: "7.1"
+                  - button "Add to watchlist" [ref=f3e455]
+                - generic [ref=f3e458]:
+                  - heading "Drawn Together" [level=3] [ref=f3e459]
+                  - paragraph [ref=f3e460]: 2026 · Film · Romance · Drama
+              - button "Open The Whisper Man" [ref=f3e462] [cursor=pointer]:
+                - generic [ref=f3e463]:
+                  - generic [ref=f3e464]: "6.8"
+                  - button "Add to watchlist" [ref=f3e467]
+                - generic [ref=f3e470]:
+                  - heading "The Whisper Man" [level=3] [ref=f3e471]
+                  - paragraph [ref=f3e472]: 2026 · Film · Crime · Drama
+              - button "Open Resident Evil" [ref=f3e474] [cursor=pointer]:
+                - button "Add to watchlist" [ref=f3e477]
+                - generic [ref=f3e480]:
+                  - heading "Resident Evil" [level=3] [ref=f3e481]
+                  - paragraph [ref=f3e482]: 2026 · Film · Horror · Sci-Fi
+              - button "Open Why Did I Get Married Again?" [ref=f3e484] [cursor=pointer]:
+                - generic [ref=f3e485]:
+                  - generic [ref=f3e487]: "7.1"
+                  - button "Add to watchlist" [ref=f3e490]
+                - generic [ref=f3e493]:
+                  - heading "Why Did I Get Married Again?" [level=3] [ref=f3e494]
+                  - paragraph [ref=f3e495]: 2026 · Film · Romance · Comedy
+              - button "Open Supergirl" [ref=f3e497] [cursor=pointer]:
+                - generic [ref=f3e498]:
+                  - generic [ref=f3e500]: "6.7"
+                  - button "Add to watchlist" [ref=f3e503]
+                - generic [ref=f3e506]:
+                  - heading "Supergirl" [level=3] [ref=f3e507]
+                  - paragraph [ref=f3e508]: 2026 · Film · Action · Adventure
+              - 'button "Open Avengers: Doomsday" [ref=f3e510] [cursor=pointer]':
+                - button "Add to watchlist" [ref=f3e513]
+                - generic [ref=f3e516]:
+                  - 'heading "Avengers: Doomsday" [level=3] [ref=f3e517]'
+                  - paragraph [ref=f3e518]: 2026 · Film · Sci-Fi · Action
+              - button "Open Just Play Dead" [ref=f3e520] [cursor=pointer]:
+                - generic [ref=f3e521]:
+                  - generic [ref=f3e523]: "6.5"
+                  - button "Add to watchlist" [ref=f3e526]
+                - generic [ref=f3e529]:
+                  - heading "Just Play Dead" [level=3] [ref=f3e530]
+                  - paragraph [ref=f3e531]: 2026 · Film · Thriller · Crime
+            - button "Scroll left"
+            - button "Scroll right" [ref=f3e533] [cursor=pointer]
+        - generic [ref=f3e536]:
+          - heading "Popular right now" [level=2] [ref=f3e538]
+          - generic [ref=f3e539]:
+            - generic [ref=f3e540]:
+              - 'button "Open Spider-Man: Brand New Day" [ref=f3e542] [cursor=pointer]':
+                - generic [ref=f3e543]:
+                  - generic [ref=f3e544]: "7.9"
+                  - button "Add to watchlist" [ref=f3e547]
+                - generic [ref=f3e550]:
+                  - 'heading "Spider-Man: Brand New Day" [level=3] [ref=f3e551]'
+                  - paragraph [ref=f3e552]: 2026 · Film · Sci-Fi · Action
+              - button "Open Coyote vs. Acme" [ref=f3e554] [cursor=pointer]:
+                - generic [ref=f3e555]:
+                  - generic [ref=f3e556]: "7.7"
+                  - button "Add to watchlist" [ref=f3e559]
+                - generic [ref=f3e562]:
+                  - heading "Coyote vs. Acme" [level=3] [ref=f3e563]
+                  - paragraph [ref=f3e564]: 2026 · Film · Comedy · Adventure
+              - button "Open The Odyssey" [ref=f3e566] [cursor=pointer]:
+                - generic [ref=f3e567]:
+                  - generic [ref=f3e568]: "8.0"
+                  - button "Add to watchlist" [ref=f3e571]
+                - generic [ref=f3e574]:
+                  - heading "The Odyssey" [level=3] [ref=f3e575]
+                  - paragraph [ref=f3e576]: 2026 · Film · Adventure · Action
+              - button "Open Mutiny" [ref=f3e578] [cursor=pointer]:
+                - generic [ref=f3e579]:
+                  - generic [ref=f3e580]: "6.4"
+                  - button "Add to watchlist" [ref=f3e583]
+                - generic [ref=f3e586]:
+                  - heading "Mutiny" [level=3] [ref=f3e587]
+                  - paragraph [ref=f3e588]: 2026 · Film · Action · Thriller
+              - button "Open Colony" [ref=f3e590] [cursor=pointer]:
+                - generic [ref=f3e591]:
+                  - generic [ref=f3e592]: "8.1"
+                  - button "Add to watchlist" [ref=f3e595]
+                - generic [ref=f3e598]:
+                  - heading "Colony" [level=3] [ref=f3e599]
+                  - paragraph [ref=f3e600]: 2026 · Film · Action · Horror
+              - button "Open The Runner" [ref=f3e602] [cursor=pointer]:
+                - generic [ref=f3e603]:
+                  - generic [ref=f3e604]: "6.7"
+                  - button "Add to watchlist" [ref=f3e607]
+                - generic [ref=f3e610]:
+                  - heading "The Runner" [level=3] [ref=f3e611]
+                  - paragraph [ref=f3e612]: 2026 · Film · Thriller · Action
+              - button "Open Moana" [ref=f3e614] [cursor=pointer]:
+                - generic [ref=f3e615]:
+                  - generic [ref=f3e616]: "6.9"
+                  - button "Add to watchlist" [ref=f3e619]
+                - generic [ref=f3e622]:
+                  - heading "Moana" [level=3] [ref=f3e623]
+                  - paragraph [ref=f3e624]: 2026 · Film · Family · Fantasy
+              - button "Open Mayday" [ref=f3e626] [cursor=pointer]:
+                - generic [ref=f3e627]:
+                  - generic [ref=f3e628]: "7.9"
+                  - button "Add to watchlist" [ref=f3e631]
+                - generic [ref=f3e634]:
+                  - heading "Mayday" [level=3] [ref=f3e635]
+                  - paragraph [ref=f3e636]: 2026 · Film · Action · Comedy
+              - button "Open Clash of the Thundermans" [ref=f3e638] [cursor=pointer]:
+                - generic [ref=f3e639]:
+                  - generic [ref=f3e640]: "6.8"
+                  - button "Add to watchlist" [ref=f3e643]
+                - generic [ref=f3e646]:
+                  - heading "Clash of the Thundermans" [level=3] [ref=f3e647]
+                  - paragraph [ref=f3e648]: 2026 · Film · TV Movie · Family
+              - button "Open Shape of My Heart" [ref=f3e650] [cursor=pointer]:
+                - generic [ref=f3e651]:
+                  - generic [ref=f3e652]: "5.2"
+                  - button "Add to watchlist" [ref=f3e655]
+                - generic [ref=f3e658]:
+                  - heading "Shape of My Heart" [level=3] [ref=f3e659]
+                  - paragraph [ref=f3e660]: 2024 · Film · Romance
+              - button "Open Ghost in the Cell" [ref=f3e662] [cursor=pointer]:
+                - generic [ref=f3e663]:
+                  - generic [ref=f3e664]: "7.2"
+                  - button "Add to watchlist" [ref=f3e667]
+                - generic [ref=f3e670]:
+                  - heading "Ghost in the Cell" [level=3] [ref=f3e671]
+                  - paragraph [ref=f3e672]: 2026 · Film · Horror · Comedy
+              - button "Open Obsession" [ref=f3e674] [cursor=pointer]:
+                - generic [ref=f3e675]:
+                  - generic [ref=f3e676]: "8.2"
+                  - button "Add to watchlist" [ref=f3e679]
+                - generic [ref=f3e682]:
+                  - heading "Obsession" [level=3] [ref=f3e683]
+                  - paragraph [ref=f3e684]: 2026 · Film · Horror · Thriller
+              - button "Open The Last Sunrise" [ref=f3e686] [cursor=pointer]:
+                - generic [ref=f3e687]:
+                  - generic [ref=f3e688]: "6.6"
+                  - button "Add to watchlist" [ref=f3e691]
+                - generic [ref=f3e694]:
+                  - heading "The Last Sunrise" [level=3] [ref=f3e695]
+                  - paragraph [ref=f3e696]: 2026 · Film · Romance · Drama
+              - button "Open Toy Story 5" [ref=f3e698] [cursor=pointer]:
+                - generic [ref=f3e699]:
+                  - generic [ref=f3e701]: "8.4"
+                  - button "Add to watchlist" [ref=f3e704]
+                - generic [ref=f3e707]:
+                  - heading "Toy Story 5" [level=3] [ref=f3e708]
+                  - paragraph [ref=f3e709]: 2026 · Film · Animation · Family
+              - 'button "Open Batman: Knightfall Part 1: Knightfall" [ref=f3e711] [cursor=pointer]':
+                - generic [ref=f3e712]:
+                  - generic [ref=f3e714]: "9.2"
+                  - button "Add to watchlist" [ref=f3e717]
+                - generic [ref=f3e720]:
+                  - 'heading "Batman: Knightfall Part 1: Knightfall" [level=3] [ref=f3e721]'
+                  - paragraph [ref=f3e722]: 2026 · Film · Animation · Action
+              - button "Open Facing El Chapo" [ref=f3e724] [cursor=pointer]:
+                - generic [ref=f3e725]:
+                  - generic [ref=f3e727]: "8.8"
+                  - button "Add to watchlist" [ref=f3e730]
+                - generic [ref=f3e733]:
+                  - heading "Facing El Chapo" [level=3] [ref=f3e734]
+                  - paragraph [ref=f3e735]: 2026 · Film · Crime · Action
+              - button "Open The Mongoose" [ref=f3e737] [cursor=pointer]:
+                - button "Add to watchlist" [ref=f3e740]
+                - generic [ref=f3e743]:
+                  - heading "The Mongoose" [level=3] [ref=f3e744]
+                  - paragraph [ref=f3e745]: 2026 · Film · Action · Thriller
+              - button "Open Above & Below" [ref=f3e747] [cursor=pointer]:
+                - generic [ref=f3e748]:
+                  - generic [ref=f3e750]: "6.2"
+                  - button "Add to watchlist" [ref=f3e753]
+                - generic [ref=f3e756]:
+                  - heading "Above & Below" [level=3] [ref=f3e757]
+                  - paragraph [ref=f3e758]: 2026 · Film · Action · Thriller
+            - button "Scroll left"
+            - button "Scroll right" [ref=f3e760] [cursor=pointer]
+        - generic [ref=f3e763]:
+          - heading "Trending series" [level=2] [ref=f3e765]
+          - generic [ref=f3e766]:
+            - generic [ref=f3e767]:
+              - button "Open Silo" [ref=f3e769] [cursor=pointer]:
+                - generic [ref=f3e770]:
+                  - generic [ref=f3e771]: "8.2"
+                  - button "Add to watchlist" [ref=f3e774]
+                - generic [ref=f3e777]:
+                  - heading "Silo" [level=3] [ref=f3e778]
+                  - paragraph [ref=f3e779]: 2023 · Series · Sci-Fi & Fantasy · Drama
+              - button "Open Lanterns" [ref=f3e781] [cursor=pointer]:
+                - generic [ref=f3e782]:
+                  - generic [ref=f3e783]: "8.3"
+                  - button "Add to watchlist" [ref=f3e786]
+                - generic [ref=f3e789]:
+                  - heading "Lanterns" [level=3] [ref=f3e790]
+                  - paragraph [ref=f3e791]: 2026 · Series · Drama · Mystery
+              - button "Open Reacher" [ref=f3e793] [cursor=pointer]:
+                - generic [ref=f3e794]:
+                  - generic [ref=f3e795]: "8.1"
+                  - button "Add to watchlist" [ref=f3e798]
+                - generic [ref=f3e801]:
+                  - heading "Reacher" [level=3] [ref=f3e802]
+                  - paragraph [ref=f3e803]: 2022 · Series · Action & Adventure · Crime
+              - button "Open The Gentlemen" [ref=f3e805] [cursor=pointer]:
+                - generic [ref=f3e806]:
+                  - generic [ref=f3e807]: "7.8"
+                  - button "Add to watchlist" [ref=f3e810]
+                - generic [ref=f3e813]:
+                  - heading "The Gentlemen" [level=3] [ref=f3e814]
+                  - paragraph [ref=f3e815]: 2024 · Series · Comedy · Drama
+              - button "Open Crew Girl" [ref=f3e817] [cursor=pointer]:
+                - button "Add to watchlist" [ref=f3e819]
+                - generic [ref=f3e822]:
+                  - heading "Crew Girl" [level=3] [ref=f3e823]
+                  - paragraph [ref=f3e824]: 2026 · Series · Drama
+              - button "Open Made in Korea" [ref=f3e826] [cursor=pointer]:
+                - generic [ref=f3e827]:
+                  - generic [ref=f3e828]: "8.1"
+                  - button "Add to watchlist" [ref=f3e831]
+                - generic [ref=f3e834]:
+                  - heading "Made in Korea" [level=3] [ref=f3e835]
+                  - paragraph [ref=f3e836]: 2025 · Series · Crime · Drama
+              - button "Open Ted Lasso" [ref=f3e838] [cursor=pointer]:
+                - generic [ref=f3e839]:
+                  - generic [ref=f3e840]: "8.4"
+                  - button "Add to watchlist" [ref=f3e843]
+                - generic [ref=f3e846]:
+                  - heading "Ted Lasso" [level=3] [ref=f3e847]
+                  - paragraph [ref=f3e848]: 2020 · Series · Drama · Comedy
+              - button "Open Last Seen" [ref=f3e850] [cursor=pointer]:
+                - generic [ref=f3e851]:
+                  - generic [ref=f3e852]: "9.5"
+                  - button "Add to watchlist" [ref=f3e855]
+                - generic [ref=f3e858]:
+                  - heading "Last Seen" [level=3] [ref=f3e859]
+                  - paragraph [ref=f3e860]: 2026 · Series · Crime · Drama
+              - button "Open Bleach" [ref=f3e862] [cursor=pointer]:
+                - generic [ref=f3e863]:
+                  - generic [ref=f3e864]: "8.3"
+                  - button "Add to watchlist" [ref=f3e867]
+                - generic [ref=f3e870]:
+                  - heading "Bleach" [level=3] [ref=f3e871]
+                  - paragraph [ref=f3e872]: 2004 · Series · Action & Adventure · Animation
+              - button "Open The Early Spring" [ref=f3e874] [cursor=pointer]:
+                - generic [ref=f3e875]:
+                  - generic [ref=f3e876]: "8.2"
+                  - button "Add to watchlist" [ref=f3e879]
+                - generic [ref=f3e882]:
+                  - heading "The Early Spring" [level=3] [ref=f3e883]
+                  - paragraph [ref=f3e884]: 2026 · Series · Drama
+              - button "Open The Shards" [ref=f3e886] [cursor=pointer]:
+                - generic [ref=f3e887]:
+                  - generic [ref=f3e888]: "7.3"
+                  - button "Add to watchlist" [ref=f3e891]
+                - generic [ref=f3e894]:
+                  - heading "The Shards" [level=3] [ref=f3e895]
+                  - paragraph [ref=f3e896]: 2026 · Series · Drama · Mystery
+              - button "Open One Piece" [ref=f3e898] [cursor=pointer]:
+                - generic [ref=f3e899]:
+                  - generic [ref=f3e900]: "8.7"
+                  - button "Add to watchlist" [ref=f3e903]
+                - generic [ref=f3e906]:
+                  - heading "One Piece" [level=3] [ref=f3e907]
+                  - paragraph [ref=f3e908]: 1999 · Series · Action & Adventure · Comedy
+              - button "Open The Paper" [ref=f3e910] [cursor=pointer]:
+                - generic [ref=f3e911]:
+                  - generic [ref=f3e912]: "7.1"
+                  - button "Add to watchlist" [ref=f3e915]
+                - generic [ref=f3e918]:
+                  - heading "The Paper" [level=3] [ref=f3e919]
+                  - paragraph [ref=f3e920]: 2025 · Series · Comedy
+              - button "Open The Grand Tour" [ref=f3e922] [cursor=pointer]:
+                - generic [ref=f3e923]:
+                  - generic [ref=f3e925]: "9.0"
+                  - button "Add to watchlist" [ref=f3e928]
+                - generic [ref=f3e931]:
+                  - heading "The Grand Tour" [level=3] [ref=f3e932]
+                  - paragraph [ref=f3e933]: 2026 · Series · Reality
+              - button "Open Lioness" [ref=f3e935] [cursor=pointer]:
+                - generic [ref=f3e936]:
+                  - generic [ref=f3e938]: "8.1"
+                  - button "Add to watchlist" [ref=f3e941]
+                - generic [ref=f3e944]:
+                  - heading "Lioness" [level=3] [ref=f3e945]
+                  - paragraph [ref=f3e946]: 2023 · Series · Drama · War & Politics
+              - 'button "Open Star Trek: Strange New Worlds" [ref=f3e948] [cursor=pointer]':
+                - generic [ref=f3e949]:
+                  - generic [ref=f3e951]: "7.9"
+                  - button "Add to watchlist" [ref=f3e954]
+                - generic [ref=f3e957]:
+                  - 'heading "Star Trek: Strange New Worlds" [level=3] [ref=f3e958]'
+                  - paragraph [ref=f3e959]: 2022 · Series · Sci-Fi & Fantasy · Drama
+              - button "Open The Perfect Lie" [ref=f3e961] [cursor=pointer]:
+                - button "Add to watchlist" [ref=f3e964]
+                - generic [ref=f3e967]:
+                  - heading "The Perfect Lie" [level=3] [ref=f3e968]
+                  - paragraph [ref=f3e969]: 2026 · Series · Drama
+              - button "Open Re:ZERO -Starting Life in Another World-" [ref=f3e971] [cursor=pointer]:
+                - generic [ref=f3e972]:
+                  - generic [ref=f3e974]: "8.1"
+                  - button "Add to watchlist" [ref=f3e977]
+                - generic [ref=f3e980]:
+                  - heading "Re:ZERO -Starting Life in Another World-" [level=3] [ref=f3e981]
+                  - paragraph [ref=f3e982]: 2016 · Series · Animation · Mystery
+            - button "Scroll left"
+            - button "Scroll right" [ref=f3e984] [cursor=pointer]
+        - generic [ref=f3e987]:
+          - heading "Critically acclaimed" [level=2] [ref=f3e989]
+          - generic [ref=f3e990]:
+            - generic [ref=f3e991]:
+              - button "Open Swapped" [ref=f3e993] [cursor=pointer]:
+                - generic [ref=f3e994]:
+                  - generic [ref=f3e995]: "8.9"
+                  - button "Add to watchlist" [ref=f3e998]
+                - generic [ref=f3e1001]:
+                  - heading "Swapped" [level=3] [ref=f3e1002]
+                  - paragraph [ref=f3e1003]: 2026 · Film · Adventure · Animation
+              - 'button "Open Demon Slayer: Kimetsu no Yaiba Infinity Castle" [ref=f3e1005] [cursor=pointer]':
+                - generic [ref=f3e1006]:
+                  - generic [ref=f3e1007]: "8.8"
+                  - button "Add to watchlist" [ref=f3e1010]
+                - generic [ref=f3e1013]:
+                  - 'heading "Demon Slayer: Kimetsu no Yaiba Infinity Castle" [level=3] [ref=f3e1014]'
+                  - paragraph [ref=f3e1015]: 2025 · Film · Animation · Action
+              - button "Open The Shawshank Redemption" [ref=f3e1017] [cursor=pointer]:
+                - generic [ref=f3e1018]:
+                  - generic [ref=f3e1019]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1022]
+                - generic [ref=f3e1025]:
+                  - heading "The Shawshank Redemption" [level=3] [ref=f3e1026]
+                  - paragraph [ref=f3e1027]: 1994 · Film · Drama · Crime
+              - button "Open The Godfather" [ref=f3e1029] [cursor=pointer]:
+                - generic [ref=f3e1030]:
+                  - generic [ref=f3e1031]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1034]
+                - generic [ref=f3e1037]:
+                  - heading "The Godfather" [level=3] [ref=f3e1038]
+                  - paragraph [ref=f3e1039]: 1972 · Film · Drama · Crime
+              - button "Open Michael" [ref=f3e1041] [cursor=pointer]:
+                - generic [ref=f3e1042]:
+                  - generic [ref=f3e1043]: "8.6"
+                  - button "Add to watchlist" [ref=f3e1046]
+                - generic [ref=f3e1049]:
+                  - heading "Michael" [level=3] [ref=f3e1050]
+                  - paragraph [ref=f3e1051]: 2026 · Film · Music · Drama
+              - button "Open Project Hail Mary" [ref=f3e1053] [cursor=pointer]:
+                - generic [ref=f3e1054]:
+                  - generic [ref=f3e1055]: "8.6"
+                  - button "Add to watchlist" [ref=f3e1058]
+                - generic [ref=f3e1061]:
+                  - heading "Project Hail Mary" [level=3] [ref=f3e1062]
+                  - paragraph [ref=f3e1063]: 2026 · Film · Sci-Fi · Adventure
+              - button "Open The Godfather Part II" [ref=f3e1065] [cursor=pointer]:
+                - generic [ref=f3e1066]:
+                  - generic [ref=f3e1067]: "8.6"
+                  - button "Add to watchlist" [ref=f3e1070]
+                - generic [ref=f3e1073]:
+                  - heading "The Godfather Part II" [level=3] [ref=f3e1074]
+                  - paragraph [ref=f3e1075]: 1974 · Film · Drama · Crime
+              - button "Open 12 Angry Men" [ref=f3e1077] [cursor=pointer]:
+                - generic [ref=f3e1078]:
+                  - generic [ref=f3e1079]: "8.6"
+                  - button "Add to watchlist" [ref=f3e1082]
+                - generic [ref=f3e1085]:
+                  - heading "12 Angry Men" [level=3] [ref=f3e1086]
+                  - paragraph [ref=f3e1087]: 1957 · Film · Drama
+              - button "Open Schindler's List" [ref=f3e1089] [cursor=pointer]:
+                - generic [ref=f3e1090]:
+                  - generic [ref=f3e1091]: "8.6"
+                  - button "Add to watchlist" [ref=f3e1094]
+                - generic [ref=f3e1097]:
+                  - heading "Schindler's List" [level=3] [ref=f3e1098]
+                  - paragraph [ref=f3e1099]: 1993 · Film · Drama · History
+              - button "Open The Dark Knight" [ref=f3e1101] [cursor=pointer]:
+                - generic [ref=f3e1102]:
+                  - generic [ref=f3e1103]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1106]
+                - generic [ref=f3e1109]:
+                  - heading "The Dark Knight" [level=3] [ref=f3e1110]
+                  - paragraph [ref=f3e1111]: 2008 · Film · Action · Thriller
+              - button "Open Spirited Away" [ref=f3e1113] [cursor=pointer]:
+                - generic [ref=f3e1114]:
+                  - generic [ref=f3e1115]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1118]
+                - generic [ref=f3e1121]:
+                  - heading "Spirited Away" [level=3] [ref=f3e1122]
+                  - paragraph [ref=f3e1123]: 2001 · Film · Animation · Family
+              - button "Open The Green Mile" [ref=f3e1125] [cursor=pointer]:
+                - generic [ref=f3e1126]:
+                  - generic [ref=f3e1127]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1130]
+                - generic [ref=f3e1133]:
+                  - heading "The Green Mile" [level=3] [ref=f3e1134]
+                  - paragraph [ref=f3e1135]: 1999 · Film · Fantasy · Drama
+              - 'button "Open The Lord of the Rings: The Return of the King" [ref=f3e1137] [cursor=pointer]':
+                - generic [ref=f3e1138]:
+                  - generic [ref=f3e1139]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1142]
+                - generic [ref=f3e1145]:
+                  - 'heading "The Lord of the Rings: The Return of the King" [level=3] [ref=f3e1146]'
+                  - paragraph [ref=f3e1147]: 2003 · Film · Adventure · Fantasy
+              - button "Open Dilwale Dulhania Le Jayenge" [ref=f3e1149] [cursor=pointer]:
+                - generic [ref=f3e1150]:
+                  - generic [ref=f3e1152]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1155]
+                - generic [ref=f3e1158]:
+                  - heading "Dilwale Dulhania Le Jayenge" [level=3] [ref=f3e1159]
+                  - paragraph [ref=f3e1160]: 1995 · Film · Comedy · Drama
+              - button "Open Parasite" [ref=f3e1162] [cursor=pointer]:
+                - generic [ref=f3e1163]:
+                  - generic [ref=f3e1165]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1168]
+                - generic [ref=f3e1171]:
+                  - heading "Parasite" [level=3] [ref=f3e1172]
+                  - paragraph [ref=f3e1173]: 2019 · Film · Comedy · Thriller
+              - button "Open Interstellar" [ref=f3e1175] [cursor=pointer]:
+                - generic [ref=f3e1176]:
+                  - generic [ref=f3e1178]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1181]
+                - generic [ref=f3e1184]:
+                  - heading "Interstellar" [level=3] [ref=f3e1185]
+                  - paragraph [ref=f3e1186]: 2014 · Film · Adventure · Drama
+              - button "Open Your Name." [ref=f3e1188] [cursor=pointer]:
+                - generic [ref=f3e1189]:
+                  - generic [ref=f3e1191]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1194]
+                - generic [ref=f3e1197]:
+                  - heading "Your Name." [level=3] [ref=f3e1198]
+                  - paragraph [ref=f3e1199]: 2016 · Film · Animation · Romance
+              - button "Open Pulp Fiction" [ref=f3e1201] [cursor=pointer]:
+                - generic [ref=f3e1202]:
+                  - generic [ref=f3e1204]: "8.5"
+                  - button "Add to watchlist" [ref=f3e1207]
+                - generic [ref=f3e1210]:
+                  - heading "Pulp Fiction" [level=3] [ref=f3e1211]
+                  - paragraph [ref=f3e1212]: 1994 · Film · Thriller · Crime
+            - button "Scroll left"
+            - button "Scroll right" [ref=f3e1214] [cursor=pointer]
+        - generic [ref=f3e1217]:
+          - heading "Top rated series" [level=2] [ref=f3e1219]
+          - generic [ref=f3e1220]:
+            - generic [ref=f3e1221]:
+              - button "Open Teach You a Lesson" [ref=f3e1223] [cursor=pointer]:
+                - generic [ref=f3e1224]:
+                  - generic [ref=f3e1225]: "9.4"
+                  - button "Add to watchlist" [ref=f3e1228]
+                - generic [ref=f3e1231]:
+                  - heading "Teach You a Lesson" [level=3] [ref=f3e1232]
+                  - paragraph [ref=f3e1233]: 2026 · Series · Action & Adventure · Drama
+              - button "Open Breaking Bad" [ref=f3e1235] [cursor=pointer]:
+                - generic [ref=f3e1236]:
+                  - generic [ref=f3e1237]: "8.9"
+                  - button "Add to watchlist" [ref=f3e1240]
+                - generic [ref=f3e1243]:
+                  - heading "Breaking Bad" [level=3] [ref=f3e1244]
+                  - paragraph [ref=f3e1245]: 2008 · Series · Drama · Crime
+              - button "Open Off Campus" [ref=f3e1247] [cursor=pointer]:
+                - generic [ref=f3e1248]:
+                  - generic [ref=f3e1249]: "8.9"
+                  - button "Add to watchlist" [ref=f3e1252]
+                - generic [ref=f3e1255]:
+                  - heading "Off Campus" [level=3] [ref=f3e1256]
+                  - paragraph [ref=f3e1257]: 2026 · Series · Drama
+              - 'button "Open Frieren: Beyond Journey''s End" [ref=f3e1259] [cursor=pointer]':
+                - generic [ref=f3e1260]:
+                  - generic [ref=f3e1261]: "8.8"
+                  - button "Add to watchlist" [ref=f3e1264]
+                - generic [ref=f3e1267]:
+                  - 'heading "Frieren: Beyond Journey''s End" [level=3] [ref=f3e1268]'
+                  - paragraph [ref=f3e1269]: 2023 · Series · Animation · Action & Adventure
+              - button "Open The Chosen" [ref=f3e1271] [cursor=pointer]:
+                - generic [ref=f3e1272]:
+                  - generic [ref=f3e1273]: "8.8"
+                  - button "Add to watchlist" [ref=f3e1276]
+                - generic [ref=f3e1279]:
+                  - heading "The Chosen" [level=3] [ref=f3e1280]
+                  - paragraph [ref=f3e1281]: 2019 · Series · Action & Adventure · Family
+              - 'button "Open Avatar: The Last Airbender" [ref=f3e1283] [cursor=pointer]':
+                - generic [ref=f3e1284]:
+                  - generic [ref=f3e1285]: "8.8"
+                  - button "Add to watchlist" [ref=f3e1288]
+                - generic [ref=f3e1291]:
+                  - 'heading "Avatar: The Last Airbender" [level=3] [ref=f3e1292]'
+                  - paragraph [ref=f3e1293]: 2005 · Series · Animation · Action & Adventure
+              - button "Open One Piece" [ref=f3e1295] [cursor=pointer]:
+                - generic [ref=f3e1296]:
+                  - generic [ref=f3e1297]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1300]
+                - generic [ref=f3e1303]:
+                  - heading "One Piece" [level=3] [ref=f3e1304]
+                  - paragraph [ref=f3e1305]: 1999 · Series · Action & Adventure · Comedy
+              - button "Open Arcane" [ref=f3e1307] [cursor=pointer]:
+                - generic [ref=f3e1308]:
+                  - generic [ref=f3e1309]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1312]
+                - generic [ref=f3e1315]:
+                  - heading "Arcane" [level=3] [ref=f3e1316]
+                  - paragraph [ref=f3e1317]: 2021 · Series · Animation · Action & Adventure
+              - button "Open The Pitt" [ref=f3e1319] [cursor=pointer]:
+                - generic [ref=f3e1320]:
+                  - generic [ref=f3e1321]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1324]
+                - generic [ref=f3e1327]:
+                  - heading "The Pitt" [level=3] [ref=f3e1328]
+                  - paragraph [ref=f3e1329]: 2025 · Series · Drama
+              - button "Open Chernobyl" [ref=f3e1331] [cursor=pointer]:
+                - generic [ref=f3e1332]:
+                  - generic [ref=f3e1333]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1336]
+                - generic [ref=f3e1339]:
+                  - heading "Chernobyl" [level=3] [ref=f3e1340]
+                  - paragraph [ref=f3e1341]: 2019 · Series · Drama
+              - button "Open Better Call Saul" [ref=f3e1343] [cursor=pointer]:
+                - generic [ref=f3e1344]:
+                  - generic [ref=f3e1345]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1348]
+                - generic [ref=f3e1351]:
+                  - heading "Better Call Saul" [level=3] [ref=f3e1352]
+                  - paragraph [ref=f3e1353]: 2015 · Series · Crime · Drama
+              - 'button "Open Fullmetal Alchemist: Brotherhood" [ref=f3e1355] [cursor=pointer]':
+                - generic [ref=f3e1356]:
+                  - generic [ref=f3e1357]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1360]
+                - generic [ref=f3e1363]:
+                  - 'heading "Fullmetal Alchemist: Brotherhood" [level=3] [ref=f3e1364]'
+                  - paragraph [ref=f3e1365]: 2009 · Series · Animation · Action & Adventure
+              - button "Open X-Men '97" [ref=f3e1367] [cursor=pointer]:
+                - generic [ref=f3e1368]:
+                  - generic [ref=f3e1369]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1372]
+                - generic [ref=f3e1375]:
+                  - heading "X-Men '97" [level=3] [ref=f3e1376]
+                  - paragraph [ref=f3e1377]: 2024 · Series · Animation · Action & Adventure
+              - button "Open Attack on Titan" [ref=f3e1379] [cursor=pointer]:
+                - generic [ref=f3e1380]:
+                  - generic [ref=f3e1382]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1385]
+                - generic [ref=f3e1388]:
+                  - heading "Attack on Titan" [level=3] [ref=f3e1389]
+                  - paragraph [ref=f3e1390]: 2013 · Series · Animation · Sci-Fi & Fantasy
+              - button "Open Solo Leveling" [ref=f3e1392] [cursor=pointer]:
+                - generic [ref=f3e1393]:
+                  - generic [ref=f3e1395]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1398]
+                - generic [ref=f3e1401]:
+                  - heading "Solo Leveling" [level=3] [ref=f3e1402]
+                  - paragraph [ref=f3e1403]: 2024 · Series · Animation · Action & Adventure
+              - button "Open Rick and Morty" [ref=f3e1405] [cursor=pointer]:
+                - generic [ref=f3e1406]:
+                  - generic [ref=f3e1408]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1411]
+                - generic [ref=f3e1414]:
+                  - heading "Rick and Morty" [level=3] [ref=f3e1415]
+                  - paragraph [ref=f3e1416]: 2013 · Series · Animation · Comedy
+              - button "Open The Sopranos" [ref=f3e1418] [cursor=pointer]:
+                - generic [ref=f3e1419]:
+                  - generic [ref=f3e1421]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1424]
+                - generic [ref=f3e1427]:
+                  - heading "The Sopranos" [level=3] [ref=f3e1428]
+                  - paragraph [ref=f3e1429]: 1999 · Series · Crime · Drama
+              - button "Open Fighting Spirit" [ref=f3e1431] [cursor=pointer]:
+                - generic [ref=f3e1432]:
+                  - generic [ref=f3e1434]: "8.7"
+                  - button "Add to watchlist" [ref=f3e1437]
+                - generic [ref=f3e1440]:
+                  - heading "Fighting Spirit" [level=3] [ref=f3e1441]
+                  - paragraph [ref=f3e1442]: 2000 · Series · Animation · Comedy
+            - button "Scroll left"
+            - button "Scroll right" [ref=f3e1444] [cursor=pointer]
+        - generic [ref=f3e1448]:
+          - generic [ref=f3e1449]:
+            - paragraph [ref=f3e1450]: Free account
+            - heading "Keep your watchlist, history and buddies in sync." [level=2] [ref=f3e1451]
+            - paragraph [ref=f3e1452]: Browsing stays open to everyone. Sign up when you want to save titles, pick up where you left off on any device, and host watch parties.
+          - generic [ref=f3e1453]:
+            - link "Create account" [ref=f3e1454] [cursor=pointer]:
+              - /url: /signup
+            - link "Sign in" [ref=f3e1455] [cursor=pointer]:
+              - /url: /login
+    - contentinfo [ref=f3e215]:
+      - generic [ref=f3e216]:
+        - generic [ref=f3e217]:
+          - generic [ref=f3e218]:
+            - link "StreamSynx" [ref=f3e219] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f3e220]: A calm, fast place to find something to watch — films, series and everything in between.
+          - navigation "Browse" [ref=f3e221]:
+            - heading "Browse" [level=2] [ref=f3e222]
+            - list [ref=f3e223]:
+              - listitem [ref=f3e224]:
+                - link "Home" [ref=f3e225] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f3e226]:
+                - link "Search" [ref=f3e227] [cursor=pointer]:
+                  - /url: /search
+              - listitem [ref=f3e228]:
+                - link "Watch parties" [ref=f3e229] [cursor=pointer]:
+                  - /url: /rooms
+              - listitem [ref=f3e230]:
+                - link "Get the app" [ref=f3e231] [cursor=pointer]:
+                  - /url: /download
+          - navigation "Your library" [ref=f3e232]:
+            - heading "Your library" [level=2] [ref=f3e233]
+            - list [ref=f3e234]:
+              - listitem [ref=f3e235]:
+                - link "Watchlist" [ref=f3e236] [cursor=pointer]:
+                  - /url: /watchList
+              - listitem [ref=f3e237]:
+                - link "Continue watching" [ref=f3e238] [cursor=pointer]:
+                  - /url: /history
+              - listitem [ref=f3e239]:
+                - link "Favorites" [ref=f3e240] [cursor=pointer]:
+                  - /url: /favorites
+              - listitem [ref=f3e241]:
+                - link "Recommended" [ref=f3e242] [cursor=pointer]:
+                  - /url: /recommended
+              - listitem [ref=f3e243]:
+                - link "Create an account" [ref=f3e244] [cursor=pointer]:
+                  - /url: /signup
+          - generic [ref=f3e245]:
+            - heading "Apps" [level=2] [ref=f3e246]
+            - generic [ref=f3e247]:
+              - link "Android" [ref=f3e248] [cursor=pointer]:
+                - /url: /download
+              - link "Android TV" [ref=f3e255] [cursor=pointer]:
+                - /url: /download
+        - generic [ref=f3e263]:
+          - paragraph [ref=f3e264]: © 2026 StreamSynx. All rights reserved.
+          - paragraph [ref=f3e265]:
+            - text: Metadata from
+            - link "TMDB" [ref=f3e266] [cursor=pointer]:
+              - /url: https://www.themoviedb.org/
+            - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.
+  - button "Open Next.js Dev Tools" [ref=f3e272] [cursor=pointer]
+  - alert [ref=f3e276]
