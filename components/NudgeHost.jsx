@@ -155,6 +155,12 @@ export default function NudgeHost() {
   const arrivedAt = useRef(Date.now());
   const interacted = useRef(false);
 
+  // Read by the timer instead of closing over `router`, whose identity changes
+  // on every navigation — the interval would otherwise restart, and someone
+  // clicking around faster than the tick would never be evaluated at all.
+  const route = useRef({ pathname: router.pathname, asPath: router.asPath });
+  route.current = { pathname: router.pathname, asPath: router.asPath };
+
   // A parked tab is not an audience. Wait for a sign of life first.
   useEffect(() => {
     const events = ["pointerdown", "keydown", "wheel", "touchstart", "scroll"];
@@ -191,8 +197,11 @@ export default function NudgeHost() {
     const evaluate = () => {
       if (document.hidden || !interacted.current) return;
       if (Date.now() - arrivedAt.current < NUDGE_DELAY_MS) return;
+      // Every overlay in the app locks body scroll, so this stands in for
+      // "a modal, the search palette or the mobile drawer is open".
+      if (document.body.style.overflow === "hidden") return;
 
-      const { pathname } = router;
+      const { pathname } = route.current;
       if (isQuietRoute(pathname)) return;
       // Cheap gate first: no Firestore read for someone whose prompts are
       // already spent, snoozed, or used up for this session.
@@ -219,7 +228,7 @@ export default function NudgeHost() {
 
     const timer = setInterval(evaluate, TICK_MS);
     return () => clearInterval(timer);
-  }, [loading, nudgeId, router, user, loadPicks]);
+  }, [loading, nudgeId, user, loadPicks]);
 
   // Never leave a card hanging over a player or the page it is advertising.
   useEffect(() => {
