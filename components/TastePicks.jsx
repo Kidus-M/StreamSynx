@@ -7,6 +7,7 @@ import { FiPlus, FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 import TastePicker from "./TastePicker";
 import { posterUrl } from "../lib/tmdb";
+import { NUDGE_TASTE, markNudgeGoal } from "../lib/nudges";
 import {
   MAX_PICKS_PER_TYPE,
   TOTAL_PICK_SLOTS,
@@ -139,6 +140,8 @@ export const TastePicksEditor = ({ uid, initialPicks, fallbackGenreIds = [], onS
     try {
       const profile = await saveTastePicks(uid, picks, { fallbackGenreIds });
       setDirty(false);
+      // Nothing left to advertise — stop the prompt that sent people here.
+      markNudgeGoal(NUDGE_TASTE);
       onSaved?.(picks, profile);
       toast.success("Taste picks saved");
     } catch (error) {
