@@ -12,3 +12,5 @@ TypeError: Cannot read properties of undefined (reading 'components')
 [   36513ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
 [   44512ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
 [   52507ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   60509ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   68515ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
