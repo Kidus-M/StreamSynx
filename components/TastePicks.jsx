@@ -141,7 +141,8 @@ export const TastePicksEditor = ({ uid, initialPicks, fallbackGenreIds = [], onS
       const profile = await saveTastePicks(uid, picks, { fallbackGenreIds });
       setDirty(false);
       // Nothing left to advertise — stop the prompt that sent people here.
-      markNudgeGoal(NUDGE_TASTE);
+      // Clearing every pick is not a completed goal, so it keeps asking.
+      if (countPicks(picks) > 0) markNudgeGoal(NUDGE_TASTE);
       onSaved?.(picks, profile);
       toast.success("Taste picks saved");
     } catch (error) {
