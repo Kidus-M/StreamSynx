@@ -14,3 +14,4 @@ TypeError: Cannot read properties of undefined (reading 'components')
 [  115599ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
 [  116149ms] [LOG] [Fast Refresh] done in 549ms @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
 [  116170ms] [LOG] Refreshing page data due to server-side change @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  124153ms] [LOG] [nudge-debug] evaluate {pathname: /watch, routerPath: /watch, quiet: true} @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
