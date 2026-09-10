@@ -202,6 +202,7 @@ export default function NudgeHost() {
       if (document.body.style.overflow === "hidden") return;
 
       const { pathname } = route.current;
+      console.log("[nudge-debug] evaluate", { pathname, routerPath: window.location.pathname, quiet: isQuietRoute(pathname) });
       if (isQuietRoute(pathname)) return;
       // Cheap gate first: no Firestore read for someone whose prompts are
       // already spent, snoozed, or used up for this session.
@@ -222,6 +223,7 @@ export default function NudgeHost() {
 
       // Counted on display, not on dismissal, so a prompt someone ignores
       // still uses up one of its turns.
+      console.log("[nudge-debug] RECORD", id, "on", pathname);
       recordNudgeShown(id);
       setNudgeId(id);
     };

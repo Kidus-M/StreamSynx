@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - navigation [ref=e5]:
+        - link "StreamSynx" [ref=e7] [cursor=pointer]:
+          - /url: /
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "Home" [ref=e10] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e12]:
+            - link "Watchlist" [ref=e13] [cursor=pointer]:
+              - /url: /watchList
+          - listitem [ref=e14]:
+            - link "Watch Parties" [ref=e15] [cursor=pointer]:
+              - /url: /rooms
+        - button "Search... ⌘K" [ref=e17] [cursor=pointer]:
+          - generic [ref=e21]: Search...
+          - generic [ref=e22]: ⌘K
+    - main [ref=e24]:
+      - generic [ref=e34]:
+        - heading "Trending movies" [level=2] [ref=e37]
+        - heading "Popular right now" [level=2] [ref=e73]
+        - heading "Trending series" [level=2] [ref=e109]
+        - heading "Critically acclaimed" [level=2] [ref=e145]
+        - heading "Top rated series" [level=2] [ref=e181]
+    - contentinfo [ref=e215]:
+      - generic [ref=e216]:
+        - generic [ref=e217]:
+          - generic [ref=e218]:
+            - link "StreamSynx" [ref=e219] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=e220]: A calm, fast place to find something to watch — films, series and everything in between.
+          - navigation "Browse" [ref=e221]:
+            - heading "Browse" [level=2] [ref=e222]
+            - list [ref=e223]:
+              - listitem [ref=e224]:
+                - link "Home" [ref=e225] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e226]:
+                - link "Search" [ref=e227] [cursor=pointer]:
+                  - /url: /search
+              - listitem [ref=e228]:
+                - link "Watch parties" [ref=e229] [cursor=pointer]:
+                  - /url: /rooms
+              - listitem [ref=e230]:
+                - link "Get the app" [ref=e231] [cursor=pointer]:
+                  - /url: /download
+          - navigation "Your library" [ref=e232]:
+            - heading "Your library" [level=2] [ref=e233]
+            - list [ref=e234]:
+              - listitem [ref=e235]:
+                - link "Watchlist" [ref=e236] [cursor=pointer]:
+                  - /url: /watchList
+              - listitem [ref=e237]:
+                - link "Continue watching" [ref=e238] [cursor=pointer]:
+                  - /url: /history
+              - listitem [ref=e239]:
+                - link "Favorites" [ref=e240] [cursor=pointer]:
+                  - /url: /favorites
+              - listitem [ref=e241]:
+                - link "Recommended" [ref=e242] [cursor=pointer]:
+                  - /url: /recommended
+              - listitem [ref=e243]:
+                - link "Create an account" [ref=e244] [cursor=pointer]:
+                  - /url: /signup
+          - generic [ref=e245]:
+            - heading "Apps" [level=2] [ref=e246]
+            - generic [ref=e247]:
+              - link "Android" [ref=e248] [cursor=pointer]:
+                - /url: /download
+              - link "Android TV" [ref=e255] [cursor=pointer]:
+                - /url: /download
+        - generic [ref=e263]:
+          - paragraph [ref=e264]: © 2026 StreamSynx. All rights reserved.
+          - paragraph [ref=e265]:
+            - text: Metadata from
+            - link "TMDB" [ref=e266] [cursor=pointer]:
+              - /url: https://www.themoviedb.org/
+            - text: . This product uses the TMDB API but is not endorsed or certified by TMDB.
+  - alert [ref=e267]
