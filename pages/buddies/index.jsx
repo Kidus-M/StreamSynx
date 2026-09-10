@@ -36,6 +36,7 @@ import BuddyMatchCard from "../../components/BuddyMatchCard";
 import BuddyProfileModal from "../../components/BuddyProfileModal";
 import { discoverBuddies } from "../../lib/buddyDiscovery";
 import { readTastePicks } from "../../lib/tasteProfile";
+import { NUDGE_DISCOVER, markNudgeGoal } from "../../lib/nudges";
 
 // --- Updated UserListItem with Theme ---
 const UserListItem = ({
@@ -187,6 +188,11 @@ const BuddiesPage = () => {
   useEffect(() => {
     if (router.isReady && router.query.tab === "discover") setActiveTab("discover");
   }, [router.isReady, router.query.tab]);
+
+  // Someone who has found Discover never needs to be told about it again.
+  useEffect(() => {
+    if (activeTab === "discover") markNudgeGoal(NUDGE_DISCOVER);
+  }, [activeTab]);
 
   // Data Fetching (Keep as is, uses onSnapshot)
   useEffect(() => {

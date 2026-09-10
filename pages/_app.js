@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'react-hot-toast';
 import { installTmdbRateLimiter } from '../lib/tmdbRateLimiter';
 import TvRemoteNavigation from '../components/TvRemoteNavigation';
+import NudgeHost from '../components/NudgeHost';
 import { AuthProvider } from '../lib/auth';
 
 installTmdbRateLimiter();
@@ -35,6 +36,9 @@ export default function App({ Component, pageProps }) {
 
       <TvRemoteNavigation />
       <Component {...pageProps} />
+      {/* Points people at taste picks, Discover and signing up — rate limited
+          and dismissible; see lib/nudges.js for when it is allowed to speak. */}
+      <NudgeHost />
       <Toaster
         position="bottom-center"
         toastOptions={{

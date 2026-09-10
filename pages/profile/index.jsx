@@ -172,6 +172,22 @@ export default function Profile() {
     };
   }, [currentUser, authLoading, router]);
 
+  /**
+   * The taste section only mounts once the profile has loaded, which is after
+   * the browser has already given up on a `#taste` hash. Links that advertise
+   * the picker (the nudge card, the Discover empty state) depend on landing
+   * there, so scroll it into view ourselves once it exists.
+   */
+  useEffect(() => {
+    if (loading || !currentUser) return;
+    if (typeof window === "undefined" || window.location.hash !== "#taste") return;
+
+    const frame = requestAnimationFrame(() => {
+      document.getElementById("taste")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [loading, currentUser]);
+
   const handleSave = useCallback(async () => {
     const trimmed = username.trim();
     if (!currentUser || !trimmed) {
