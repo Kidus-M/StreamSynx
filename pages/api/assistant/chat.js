@@ -134,7 +134,8 @@ const systemPrompt = (name, context) => `You are ${name}, the recommendation ass
 
 How to behave:
 - Be warm, brief and specific. One or two short sentences of reply, then the picks. No lists of caveats.
-- Recommend 3 to ${MAX_PICKS} real, well-known films or series that fit the request AND the viewer's history, favourites and habits below. Prefer titles they have not watched. If they ask for "more like X", lean on X.
+- Recommend 3 to ${MAX_PICKS} real, well-known films or series that fit the request AND the viewer's history, favourites and habits below. If they ask for "more like X", lean on X.
+- Never pick a title that appears under "watched", "continue watching", "favourite" or "taste picks" — they know those already; use them only to understand taste. At most one pick may come from their watchlist, and say so.
 - Size to their attention: if their habits show short sittings or a low finish rate, favour tighter runtimes or episodic series; if they binge, a series is fair game. Mention this only when it drives the choice.
 - If the request is vague, still commit to picks and say what you assumed. Only ask a question when it is genuinely impossible to choose.
 - Never invent titles. Use exact, searchable titles and the correct release year.
@@ -202,8 +203,15 @@ const callModel = async (model, messages, origin, { strict = true } = {}) => {
       throw error;
     }
     const choice = payload?.choices?.[0];
-    const text = choice?.message?.content;
-    if (!text) throw new Error(`${model} returned an empty answer`);
+    // Some providers park the whole answer in the reasoning field when
+    // thinking is switched off mid-request; the JSON is still in there.
+    const text =
+      choice?.message?.content || choice?.message?.reasoning || choice?.message?.reasoning_content || "";
+    if (!text.trim()) {
+      const error = new Error(`${model} returned an empty answer`);
+      error.retryable = true;
+      throw error;
+    }
     return { text, model: payload?.model || model, finishReason: choice?.finish_reason || null };
   } finally {
     clearTimeout(timer);
@@ -216,13 +224,23 @@ const callModel = async (model, messages, origin, { strict = true } = {}) => {
  * mean "next", so a busy free tier degrades to a slower model, not to an
  * error — and never to raw model output on the screen.
  */
+const ATTEMPTS_PER_MODEL = 3;
+const RETRY_DELAY_MS = 600;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const complete = async (messages, origin) => {
   const models = MODELS.length ? MODELS : DEFAULT_MODELS;
   let lastError = null;
+  // An answer with a reply but no picks is kept in reserve: better than an
+  // error, worse than anything with picks from a model further down.
+  let replyOnly = null;
+
   for (const model of models) {
-    // A model that is up but fumbles the JSON gets one more go: with the
-    // free tier, the next model in line is often rate-limited anyway.
-    for (let attempt = 0; attempt < 2; attempt += 1) {
+    // A model that is up but fumbles — an empty first answer, broken JSON —
+    // gets more goes than a model that is down: with the free tier, the next
+    // model in line is often rate-limited anyway.
+    for (let attempt = 0; attempt < ATTEMPTS_PER_MODEL; attempt += 1) {
       try {
         let answer;
         try {
@@ -242,16 +260,25 @@ const complete = async (messages, origin) => {
           error.retryable = true;
           throw error;
         }
+        if (!Array.isArray(parsed.picks) || !parsed.picks.length) {
+          replyOnly = replyOnly || { parsed, model: answer.model };
+          const error = new Error(`${model} answered without picks`);
+          error.retryable = true;
+          throw error;
+        }
         return { parsed, model: answer.model };
       } catch (error) {
         lastError = error;
-        console.warn(`Assistant: ${model} failed —`, error.message);
+        console.warn(`Assistant: ${model} failed (try ${attempt + 1}) —`, error.message);
         // A bad key fails the same way on every model.
         if (error.status === 401) throw error;
         if (!error.retryable) break;
+        await sleep(RETRY_DELAY_MS);
       }
     }
   }
+
+  if (replyOnly) return replyOnly;
   throw lastError || new Error("No model answered");
 };
 
@@ -285,6 +312,32 @@ const unresolvedPick = (pick, type) => ({
   why: String(pick?.why || "").slice(0, 240),
 });
 
+const normalize = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+
+/**
+ * TMDB search is fuzzy: "FROM" comes back with "Daughter from Another Mother"
+ * ahead of the show called FROM. An exact title wins, then a title that
+ * starts the same way, then whatever is most popular and has a poster.
+ */
+const bestMatch = (results, title) => {
+  const wanted = normalize(title);
+  const score = (item) => {
+    const name = normalize(item.title || item.name);
+    const original = normalize(item.original_title || item.original_name);
+    let points = 0;
+    if (name === wanted || original === wanted) points += 100;
+    else if (name.startsWith(wanted) || wanted.startsWith(name)) points += 40;
+    if (item.poster_path) points += 10;
+    points += Math.min(item.popularity || 0, 500) / 100;
+    return points;
+  };
+  return results.slice().sort((a, b) => score(b) - score(a))[0] || null;
+};
+
 /** Finds the TMDB record for a suggested title; the year narrows, then relaxes. */
 const resolvePick = async (pick) => {
   const title = String(pick?.title || pick?.name || "").trim();
@@ -296,7 +349,7 @@ const resolvePick = async (pick) => {
   const attempts = year ? [{ query: title, [yearParam]: year }, { query: title }] : [{ query: title }];
   for (const params of attempts) {
     const data = await tmdb(`/search/${type}`, params);
-    const hit = (data?.results || []).find((item) => item.poster_path) || data?.results?.[0];
+    const hit = bestMatch(data?.results || [], title);
     if (hit) {
       const date = hit.release_date || hit.first_air_date || "";
       return {
