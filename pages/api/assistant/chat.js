@@ -48,6 +48,8 @@ const MODEL_TIMEOUT_MS = 45 * 1000;
 /** Generous: some free models spend tokens thinking even when asked not to. */
 const MAX_OUTPUT_TOKENS = 1800;
 const MAX_PICKS = 5;
+/** Fewer than this after filtering out what they know triggers a repair round. */
+const MIN_PICKS = 3;
 const MAX_MESSAGES = 12;
 const MAX_MESSAGE_CHARS = 2000;
 
@@ -108,6 +110,27 @@ const describeHabits = (habits) => {
   return `Viewing habits (measured on their device):\n- ${lines.join("\n- ")}`;
 };
 
+/** "Deadpool (20d ago)" → "Deadpool"; "Ted Lasso — S4E7 (9d ago)" → "Ted Lasso". */
+const bareTitle = (entry) =>
+  String(entry || "")
+    .split(" — ")[0]
+    .replace(/\s*\((?:series|S\d+E\d+|[^)]*ago|today|yesterday)\)\s*$/i, "")
+    .trim();
+
+/** Every title they already know, by name, for the model's do-not list. */
+const knownTitles = (context = {}) => {
+  const names = [
+    ...(context.recentMovies || []),
+    ...(context.recentShows || []),
+    ...(context.continueWatching || []),
+    ...(context.favoriteMovies || []),
+    ...(context.favoriteShows || []),
+    ...(context.tastePicks?.movies || []),
+    ...(context.tastePicks?.shows || []),
+  ].map(bareTitle).filter(Boolean);
+  return Array.from(new Set(names));
+};
+
 const describeViewer = (context = {}) => {
   const lines = [
     context.username && `Name: ${context.username}`,
@@ -127,7 +150,11 @@ const describeViewer = (context = {}) => {
     list("Rated poorly", context.disliked),
     list("Recent searches", context.recentSearches),
   ].filter(Boolean);
-  return `About the viewer:\n- ${lines.join("\n- ")}\n\n${describeHabits(context.habits)}`;
+  const known = knownTitles(context);
+  const doNot = known.length
+    ? `\n\nDO NOT recommend any of these — they are already in their library: ${known.join("; ")}.`
+    : "";
+  return `About the viewer:\n- ${lines.join("\n- ")}\n\n${describeHabits(context.habits)}${doNot}`;
 };
 
 const systemPrompt = (name, context) => `You are ${name}, the recommendation assistant inside StreamSynx, a site for watching films and TV series. You help one signed-in viewer decide what to watch next.
@@ -408,10 +435,35 @@ export default async function handler(req, res) {
 
   const context = body.context && typeof body.context === "object" ? body.context : {};
   const origin = req.headers.origin || `https://${req.headers.host || "streamsynx.app"}`;
+  const seen = new Set(Array.isArray(context.seen) ? context.seen : []);
+
+  /** Resolves and de-duplicates picks; reports which ones the viewer already knows. */
+  const materialize = async (rawPicks, used) => {
+    const resolved = await Promise.all(
+      rawPicks.map((pick) =>
+        TMDB_KEY
+          ? resolvePick(pick).catch(() => unresolvedPick(pick, mediaTypeOf(pick?.type)))
+          : unresolvedPick(pick, mediaTypeOf(pick?.type))
+      )
+    );
+    const kept = [];
+    const rejected = [];
+    resolved.forEach((pick) => {
+      if (!pick?.title) return;
+      const key = pick.id ? `${pick.media_type}:${pick.id}` : `name:${pick.title.toLowerCase()}`;
+      if (used.has(key)) return;
+      used.add(key);
+      if (seen.has(key)) rejected.push(pick.title);
+      else kept.push(pick);
+    });
+    return { kept, rejected };
+  };
+
+  const thread = [{ role: "system", content: systemPrompt(name, context) }, ...messages];
 
   let answer;
   try {
-    answer = await complete([{ role: "system", content: systemPrompt(name, context) }, ...messages], origin);
+    answer = await complete(thread, origin);
   } catch (error) {
     console.error("Assistant: every model failed —", error);
     const status = error.status === 429 ? 429 : 502;
@@ -425,27 +477,43 @@ export default async function handler(req, res) {
   }
 
   const { parsed } = answer;
-  const reply = String(parsed.reply || "Here's what I'd go with.").trim().slice(0, 1200);
+  let reply = String(parsed.reply || "Here's what I'd go with.").trim().slice(0, 1200);
   const rawPicks = Array.isArray(parsed.picks) ? parsed.picks.slice(0, MAX_PICKS + 2) : [];
 
-  const seen = new Set(Array.isArray(context.seen) ? context.seen : []);
-  const resolved = await Promise.all(
-    rawPicks.map((pick) =>
-      TMDB_KEY
-        ? resolvePick(pick).catch(() => unresolvedPick(pick, mediaTypeOf(pick?.type)))
-        : unresolvedPick(pick, mediaTypeOf(pick?.type))
-    )
-  );
-
-  const picks = [];
   const used = new Set();
-  resolved.forEach((pick) => {
-    if (!pick?.title) return;
-    const key = pick.id ? `${pick.media_type}:${pick.id}` : `name:${pick.title.toLowerCase()}`;
-    if (used.has(key) || seen.has(key)) return;
-    used.add(key);
-    picks.push(pick);
-  });
+  let { kept: picks, rejected } = await materialize(rawPicks, used);
+
+  // The model reached for things they already know and the filter left the
+  // answer thin. One repair round: name the rejects, ask for replacements.
+  if (rejected.length && picks.length < MIN_PICKS) {
+    try {
+      const repair = await complete(
+        [
+          ...thread,
+          { role: "assistant", content: JSON.stringify(parsed) },
+          {
+            role: "user",
+            content: `${rejected.join(", ")} ${rejected.length === 1 ? "is" : "are"} already in my library — I know ${
+              rejected.length === 1 ? "it" : "them"
+            }. Give me ${MAX_PICKS} different titles I have not seen, same JSON format, and rewrite the reply so it does not mention the ones I know.`,
+          },
+        ],
+        origin
+      );
+      const more = await materialize(
+        Array.isArray(repair.parsed.picks) ? repair.parsed.picks.slice(0, MAX_PICKS + 2) : [],
+        used
+      );
+      if (more.kept.length) {
+        picks = [...picks, ...more.kept];
+        if (typeof repair.parsed.reply === "string" && repair.parsed.reply.trim()) {
+          reply = repair.parsed.reply.trim().slice(0, 1200);
+        }
+      }
+    } catch (error) {
+      console.warn("Assistant: repair round failed —", error.message);
+    }
+  }
 
   res.status(200).json({ reply, picks: picks.slice(0, MAX_PICKS), model: answer.model });
 }
