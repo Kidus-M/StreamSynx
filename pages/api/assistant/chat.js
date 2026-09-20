@@ -220,29 +220,36 @@ const complete = async (messages, origin) => {
   const models = MODELS.length ? MODELS : DEFAULT_MODELS;
   let lastError = null;
   for (const model of models) {
-    try {
-      let answer;
+    // A model that is up but fumbles the JSON gets one more go: with the
+    // free tier, the next model in line is often rate-limited anyway.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        answer = await callModel(model, messages, origin, { strict: true });
-      } catch (error) {
-        if (error.status !== 400) throw error;
-        answer = await callModel(model, messages, origin, { strict: false });
-      }
+        let answer;
+        try {
+          answer = await callModel(model, messages, origin, { strict: true });
+        } catch (error) {
+          if (error.status !== 400) throw error;
+          answer = await callModel(model, messages, origin, { strict: false });
+        }
 
-      const parsed = extractJson(answer.text);
-      if (!parsed || typeof parsed.reply !== "string") {
-        throw new Error(
-          answer.finishReason === "length"
-            ? `${model} ran out of tokens before the JSON`
-            : `${model} did not return JSON`
-        );
+        const parsed = extractJson(answer.text);
+        if (!parsed || typeof parsed.reply !== "string") {
+          const error = new Error(
+            answer.finishReason === "length"
+              ? `${model} ran out of tokens before the JSON`
+              : `${model} did not return JSON`
+          );
+          error.retryable = true;
+          throw error;
+        }
+        return { parsed, model: answer.model };
+      } catch (error) {
+        lastError = error;
+        console.warn(`Assistant: ${model} failed —`, error.message);
+        // A bad key fails the same way on every model.
+        if (error.status === 401) throw error;
+        if (!error.retryable) break;
       }
-      return { parsed, model: answer.model };
-    } catch (error) {
-      lastError = error;
-      console.warn(`Assistant: ${model} failed —`, error.message);
-      // A bad key fails the same way on every model.
-      if (error.status === 401) break;
     }
   }
   throw lastError || new Error("No model answered");
