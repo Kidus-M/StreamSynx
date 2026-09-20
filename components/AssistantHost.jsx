@@ -66,7 +66,7 @@ const PickCard = ({ pick, onOpen }) => {
         href={href}
         onClick={onOpen}
         className="relative h-[84px] w-14 shrink-0 overflow-hidden rounded-lg bg-secondary"
-        aria-label={`Play ${pick.title}`}
+        aria-label={`${resolved ? "Play" : "Find"} ${pick.title}`}
       >
         {poster ? (
           <img src={poster} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -150,7 +150,7 @@ const Bubble = ({ message, onOpen }) => {
           {message.picks?.length > 0 && (
             <div className="mt-2 space-y-2">
               {message.picks.map((pick) => (
-                <PickCard key={`${pick.media_type}-${pick.id}`} pick={pick} onOpen={onOpen} />
+                <PickCard key={`${pick.media_type}-${pick.id || pick.title}`} pick={pick} onOpen={onOpen} />
               ))}
             </div>
           )}
