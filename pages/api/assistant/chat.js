@@ -22,7 +22,9 @@
 
 const BASE_URL = (process.env.AI_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "");
 const API_KEY = process.env.OPENROUTER_API_KEY || process.env.AI_API_KEY || "";
-const TMDB_KEY = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "";
+// Same key the browser uses (lib/tmdb.js); `API_KEY` in this project is not
+// a TMDB key, so it is deliberately not consulted.
+const TMDB_KEY = process.env.NEXT_PUBLIC_API_KEY || process.env.TMDB_API_KEY || "";
 const FIREBASE_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
 
 /**
@@ -251,15 +253,36 @@ const complete = async (messages, origin) => {
 const tmdb = async (path, params) => {
   const query = new URLSearchParams({ api_key: TMDB_KEY, language: "en-US", ...params });
   const response = await fetch(`https://api.themoviedb.org/3${path}?${query}`);
-  if (!response.ok) return null;
+  if (!response.ok) {
+    // Loud, because a bad key silently turns every answer into "no picks".
+    console.warn(`Assistant: TMDB ${path} answered ${response.status}`);
+    return null;
+  }
   return response.json();
 };
 
+/** Models say "series", "show" or "film" as often as "tv" / "movie". */
+const mediaTypeOf = (value) =>
+  /^(tv|series|show|season)/i.test(String(value || "")) ? "tv" : "movie";
+
+/** What goes back when a title cannot be matched: still a name to click on. */
+const unresolvedPick = (pick, type) => ({
+  id: null,
+  media_type: type,
+  title: String(pick?.title || pick?.name || "").trim(),
+  year: Number(pick?.year) ? String(Number(pick.year)) : "",
+  poster_path: null,
+  vote_average: 0,
+  genre_ids: [],
+  overview: "",
+  why: String(pick?.why || "").slice(0, 240),
+});
+
 /** Finds the TMDB record for a suggested title; the year narrows, then relaxes. */
 const resolvePick = async (pick) => {
-  const title = String(pick?.title || "").trim();
+  const title = String(pick?.title || pick?.name || "").trim();
   if (!title) return null;
-  const type = pick?.type === "tv" ? "tv" : "movie";
+  const type = mediaTypeOf(pick?.type);
   const year = Number(pick?.year) || null;
   const yearParam = type === "tv" ? "first_air_date_year" : "year";
 
@@ -282,7 +305,7 @@ const resolvePick = async (pick) => {
       };
     }
   }
-  return null;
+  return unresolvedPick(pick, type);
 };
 
 /* -------------------------------- Handler --------------------------------- */
@@ -346,13 +369,19 @@ export default async function handler(req, res) {
   const rawPicks = Array.isArray(parsed.picks) ? parsed.picks.slice(0, MAX_PICKS + 2) : [];
 
   const seen = new Set(Array.isArray(context.seen) ? context.seen : []);
-  const resolved = TMDB_KEY ? await Promise.all(rawPicks.map((pick) => resolvePick(pick).catch(() => null))) : [];
+  const resolved = await Promise.all(
+    rawPicks.map((pick) =>
+      TMDB_KEY
+        ? resolvePick(pick).catch(() => unresolvedPick(pick, mediaTypeOf(pick?.type)))
+        : unresolvedPick(pick, mediaTypeOf(pick?.type))
+    )
+  );
 
   const picks = [];
   const used = new Set();
   resolved.forEach((pick) => {
-    if (!pick) return;
-    const key = `${pick.media_type}:${pick.id}`;
+    if (!pick?.title) return;
+    const key = pick.id ? `${pick.media_type}:${pick.id}` : `name:${pick.title.toLowerCase()}`;
     if (used.has(key) || seen.has(key)) return;
     used.add(key);
     picks.push(pick);

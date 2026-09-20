@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
-import { FiArrowUp, FiPlay, FiRefreshCw, FiX } from "react-icons/fi";
+import { FiArrowUp, FiPlay, FiRefreshCw, FiSearch, FiX } from "react-icons/fi";
 import { FaCheck, FaPlus, FaStar } from "react-icons/fa";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import toast from "react-hot-toast";
@@ -54,11 +54,16 @@ const PickCard = ({ pick, onOpen }) => {
   const media = { id: pick.id, media_type: pick.media_type, title: pick.title, poster_path: pick.poster_path };
   const saved = isSaved(media);
   const poster = posterUrl(pick.poster_path);
+  // A title TMDB could not match still gets a click: straight into search.
+  const resolved = Boolean(pick.id);
+  const href = resolved
+    ? watchHref(media)
+    : `/search?q=${encodeURIComponent(pick.title)}&type=${pick.media_type === "tv" ? "tv" : "movie"}`;
 
   return (
     <div className="flex gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-2.5 transition-colors hover:border-white/[0.12]">
       <Link
-        href={watchHref(media)}
+        href={href}
         onClick={onOpen}
         className="relative h-[84px] w-14 shrink-0 overflow-hidden rounded-lg bg-secondary"
         aria-label={`Play ${pick.title}`}
@@ -99,22 +104,23 @@ const PickCard = ({ pick, onOpen }) => {
         )}
         <div className="mt-auto flex items-center gap-1.5 pt-2">
           <Link
-            href={watchHref(media)}
+            href={href}
             onClick={onOpen}
-            className="btn-primary h-8 flex-1 px-3 py-0 text-[12px]"
+            className={`${resolved ? "btn-primary" : "btn-ghost"} h-8 flex-1 px-3 py-0 text-[12px]`}
           >
-            <FiPlay className="h-3 w-3" />
-            Play
+            {resolved ? <FiPlay className="h-3 w-3" /> : <FiSearch className="h-3 w-3" />}
+            {resolved ? "Play" : "Find it"}
           </Link>
           <button
             type="button"
+            disabled={!resolved}
             onClick={() => toggle(media)}
             aria-label={saved ? "Remove from watchlist" : "Add to watchlist"}
             title={saved ? "Remove from watchlist" : "Add to watchlist"}
             className={`flex h-8 w-8 items-center justify-center rounded-xl border transition-colors ${
               saved
                 ? "border-accent/40 bg-accent/15 text-accent"
-                : "border-white/[0.08] bg-white/[0.04] text-textsecondary hover:text-textprimary"
+                : "border-white/[0.08] bg-white/[0.04] text-textsecondary hover:text-textprimary disabled:opacity-40"
             }`}
           >
             {saved ? <FaCheck size={10} /> : <FaPlus size={10} />}
