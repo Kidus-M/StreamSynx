@@ -30,9 +30,9 @@ const FIREBASE_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
  * first; `openrouter/free` at the end routes to whatever is free that day.
  */
 const DEFAULT_MODELS = [
-  "google/gemma-4-31b-it:free",
+  // Reliable JSON in strict mode, and rarely rate-limited (Sept 2026).
   "nvidia/nemotron-3-super-120b-a12b:free",
-  "deepseek/deepseek-v4-flash-0731:free",
+  "google/gemma-4-31b-it:free",
   "qwen/qwen3.8-27b:free",
   "openrouter/free",
 ];
@@ -43,6 +43,8 @@ const MODELS = (process.env.AI_MODELS || "")
   .filter(Boolean);
 
 const MODEL_TIMEOUT_MS = 45 * 1000;
+/** Generous: some free models spend tokens thinking even when asked not to. */
+const MAX_OUTPUT_TOKENS = 1800;
 const MAX_PICKS = 5;
 const MAX_MESSAGES = 12;
 const MAX_MESSAGE_CHARS = 2000;
@@ -136,7 +138,7 @@ How to behave:
 - Never invent titles. Use exact, searchable titles and the correct release year.
 - If the message is not about what to watch, answer in one line and steer back to picks.
 
-Output format — reply with ONLY this JSON object, no markdown fences, no text before or after:
+Output format — reply with ONLY this JSON object, no markdown fences, no text before or after. Do not narrate or think out loud; the first character of your output must be "{":
 {"reply": "your short message to the viewer", "picks": [{"title": "Exact title", "year": 2014, "type": "movie" | "tv", "why": "one sentence tying it to them"}]}
 
 ${describeViewer(context)}`;
@@ -145,7 +147,11 @@ ${describeViewer(context)}`;
 
 const extractJson = (text) => {
   if (!text) return null;
-  const cleaned = String(text).replace(/```(?:json)?/gi, "").trim();
+  const cleaned = String(text)
+    // Reasoning models sometimes think out loud in the content itself.
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/```(?:json)?/gi, "")
+    .trim();
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
   if (start === -1 || end === -1 || end <= start) return null;
@@ -156,7 +162,13 @@ const extractJson = (text) => {
   }
 };
 
-const callModel = async (model, messages, origin) => {
+/**
+ * One request to one model. `strict` asks for JSON mode and switches any
+ * built-in reasoning off — a thinking model that narrates for 900 tokens
+ * never gets to the JSON. Gateways that reject those fields answer 400, and
+ * the caller retries the same model without them.
+ */
+const callModel = async (model, messages, origin, { strict = true } = {}) => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
   try {
@@ -170,7 +182,15 @@ const callModel = async (model, messages, origin) => {
         "HTTP-Referer": origin,
         "X-Title": "StreamSynx",
       },
-      body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 900 }),
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        ...(strict
+          ? { response_format: { type: "json_object" }, reasoning: { enabled: false, exclude: true } }
+          : {}),
+      }),
     });
 
     const payload = await response.json().catch(() => ({}));
@@ -179,26 +199,48 @@ const callModel = async (model, messages, origin) => {
       error.status = response.status;
       throw error;
     }
-    const text = payload?.choices?.[0]?.message?.content;
+    const choice = payload?.choices?.[0];
+    const text = choice?.message?.content;
     if (!text) throw new Error(`${model} returned an empty answer`);
-    return { text, model: payload?.model || model };
+    return { text, model: payload?.model || model, finishReason: choice?.finish_reason || null };
   } finally {
     clearTimeout(timer);
   }
 };
 
-/** Walks the model list; a rate limit or outage on one is not a failure. */
+/**
+ * Walks the model list until one returns an answer we can parse. A rate
+ * limit, an outage, or a model that talks instead of answering all just
+ * mean "next", so a busy free tier degrades to a slower model, not to an
+ * error — and never to raw model output on the screen.
+ */
 const complete = async (messages, origin) => {
   const models = MODELS.length ? MODELS : DEFAULT_MODELS;
   let lastError = null;
   for (const model of models) {
     try {
-      return await callModel(model, messages, origin);
+      let answer;
+      try {
+        answer = await callModel(model, messages, origin, { strict: true });
+      } catch (error) {
+        if (error.status !== 400) throw error;
+        answer = await callModel(model, messages, origin, { strict: false });
+      }
+
+      const parsed = extractJson(answer.text);
+      if (!parsed || typeof parsed.reply !== "string") {
+        throw new Error(
+          answer.finishReason === "length"
+            ? `${model} ran out of tokens before the JSON`
+            : `${model} did not return JSON`
+        );
+      }
+      return { parsed, model: answer.model };
     } catch (error) {
       lastError = error;
       console.warn(`Assistant: ${model} failed —`, error.message);
-      // A bad key or bad request will fail the same way on every model.
-      if (error.status === 401 || error.status === 400) break;
+      // A bad key fails the same way on every model.
+      if (error.status === 401) break;
     }
   }
   throw lastError || new Error("No model answered");
@@ -294,14 +336,14 @@ export default async function handler(req, res) {
       error:
         status === 429
           ? "The free models are busy right now. Try again in a minute."
-          : "I couldn't reach a model just now. Try again shortly.",
+          : "I couldn't get a clean answer just now. Try again, or rephrase.",
     });
     return;
   }
 
-  const parsed = extractJson(answer.text);
-  const reply = String(parsed?.reply || (parsed ? "" : answer.text) || "Here's what I'd go with.").trim();
-  const rawPicks = Array.isArray(parsed?.picks) ? parsed.picks.slice(0, MAX_PICKS + 2) : [];
+  const { parsed } = answer;
+  const reply = String(parsed.reply || "Here's what I'd go with.").trim().slice(0, 1200);
+  const rawPicks = Array.isArray(parsed.picks) ? parsed.picks.slice(0, MAX_PICKS + 2) : [];
 
   const seen = new Set(Array.isArray(context.seen) ? context.seen : []);
   const resolved = TMDB_KEY ? await Promise.all(rawPicks.map((pick) => resolvePick(pick).catch(() => null))) : [];
