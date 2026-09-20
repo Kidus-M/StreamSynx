@@ -15,6 +15,7 @@ import MovieCard from "../../components/MinimalCard";
 import { db } from "../../firebase";
 import { useAuth } from "../../lib/auth";
 import { addContinueWatching } from "../../lib/localStore";
+import { startWatchSession } from "../../lib/watchStats";
 import { backdropUrl, formatRuntime, posterUrl, tmdbGet } from "../../lib/tmdb";
 
 const MoviePage = () => {
@@ -81,6 +82,18 @@ const MoviePage = () => {
       href: `/watch?movie_id=${movie.id}`,
     });
   }, [movie?.id, movie?.title, movie?.poster_path, movie?.backdrop_path, movie?.release_date, released]);
+
+  // Time the player stays open, for the assistant's sense of attention span.
+  useEffect(() => {
+    if (!movie?.id || !released) return undefined;
+    return startWatchSession({
+      id: movie.id,
+      media_type: "movie",
+      title: movie.title,
+      runtime: movie.runtime || 0,
+      genre_ids: (movie.genres || []).map((genre) => genre.id),
+    });
+  }, [movie?.id, movie?.title, movie?.runtime, movie?.genres, released]);
 
   // Cloud history for signed-in users.
   useEffect(() => {

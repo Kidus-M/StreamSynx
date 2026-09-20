@@ -251,8 +251,9 @@ export default function NudgeHost() {
     setNudgeId(null);
   }, [nudgeId]);
 
+  // Sits above the assistant launcher, which owns the corner itself.
   return (
-    <div className="pointer-events-none fixed inset-x-3 bottom-3 z-[45] flex justify-center sm:inset-x-auto sm:bottom-5 sm:right-5 sm:justify-end">
+    <div className="pointer-events-none fixed inset-x-3 bottom-[4.75rem] z-[45] flex justify-center sm:inset-x-auto sm:bottom-[5.25rem] sm:right-5 sm:justify-end">
       <AnimatePresence>
         {nudgeId && (
           <NudgeCard

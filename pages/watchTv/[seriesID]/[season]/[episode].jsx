@@ -16,6 +16,7 @@ import EpisodeBrowser, { hasAired } from "../../../../components/EpisodeBrowser"
 import { db } from "../../../../firebase";
 import { useAuth } from "../../../../lib/auth";
 import { addContinueWatching, setLastEpisode } from "../../../../lib/localStore";
+import { startWatchSession } from "../../../../lib/watchStats";
 import { backdropUrl, posterUrl, tmdbGet } from "../../../../lib/tmdb";
 
 /** Episodes for one season, with request cancellation on fast switching. */
@@ -202,6 +203,21 @@ const EpisodePage = () => {
       href: `/watchTv/${show.id}/${playingSeason}/${playingEpisode}`,
     });
   }, [show?.id, show?.name, show?.poster_path, show?.backdrop_path, playingSeason, playingEpisode, currentEpisode?.name, currentEpisode?.still_path]);
+
+  // Time the player stays open, for the assistant's sense of attention span.
+  const episodeRuntime = currentEpisode?.runtime || show?.episode_run_time?.[0] || 0;
+  useEffect(() => {
+    if (!show?.id) return undefined;
+    return startWatchSession({
+      id: show.id,
+      media_type: "tv",
+      title: show.name,
+      runtime: episodeRuntime,
+      genre_ids: (show.genres || []).map((genre) => genre.id),
+      season: playingSeason,
+      episode: playingEpisode,
+    });
+  }, [show?.id, show?.name, show?.genres, episodeRuntime, playingSeason, playingEpisode]);
 
   // Cloud history.
   useEffect(() => {

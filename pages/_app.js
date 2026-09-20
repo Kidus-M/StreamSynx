@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { installTmdbRateLimiter } from '../lib/tmdbRateLimiter';
 import TvRemoteNavigation from '../components/TvRemoteNavigation';
 import NudgeHost from '../components/NudgeHost';
+import AssistantHost from '../components/AssistantHost';
 import { AuthProvider } from '../lib/auth';
 
 installTmdbRateLimiter();
@@ -39,6 +40,9 @@ export default function App({ Component, pageProps }) {
       {/* Points people at taste picks, Discover and signing up — rate limited
           and dismissible; see lib/nudges.js for when it is allowed to speak. */}
       <NudgeHost />
+      {/* The floating "what should I watch" pane — signed-in accounts only;
+          guests get a sign-in gate. See lib/assistant.js. */}
+      <AssistantHost />
       <Toaster
         position="bottom-center"
         toastOptions={{
