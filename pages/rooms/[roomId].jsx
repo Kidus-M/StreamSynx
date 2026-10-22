@@ -759,7 +759,7 @@ const handleRemoveMember = async (memberUidToRemove) => {
     try {
       if (!isCreator) {
         await updateDoc(roomDocRef, {
-          memberIds: arrayRemove(currentUser.uid),
+          members: arrayRemove(currentUser.uid),
         });
       } else {
         toast.error("Creators cannot leave. Delete room instead.");
