@@ -8,10 +8,28 @@ import TvRemoteNavigation from '../components/TvRemoteNavigation';
 import NudgeHost from '../components/NudgeHost';
 import AssistantHost from '../components/AssistantHost';
 import { AuthProvider } from '../lib/auth';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { initAnalytics, trackPageview, trackVital } from '../lib/analytics/tracker';
 
 installTmdbRateLimiter();
 
+/** Next calls this with Core Web Vitals for every page load. */
+export function reportWebVitals(metric) {
+  trackVital(metric);
+}
+
 export default function App({ Component, pageProps }) {
+  const router = useRouter();
+
+  // First-party analytics: visits, pages, watch time — see lib/analytics/tracker.js.
+  useEffect(() => {
+    initAnalytics();
+    const onRoute = (url) => trackPageview(url.split('?')[0]);
+    router.events.on('routeChangeComplete', onRoute);
+    return () => router.events.off('routeChangeComplete', onRoute);
+  }, [router.events]);
+
   return (
     <AuthProvider>
       <Head>
