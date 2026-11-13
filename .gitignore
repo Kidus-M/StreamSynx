@@ -38,3 +38,6 @@ android-tv/local.properties
 serviceAccountKey.json
 *serviceAccount*.json
 scripts/backups/
+
+# agent quality-gate ledgers
+.aqg/
