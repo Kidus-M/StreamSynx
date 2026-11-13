@@ -57,7 +57,7 @@ export function TrendChart({ points, format, label, height = 260, name }) {
   const hovered = hover !== null ? points[hover] : null;
 
   return (
-    <div ref={ref} className="relative w-full select-none">
+    <div ref={ref} className="relative w-full min-w-0 overflow-hidden select-none">
       <svg width={width} height={height} role="img" aria-label={`${name} over time`} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         <defs>
           <linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1">
@@ -75,7 +75,7 @@ export function TrendChart({ points, format, label, height = 260, name }) {
         ))}
         {points.map((p, i) =>
           i % labelEvery === 0 || i === points.length - 1 ? (
-            <text key={p.t} x={x(i)} y={height - 8} textAnchor="middle" className="fill-[color:var(--a-muted)] text-[10px]">
+            <text key={p.t} x={x(i)} y={height - 8} textAnchor={i === points.length - 1 ? "end" : i === 0 ? "start" : "middle"} className="fill-[color:var(--a-muted)] text-[10px]">
               {label(p.t)}
             </text>
           ) : null

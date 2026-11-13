@@ -45,7 +45,7 @@ export default function WorldMap({ cities, live }) {
     .filter((s) => s.xy);
 
   return (
-    <div ref={ref} className="relative w-full">
+    <div ref={ref} className="relative w-full min-w-0 overflow-hidden">
       <svg width={width} height={height} role="img" aria-label="Map of visitor locations">
         <path d={graticule} fill="none" stroke="var(--a-grid)" strokeWidth="0.5" />
         <path d={path} fill="var(--a-land)" stroke="var(--a-land-edge)" strokeWidth="0.6" />
