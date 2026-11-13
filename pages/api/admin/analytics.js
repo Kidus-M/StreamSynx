@@ -143,7 +143,7 @@ export default async function handler(req, res) {
         lastSeenAt: u.lastSeenAt || 0,
         place: [u.lastGeo?.city, u.lastGeo?.country].filter(Boolean).join(", "),
       }))
-      .sort((a, b) => b.watchMs + b.activeMs - (a.watchMs + a.activeMs))
+      .sort((a, b) => b.activeMs - a.activeMs || b.watchMs - a.watchMs)
       .slice(0, 25);
 
     return res.status(200).json({

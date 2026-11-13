@@ -465,7 +465,7 @@ export default function AnalyticsPage() {
                 <button type="button" className="text-[color:var(--a-ink)] underline decoration-[color:var(--a-accent)] underline-offset-4" onClick={() => setPerson(topUser)}>
                   {topUser.name || topUser.email}
                 </button>{" "}
-                — {fmtDuration(topUser.watchMs)} watched over {topUser.sessions} session{topUser.sessions === 1 ? "" : "s"}.
+                — {fmtDuration(topUser.activeMs)} on StreamSynx, {fmtDuration(topUser.watchMs)} of it watching, over {topUser.sessions} session{topUser.sessions === 1 ? "" : "s"}.
                 {data.truncated && " (Range capped at the newest 15,000 sessions.)"}
               </p>
             )}
@@ -569,7 +569,7 @@ export default function AnalyticsPage() {
             id="people"
             index={4}
             title="People"
-            note="Signed-in accounts, ranked by time spent"
+            note="Signed-in accounts, ranked by total time on StreamSynx"
             aside={
               <div className="flex rounded-full border border-[color:var(--a-line)] p-0.5 text-xs">
                 {[
@@ -595,8 +595,8 @@ export default function AnalyticsPage() {
                     <tr>
                       <th className="w-8 pb-2 font-normal">#</th>
                       <th className="pb-2 font-normal">Account</th>
-                      <th className="w-[26%] pb-2 font-normal">Watched</th>
-                      <th className="pb-2 text-right font-normal">On site</th>
+                      <th className="w-[26%] pb-2 font-normal">Time spent</th>
+                      <th className="pb-2 text-right font-normal">Watched</th>
                       <th className="pb-2 text-right font-normal">Sessions</th>
                       <th className="pb-2 pl-6 font-normal">From</th>
                       <th className="pb-2 text-right font-normal">Last seen</th>
@@ -604,7 +604,7 @@ export default function AnalyticsPage() {
                   </thead>
                   <tbody className="divide-y divide-[color:var(--a-line)]">
                     {leaders.slice(0, 50).map((u, i) => {
-                      const top = Math.max(1, leaders[0].watchMs, ...leaders.slice(0, 50).map((x) => x.watchMs));
+                      const top = Math.max(1, ...leaders.slice(0, 50).map((x) => x.activeMs));
                       const clickable = peopleView === "range";
                       return (
                         <tr
@@ -625,12 +625,12 @@ export default function AnalyticsPage() {
                           <td className="py-2.5 pr-4">
                             <span className="flex items-center gap-3">
                               <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color:var(--a-empty)]">
-                                <span className="block h-full rounded-full bg-[color:var(--a-accent)]" style={{ width: `${(u.watchMs / top) * 100}%` }} />
+                                <span className="block h-full rounded-full bg-[color:var(--a-accent)]" style={{ width: `${(u.activeMs / top) * 100}%` }} />
                               </span>
-                              <span className="w-16 text-right tabular-nums">{fmtDuration(u.watchMs)}</span>
+                              <span className="w-16 text-right tabular-nums">{fmtDuration(u.activeMs)}</span>
                             </span>
                           </td>
-                          <td className="py-2.5 text-right tabular-nums text-[color:var(--a-ink-2)]">{fmtDuration(u.activeMs)}</td>
+                          <td className="py-2.5 text-right tabular-nums text-[color:var(--a-accent)]">{u.watchMs ? `▶ ${fmtDuration(u.watchMs)}` : "—"}</td>
                           <td className="py-2.5 text-right tabular-nums text-[color:var(--a-ink-2)]">{u.sessions}</td>
                           <td className="max-w-[180px] truncate py-2.5 pl-6 text-[color:var(--a-ink-2)]">{u.place || "—"}</td>
                           <td className="py-2.5 text-right text-[color:var(--a-ink-2)]">{fmtAgo(u.lastSeenAt, now)}</td>
