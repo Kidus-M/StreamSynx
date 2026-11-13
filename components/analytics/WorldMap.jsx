@@ -95,7 +95,7 @@ export default function WorldMap({ cities, live }) {
       )}
       <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-4 text-[10px] uppercase tracking-[0.14em] text-[color:var(--a-muted)]">
         <span className="flex items-center gap-1.5">
-          <i className="inline-block h-2.5 w-2.5 rounded-full border border-[color:var(--a-accent)] bg-[color:var(--a-accent)]/40" />
+          <i className="inline-block h-2.5 w-2.5 rounded-full border border-[color:var(--a-accent)] bg-[rgba(233,185,73,0.4)]" />
           visitors by city
         </span>
         <span className="flex items-center gap-1.5">
