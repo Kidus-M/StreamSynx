@@ -30,6 +30,9 @@ export default function App({ Component, pageProps }) {
     return () => router.events.off('routeChangeComplete', onRoute);
   }, [router.events]);
 
+  // The owner dashboard is a tool, not the product: no nudges or assistant there.
+  const isAdmin = router.pathname.startsWith('/admin');
+
   return (
     <AuthProvider>
       <Head>
@@ -57,10 +60,10 @@ export default function App({ Component, pageProps }) {
       <Component {...pageProps} />
       {/* Points people at taste picks, Discover and signing up — rate limited
           and dismissible; see lib/nudges.js for when it is allowed to speak. */}
-      <NudgeHost />
+      {!isAdmin && <NudgeHost />}
       {/* The floating "what should I watch" pane — signed-in accounts only;
           guests get a sign-in gate. See lib/assistant.js. */}
-      <AssistantHost />
+      {!isAdmin && <AssistantHost />}
       <Toaster
         position="bottom-center"
         toastOptions={{
